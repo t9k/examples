@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mlperf-minigo-download-dataset
+spec:
+  restartPolicy: Never
+  containers:
+    - name: worker
+      image: registry.tensorstack.cn/t9k/mlperf-nvidia:minigo
+      args:
+        - sleep
+        - "1000000"
+      resources:
+        limits:
+          cpu: 8
+          memory: 32Gi
+      volumeMounts:
+        - mountPath: /pvc
+          name: data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: mlperf

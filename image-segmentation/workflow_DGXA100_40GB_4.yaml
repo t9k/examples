@@ -1,0 +1,204 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: WorkflowTemplate
+metadata:
+  name: mlperf-segmentation-dataset
+  labels: {}
+spec:
+  params: []
+  workspaces:
+    - name: pvc
+      description: PVC to store dataset
+  results: []
+  type: SeqPod
+  seqPod:
+    steps:
+      - name: download-and-preprocess-dataset
+        image: registry.tensorstack.cn/t9k/mlperf-nvidia:image_segmentation_preprocessing
+        resources:
+          limits:
+            cpu: 2
+            memory: 8Gi
+        script: |
+          #!/bin/bash
+          set -e
+
+          # set HTTP/HTTPS proxy if necessary
+          # export http_proxy=
+          # export https_proxy=
+
+          # in case of ephemeral-storage
+          mkdir $(workspaces.pvc.path)/KiTS19
+          cd $(workspaces.pvc.path)/KiTS19
+          mkdir raw-data-dir
+          mkdir data
+          cd raw-data-dir
+          git clone https://github.com/neheller/kits19
+          cd kits19
+          pip3 install -r requirements.txt
+          python3 -m starter_code.get_imaging
+
+          cd /workspace/unet3d
+          python preprocess_dataset.py --data_dir $(workspaces.pvc.path)/KiTS19/raw-data-dir/kits19/data --results_dir $(workspaces.pvc.path)/KiTS19/data
+
+          cd $(workspaces.pvc.path)/KiTS19
+          rm -rf raw-data-dir
+
+---
+
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: WorkflowTemplate
+metadata:
+  name: mlperf-segmentation-train
+spec:
+  params:
+    - default: mlperf
+      description: Name of the PVC that stores dataset
+      name: pvc_name
+  resource:
+    failureRules:
+      fieldSelector: status.phase==Failed
+    manifest: |
+      apiVersion: batch.tensorstack.dev/v1beta1
+      kind: MPIJob
+      metadata:
+        name: mlperf-segmentation
+      spec:
+        mca:
+          btl: ^openib
+          pml: ob1
+        mpiHome: /usr/local/mpi
+        ssh:
+          sshdPath: /usr/sbin/sshd
+        scheduler:
+          t9kScheduler:
+            queue: mlperf
+            priority: 50
+        runPolicy:
+          cleanUpWorkers: true
+        worker:
+          replicas: 4
+          processesPerWorker: 1
+          processRecovery:
+            enable: true
+            limit: 0
+          cmd:
+            - python
+            - main.py
+            - "--data_dir=/pvc/KiTS19/data"
+            - "--epochs=10000"
+            - "--quality_threshold=0.908"
+            - "--batch_size=4"
+            - "--evaluate_every=20"
+            - "--start_eval_at=1000"
+            - "--lr_warmup_epochs=1000"
+            - "--optimizer=nag"
+            - "--learning_rate=2.0"
+            - "--static_cast"
+            - "-sls=32784"
+            - "-gpf=4"
+            - "--warmup"
+            - "--val_batch_size=1"
+            - "--num_workers=4"
+            - "--input_batch_multiplier=4"
+            - "--gpu_per_node=1"
+            - "-ucl"
+            - "-sts"
+            - "--fp16in"
+          template:
+            spec:
+              containers:
+                - name: mpi-worker
+                  image: registry.tensorstack.cn/t9k/mlperf-nvidia:image_segmentation
+                  workingDir: /workspace/unet3d/
+                  env:
+                    - name: LD_LIBRARY_PATH
+                      value: "/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib"
+                    - name: OMP_NUM_THREADS
+                      value: "1"
+                    - name: HOROVOD_CYCLE_TIME
+                      value: "0.1"
+                  resources:
+                    limits:
+                      cpu: 4
+                      memory: 8Gi
+                      tensorstack.dev/nvidia-gpu: 1
+                  volumeMounts:
+                    - mountPath: /pvc
+                      name: data
+                    - mountPath: /dev/shm
+                      name: dshm
+                    - mountPath: /results
+                      name: results
+              volumes:
+                - name: data
+                  persistentVolumeClaim:
+                    claimName: mlperf
+                - name: dshm
+                  emptyDir:
+                    medium: Memory
+                - name: results
+                  emptyDir:
+                    medium: Memory
+    successRules:
+      fieldSelector: status.phase==Completed
+  results: []
+  type: Resource
+  workspaces: []
+
+---
+
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: WorkflowTemplate
+metadata:
+  name: mlperf-segmentation
+  labels: {}
+spec:
+  workspaces:
+    - name: pvc
+      description: PVC to store dataset
+  params:
+    - name: pvc_name
+      description: Name of the PVC that stores dataset
+      default: mlperf
+  results: []
+  type: DAG
+  dag:
+    failureStrategy: StopAllWorkflowTemplates
+    templates:
+      - name: mlperf-segmentation-dataset
+        workflowTemplateRef: mlperf-segmentation-dataset
+        workspaces:
+          - name: pvc
+            workspace: pvc
+        params: []
+        retries: 0
+        when: []
+        dependencies: []
+      - name: mlperf-segmentation-train
+        workflowTemplateRef: mlperf-segmentation-train
+        workspaces: []
+        params:
+          - name: pvc_name
+            value: $(params.pvc_name)
+        retries: 0
+        when: []
+        dependencies:
+          - mlperf-segmentation-dataset
+
+---
+
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: WorkflowRun
+metadata:
+  name: mlperf-segmentation
+spec:
+  params:
+    - name: pvc_name
+      value: mlperf
+  serviceAccountName: managed-project-sa
+  timeout: 1h0m0s
+  workflowTemplateRef: mlperf-segmentation
+  workspaces:
+    - name: pvc
+      persistentVolumeClaim:
+        claimName: mlperf
