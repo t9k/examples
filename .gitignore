@@ -1,0 +1,28 @@
+# dataset files
+data/
+mnist.npz
+
+# model files
+saved_model/
+
+# log files
+log/
+.aimd/
+
+# output files
+output/
+
+# Jupyter notebook tmp directory
+.ipynb_checkpoints
+
+# Mac generated files
+*.DS_Store
+
+# For local test
+local-test
+
+# Visual Studio Code configuration file
+/.vscode/
+
+# Python generated files
+*.egg-info/

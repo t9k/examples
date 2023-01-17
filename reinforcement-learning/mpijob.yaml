@@ -1,0 +1,87 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: MPIJob
+metadata:
+  name: minigo
+spec:
+  mca:
+    btl: ^openib
+    pml: ob1
+  mpiHome: /usr/local/mpi
+  ssh:
+    sshdPath: /usr/sbin/sshd
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  runPolicy:
+    cleanUpWorkers: true
+  worker:
+    replicas: 4
+    processesPerWorker: 9
+    processRecovery:
+      enable: true
+      limit: 0
+    cmd:
+      - python
+      - ml_perf/train_loop.py
+      - "--board_size=19"
+      - "--base_dir=ml_perf/mpi-results"
+      - "--flagfile=ml_perf/flags/19/train_loop.flags"
+      - "--checkpoint_dir=/pvc/minigo_data/mlperf07"
+      - "--target_path=/pvc/minigo_data/target.minigo.tf"
+      - "--num_gpus_train=2"
+      - "--ranks_per_node=9"
+      - "--procs_per_gpu=8"
+      - "--use_trt=1"
+      - "--verbose=0"
+      - "--selfplay_threads=2"
+      - "--parallel_search=2"
+      - "--parallel_inference=1"
+      - "--concurrent_games_per_thread=32"
+      - "--train_batch_size=4096"
+      - "--suggested_games_per_iteration=8192"
+      - "--iterations=70"
+    template:
+      spec:
+        containers:
+          - name: mpi-worker
+            image: registry.tensorstack.cn/t9k/mlperf-nvidia:minigo
+            imagePullPolicy: IfNotPresent
+            workingDir: /opt/reinforcement/minigo/
+            env:
+              - name: LD_LIBRARY_PATH
+                value: "/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib"
+              - name: PYTHONPATH
+                value: ":/opt/reinforcement/minigo/bazel-bin/cc"
+              - name: HOROVOD_CYCLE_TIME
+                value: "0.1"
+              - name: HOROVOD_FUSION_THRESHOLD
+                value: "67108864"
+              - name: HOROVOD_NUM_STREAMS
+                value: "2"
+              - name: ENABLE_MPS
+                value: "1"
+              - name: TF_CPP_MIN_LOG_LEVEL
+                value: "1"
+            resources:
+              limits:
+                cpu: 16
+                memory: 96Gi
+                tensorstack.dev/nvidia-gpu: 1
+            volumeMounts:
+              - mountPath: /pvc
+                name: data
+              - mountPath: /dev/shm
+                name: dshm
+              - mountPath: /results
+                name: results
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: mlperf
+          - name: dshm
+            emptyDir:
+              medium: Memory
+          - name: results
+            emptyDir:
+              medium: Memory
