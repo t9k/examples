@@ -9,10 +9,10 @@ spec:
   mpiHome: /usr/local/mpi
   ssh:
     sshdPath: /usr/sbin/sshd
-  scheduler:
-    t9kScheduler:
-      queue: a100
-      priority: 50
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
   runPolicy:
     cleanUpWorkers: true
   worker:

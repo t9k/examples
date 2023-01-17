@@ -57,7 +57,7 @@ kubectl delete pod mlperf-minigo-download-dataset
 
 ## 训练
 
-创建 MPIJob 以启动训练：
+使用 `mpijob.yaml` 创建 MPIJob 以启动训练（如果使用队列，取消对于调度器配置的注释（第 12-15 行），并修改队列名称（第 14 行，默认为 `default`））：
 
 ```shell
 kubectl apply -f mpijob.yaml
@@ -67,9 +67,9 @@ kubectl apply -f mpijob.yaml
 
 更多选项设置请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/minigo/implementations/tensorflow-22.09)的 README 以及源代码。
 
-## 配置和指标
+## 资源需求和指标
 
-默认配置 `mpijob.yaml` 需要 64 个 CPU（核心数）（若 CPU 核心数不足，则减小该值，通过修改配置文件的第 68 行）、384 GiB 内存以及显存不少于 20GiB 的 4 个 GPU，训练此模型时主要瓶颈在于 CPU，可视具体情况适当修改以下参数：
+配置文件 `mpijob.yaml` 需要 64 个 CPU（核心）（若 CPU 核心数不足，则减小该值，通过修改第 68 行）、384 Gi 内存以及 4 个 GPU（显存不少于 20G）。训练此模型时主要瓶颈在于 CPU，可视具体情况适当修改以下参数：
 
 * `procs_per_gpu`：若 CPU 未满载，且 GPU 有空余的显存，则可适当增大，否则适当减小。
 * `ranks_per_node`：固定为 `procs_per_gpu` + 1。

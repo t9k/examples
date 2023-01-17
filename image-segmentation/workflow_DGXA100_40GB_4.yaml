@@ -69,10 +69,10 @@ spec:
         mpiHome: /usr/local/mpi
         ssh:
           sshdPath: /usr/sbin/sshd
-        scheduler:
-          t9kScheduler:
-            queue: mlperf
-            priority: 50
+        # scheduler:
+        #   t9kScheduler:
+        #     queue: default
+        #     priority: 50
         runPolicy:
           cleanUpWorkers: true
         worker:
@@ -132,7 +132,7 @@ spec:
               volumes:
                 - name: data
                   persistentVolumeClaim:
-                    claimName: mlperf
+                    claimName: $(params.pvc_name)
                 - name: dshm
                   emptyDir:
                     medium: Memory
