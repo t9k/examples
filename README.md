@@ -22,7 +22,7 @@ TensorStack AI 计算平台所在的 Kubernetes 集群需要：
 
     这一步是可选的，是否执行这一步取决于您是否需要对作业调度进行控制。例如，如果您不希望 Job 的工作器被调度到某一些节点上，那么这一步就是必要的。
 
-1. 在您的项目中创建一个名为 mlperf、大小 2 Ti 的 PVC，然后创建一个同样名为 mlperf 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
+1. 在您的项目中创建一个名为 mlperf、大小 2 TiB 的 PVC，然后创建一个同样名为 mlperf 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
 
 1. 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆此仓库。
 
