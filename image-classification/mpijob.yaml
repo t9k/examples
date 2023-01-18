@@ -1,0 +1,138 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: MPIJob
+metadata:
+  name: resnet
+spec:
+  mca:
+    btl: ^openib
+    pml: ob1
+  mpiHome: /usr/local/mpi
+  ssh:
+    sshdPath: /usr/sbin/sshd
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  runPolicy:
+    cleanUpWorkers: true
+  worker:
+    replicas: 4
+    processesPerWorker: 1
+    processRecovery:
+      enable: true
+      limit: 0
+    cmd:
+      - python
+      - train_imagenet.py
+      - "--gpus=0"
+      - "--batch-size=408"
+      - "--kv-store=horovod"
+      - "--lr=10.5"
+      - "--mom=0.9"
+      - "--lr-step-epochs=pow2"
+      - "--lars-eta=0.001"
+      - "--label-smoothing=0.1"
+      - "--wd=5.0e-05"
+      - "--warmup-epochs=2"
+      - "--eval-period=4"
+      - "--eval-offset=2"
+      - "--optimizer=sgdwfastlars"
+      - "--network=resnet-v1b-stats-fl"
+      - "--num-layers=50"
+      - "--num-epochs=37"
+      - "--accuracy-threshold=0.759"
+      - "--seed=1"
+      - "--dtype=float16"
+      - "--disp-batches=20"
+      - "--image-shape=4,224,224"
+      - "--fuse-bn-relu=1"
+      - "--fuse-bn-add-relu=1"
+      - "--bn-group=1"
+      - "--min-random-area=0.05"
+      - "--max-random-area=1.0"
+      - "--conv-algo=1"
+      - "--force-tensor-core=1"
+      - "--input-layout=NHWC"
+      - "--conv-layout=NHWC"
+      - "--batchnorm-layout=NHWC"
+      - "--pooling-layout=NHWC"
+      - "--batchnorm-mom=0.9"
+      - "--batchnorm-eps=1e-5"
+      - "--data-train=/pvc/imagenet_processed/train.rec"
+      - "--data-train-idx=/pvc/imagenet_processed/train.idx"
+      - "--data-val=/pvc/imagenet_processed/val.rec"
+      - "--data-val-idx=/pvc/imagenet_processed/val.idx"
+      - "--use-dali"
+      - "--dali-dont-use-mmap=0"
+      - "--dali-hw-decoder-load=0"
+      - "--dali-prefetch-queue=5"
+      - "--dali-nvjpeg-memory-padding=256"
+      - "--input-batch-multiplier=1"
+      - "--dali-threads=6"
+      - "--dali-cache-size=0"
+      - "--dali-roi-decode=1"
+      - "--dali-preallocate-width=0"
+      - "--dali-preallocate-height=0"
+      - "--dali-tmp-buffer-hint=25273239"
+      - "--dali-decoder-buffer-hint=1315942"
+      - "--dali-crop-buffer-hint=165581"
+      - "--dali-normalize-buffer-hint=441549"
+      - "--profile=0"
+      - "--e2e-cuda-graphs=0"
+    template:
+      spec:
+        containers:
+          - name: mpi-worker
+            image: registry.tensorstack.cn/t9k/mlperf-nvidia:image_classification
+            imagePullPolicy: IfNotPresent
+            workingDir: /workspace/image_classification/
+            env:
+              - name: LD_LIBRARY_PATH
+                value: "/usr/local/cuda/compat/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib"
+              - name: NCCL_DEBUG
+                value: INFO
+              - name: NCCL_MAX_RINGS
+                value: "4"
+              - name: HOROVOD_CYCLE_TIME
+                value: "0.1"
+              - name: HOROVOD_FUSION_THRESHOLD
+                value: "67108864"
+              - name: HOROVOD_NUM_NCCL_STREAMS
+                value: "2"
+              - name: MXNET_ENABLE_CUDA_GRAPHS
+                value: "1"
+              - name: MXNET_OPTIMIZER_AGGREGATION_SIZE
+                value: "54"
+              - name: MXNET_HOROVOD_NUM_GROUPS
+                value: "1"
+              - name: MXNET_EXEC_BULK_EXEC_MAX_NODE_TRAIN_FWD
+                value: "999"
+              - name: MXNET_EXEC_BULK_EXEC_MAX_NODE_TRAIN_BWD
+                value: "999"
+              - name: MXNET_CUDNN_NHWC_BN_HEURISTIC_FWD
+                value: "1"
+              - name: MXNET_CUDNN_NHWC_BN_HEURISTIC_BWD
+                value: "1"
+              - name: MXNET_CUDNN_NHWC_BN_ADD_HEURISTIC_FWD
+                value: "0"
+              - name: MXNET_CUDNN_NHWC_BN_ADD_HEURISTIC_BWD
+                value: "0"
+              - name: NVIDIA_MXNET_VERSION
+                value: "22.04"
+            resources:
+              limits:
+                cpu: 8
+                memory: 32Gi
+                nvidia.com/gpu: 1
+            volumeMounts:
+              - mountPath: /pvc
+                name: data
+              - mountPath: /dev/shm
+                name: dshm
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: mlperf
+          - name: dshm
+            emptyDir:
+              medium: Memory
