@@ -6,9 +6,11 @@
 
 ## 数据集
 
-参照步骤 [Build docker and prepare dataset](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/minigo/implementations/tensorflow-22.09#build-docker-and-prepare-dataset)，首先创建一个用于下载和预处理数据集的 Pod：
+切换到当前目录下，参照步骤 [Build docker and prepare dataset](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/minigo/implementations/tensorflow-22.09#build-docker-and-prepare-dataset)，创建一个用于下载和预处理数据集的 Pod：
 
 ```shell
+# cd into current directory
+cd ~/mlperf-examples/reinforcement-learning
 kubectl apply -f download_dataset_pod.yaml
 ```
 

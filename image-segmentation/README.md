@@ -18,7 +18,7 @@ cd ~/mlperf-examples/image-segmentation
 kubectl apply -f workflow_DGXA100_40GB_4.yaml
 ```
 
-文件名中的 `DGXA100_40GB` 表示配置适用于 NVIDIA A100 GPU（40GB 显存），`4` 表示 GPU 数量。如果您的硬件有所不同，请参阅[配置和指标](#配置和指标)部分以修改配置。
+文件名中的 `DGXA100_40GB` 表示配置适用于 NVIDIA A100 GPU（40GB 显存），`4` 表示 GPU 数量。如果您的硬件有所不同，请参阅[资源需求和指标](#资源需求和指标)部分以修改配置。
 
 创建 WorkflowRun 之后，前往工作流控制台查看其运行进度。第一次运行时，拉取镜像可能花费较长时间。
 
@@ -39,7 +39,7 @@ kubectl apply -f workflow_DGXA100_40GB_4.yaml
 
 WorkflowTemplate `mlperf-segmentation-dataset` 负责下载和预处理数据集，其执行的脚本参照步骤 [Steps to download and verify data](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/unet3d/implementations/mxnet-22.04#steps-to-download-and-verify-data) 并进行了一定的修改。
 
-如果在下载数据集这一步卡住，请考虑使用 HTTP/HTTPS 代理服务器，通过修改 YAML 配置文件的第 26-27 行。
+如果在下载数据集这一步卡住，请考虑使用 HTTP/HTTPS 代理服务器，通过修改配置文件的第 26-27 行。
 
 ### 训练
 
