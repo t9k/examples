@@ -1,0 +1,156 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: bert
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  replicaSpecs:
+    - type: master
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          securityContext:
+            runAsUser: 1000
+          containers:
+            - command:
+                - python3
+                - /workspace/bert/run_pretraining.py
+                - "--train_batch_size=80"
+                - "--gradient_accumulation_steps=2"
+                - "--learning_rate=3.5e-4"
+                - "--max_samples_termination=4500000"
+                - "--max_steps=10000"
+                - "--opt_lamb_beta_1=0.9"
+                - "--opt_lamb_beta_2=0.999"
+                - "--start_warmup_step=0.0"
+                - "--warmup_proportion=0.0"
+                - "--warmup_steps=0.0"
+                - "--phase2"
+                - "--max_seq_length=512"
+                - "--max_predictions_per_seq=76"
+                - "--train_mlm_accuracy_window_size=0"
+                - "--target_mlm_accuracy=0.720"
+                - "--weight_decay_rate=0.01"
+                - "--do_train"
+                - "--init_checkpoint=bert_data/phase1/model.ckpt-28252.pt"
+                - "--input_dir=bert_data/hdf5/training-4320/hdf5_4320_shards_varlength"
+                - "--output_dir=results"
+                - "--bert_config_path=bert_data/phase1/bert_config.json"
+                - "--skip_checkpoint"
+                - "--eval_iter_start_samples=150000"
+                - "--eval_iter_samples=150000"
+                - "--eval_batch_size=16"
+                - "--eval_dir=bert_data/hdf5/eval_varlength"
+                - "--num_eval_examples=10000"
+                - "--cache_eval_data"
+                - "--fp16"
+                - "--distributed_lamb"
+                - "--dwu-num-rs-pg=1" 
+                - "--dwu-num-ar-pg=1" 
+                - "--dwu-num-ag-pg=1"
+                - "--dwu-num-blocks=1"
+                - "--log_freq=0"
+                - "--allreduce_post_accumulation"
+                - "--allreduce_post_accumulation_fp16"
+                - "--dense_seq_output"
+                - "--unpad"
+                - "--unpad_fmha"
+                - "--exchange_padding"
+              workingDir: /pvc
+              imagePullPolicy: IfNotPresent
+              image: registry.tensorstack.cn/t9k/mlperf-nvidia:language_model
+              name: pytorch
+              resources:
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /pvc
+                  name: data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: mlperf
+            - name: dshm
+              emptyDir:
+                medium: Memory
+    - type: worker
+      replicas: 3
+      restartPolicy: Never
+      template:
+        spec:
+          securityContext:
+            runAsUser: 1000
+          containers:
+            - command:
+                - python3
+                - /workspace/bert/run_pretraining.py
+                - "--train_batch_size=80"
+                - "--gradient_accumulation_steps=2"
+                - "--learning_rate=3.5e-4"
+                - "--max_samples_termination=4500000"
+                - "--max_steps=10000"
+                - "--opt_lamb_beta_1=0.9"
+                - "--opt_lamb_beta_2=0.999"
+                - "--start_warmup_step=0.0"
+                - "--warmup_proportion=0.0"
+                - "--warmup_steps=0.0"
+                - "--phase2"
+                - "--max_seq_length=512"
+                - "--max_predictions_per_seq=76"
+                - "--train_mlm_accuracy_window_size=0"
+                - "--target_mlm_accuracy=0.720"
+                - "--weight_decay_rate=0.01"
+                - "--do_train"
+                - "--init_checkpoint=bert_data/phase1/model.ckpt-28252.pt"
+                - "--input_dir=bert_data/hdf5/training-4320/hdf5_4320_shards_varlength"
+                - "--output_dir=results"
+                - "--bert_config_path=bert_data/phase1/bert_config.json"
+                - "--skip_checkpoint"
+                - "--eval_iter_start_samples=150000"
+                - "--eval_iter_samples=150000"
+                - "--eval_batch_size=16"
+                - "--eval_dir=bert_data/hdf5/eval_varlength"
+                - "--num_eval_examples=10000"
+                - "--cache_eval_data"
+                - "--fp16"
+                - "--distributed_lamb"
+                - "--dwu-num-rs-pg=1" 
+                - "--dwu-num-ar-pg=1" 
+                - "--dwu-num-ag-pg=1"
+                - "--dwu-num-blocks=1"
+                - "--log_freq=0"
+                - "--allreduce_post_accumulation"
+                - "--allreduce_post_accumulation_fp16"
+                - "--dense_seq_output"
+                - "--unpad"
+                - "--unpad_fmha"
+                - "--exchange_padding"
+              workingDir: /pvc
+              imagePullPolicy: IfNotPresent
+              image: registry.tensorstack.cn/t9k/mlperf-nvidia:language_model
+              name: pytorch
+              resources:
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /pvc
+                  name: data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: mlperf
+            - name: dshm
+              emptyDir:
+                medium: Memory

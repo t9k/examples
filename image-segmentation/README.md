@@ -49,6 +49,6 @@ WorkflowTemplate `mlperf-segmentation-train` 创建一个 MPIJob 以启动训练
 
 ### 资源需求和指标
 
-配置文件 `workflow_DGXA100_40GB_4.yaml` 需要 16 个 CPU（核心），32Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G 则可适当增大（或减小）参数 `batch_size` 和 `val_batch_size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/unet3d/implementations/mxnet-22.04)中针对不同硬件的配置。
+配置文件 `workflow_DGXA100_40GB_4.yaml` 需要 16 个 CPU（核心），32Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `batch_size` 和 `val_batch_size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/unet3d/implementations/mxnet-22.04)中针对不同硬件的配置。
 
-默认配置的运行时间参考值为 ~60min，接近 [v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（NVIDIA A100-PCIe-80GB x4，花费时间 ~50-60min）。
+该配置的运行时间参考值为 ~60min，接近 [v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（NVIDIA A100-PCIe-80GB x4，花费时间 ~50-60min）。
