@@ -11,9 +11,12 @@ spec:
         - sleep
         - "1000000"
       resources:
-        limits:
+        requests:
           cpu: 1
           memory: 2Gi
+        limits:
+          cpu: 8
+          memory: 32Gi
       volumeMounts:
         - mountPath: /pvc
           name: data

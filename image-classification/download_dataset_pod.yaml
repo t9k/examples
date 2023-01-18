@@ -12,6 +12,10 @@ spec:
         - "1000000"
       resources:
         limits:
+          cpu: 10
+          memory: 16Gi
+          nvidia.com/gpu: 1
+        requests:
           cpu: 1
           memory: 8Gi
           nvidia.com/gpu: 1
