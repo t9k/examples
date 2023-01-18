@@ -67,7 +67,7 @@ spec:
               limits:
                 cpu: 16
                 memory: 96Gi
-                tensorstack.dev/nvidia-gpu: 1
+                nvidia.com/gpu: 1
             volumeMounts:
               - mountPath: /pvc
                 name: data
