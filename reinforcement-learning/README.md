@@ -1,5 +1,7 @@
 # 强化学习
 
+## benchmark 概况
+
 | Area     | Benchmark              | Dataset | Quality Target              | Reference Implementation Model    |
 | -------- | ---------------------- | ------- | --------------------------- | --------------------------------- |
 | Research | Reinforcement learning | Go      | 50% win rate vs. checkpoint | Mini Go (based on Alpha Go paper) |
@@ -78,4 +80,4 @@ kubectl apply -f mpijob.yaml
 
 请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/minigo/implementations/tensorflow-22.09)中针对不同硬件的配置。
 
-默认配置的运行时间主要取决于 CPU 的性能。作为参考，[v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器相比长了很多（Dell R750xax4A100-PCIE-80GB：Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz x2，NVIDIA A100-PCIe-80GB x4，花费时间 516min）。
+该配置的运行时间主要取决于 CPU 的性能。作为参考，[v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（Dell R750xax4A100-PCIE-80GB：Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz x2，NVIDIA A100-PCIe-80GB x4）花费时间 516min。

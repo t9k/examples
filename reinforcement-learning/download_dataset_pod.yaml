@@ -12,8 +12,8 @@ spec:
         - "1000000"
       resources:
         limits:
-          cpu: 8
-          memory: 32Gi
+          cpu: 1
+          memory: 2Gi
       volumeMounts:
         - mountPath: /pvc
           name: data

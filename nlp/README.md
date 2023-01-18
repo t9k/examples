@@ -55,7 +55,7 @@ kubectl apply -f trainingjob.yaml
 
 更多选项设置请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09)的 README 以及源代码。
 
-## 配置和指标
+## 资源需求和指标
 
 配置文件 `trainingjob.yaml` 需要 16 个 CPU（核心），32Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `train_batch_size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09)中针对不同硬件的配置。
 

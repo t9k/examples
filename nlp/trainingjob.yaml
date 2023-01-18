@@ -60,7 +60,7 @@ spec:
                 - "--unpad"
                 - "--unpad_fmha"
                 - "--exchange_padding"
-              workingDir: /pvc/
+              workingDir: /pvc
               imagePullPolicy: IfNotPresent
               image: registry.tensorstack.cn/t9k/mlperf-nvidia:language_model
               name: pytorch
@@ -133,7 +133,7 @@ spec:
                 - "--unpad"
                 - "--unpad_fmha"
                 - "--exchange_padding"
-              workingDir: /pvc/
+              workingDir: /pvc
               imagePullPolicy: IfNotPresent
               image: registry.tensorstack.cn/t9k/mlperf-nvidia:language_model
               name: pytorch
