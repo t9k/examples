@@ -45,7 +45,7 @@ spec:
       spec:
         containers:
           - name: mpi-worker
-            image: t9kpublic/mlperf-nvidia:minigo
+            image: t9kpublic/mlperf-minigo:v2.1
             imagePullPolicy: IfNotPresent
             workingDir: /opt/reinforcement/minigo/
             env:

@@ -83,7 +83,7 @@ spec:
       spec:
         containers:
           - name: mpi-worker
-            image: t9kpublic/mlperf-nvidia:image_classification
+            image: t9kpublic/mlperf-image-classification:v2.1
             imagePullPolicy: IfNotPresent
             workingDir: /workspace/image_classification/
             env:
