@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never
   containers:
     - name: worker
-      image: t9kpublic/mlperf-nvidia:image_classification
+      image: t9kpublic/mlperf-image-classification:v2.1
       args:
         - sleep
         - "1000000"

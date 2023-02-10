@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never
   containers:
     - name: worker
-      image: t9kpublic/mlperf-nvidia:language_model
+      image: t9kpublic/mlperf-language-model:v2.1
       args:
         - sleep
         - "1000000"

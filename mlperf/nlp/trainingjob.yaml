@@ -62,7 +62,7 @@ spec:
                 - "--exchange_padding"
               workingDir: /pvc
               imagePullPolicy: IfNotPresent
-              image: t9kpublic/mlperf-nvidia:language_model
+              image: t9kpublic/mlperf-language-model:v2.1
               name: pytorch
               resources:
                 limits:
@@ -135,7 +135,7 @@ spec:
                 - "--exchange_padding"
               workingDir: /pvc
               imagePullPolicy: IfNotPresent
-              image: t9kpublic/mlperf-nvidia:language_model
+              image: t9kpublic/mlperf-language-model:v2.1
               name: pytorch
               resources:
                 limits:
