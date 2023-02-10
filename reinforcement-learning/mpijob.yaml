@@ -45,7 +45,7 @@ spec:
       spec:
         containers:
           - name: mpi-worker
-            image: registry.tensorstack.cn/t9k/mlperf-nvidia:minigo
+            image: t9kpublic/mlperf-nvidia:minigo
             imagePullPolicy: IfNotPresent
             workingDir: /opt/reinforcement/minigo/
             env:

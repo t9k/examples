@@ -39,7 +39,7 @@ spec:
       - "--optimizer=sgdwfastlars"
       - "--network=resnet-v1b-stats-fl"
       - "--num-layers=50"
-      - "--num-epochs=37"
+      - "--num-epochs=39"
       - "--accuracy-threshold=0.759"
       - "--seed=1"
       - "--dtype=float16"
@@ -83,7 +83,7 @@ spec:
       spec:
         containers:
           - name: mpi-worker
-            image: registry.tensorstack.cn/t9k/mlperf-nvidia:image_classification
+            image: t9kpublic/mlperf-nvidia:image_classification
             imagePullPolicy: IfNotPresent
             workingDir: /workspace/image_classification/
             env:
@@ -122,7 +122,7 @@ spec:
             resources:
               limits:
                 cpu: 8
-                memory: 32Gi
+                memory: 40Gi
                 nvidia.com/gpu: 1
             volumeMounts:
               - mountPath: /pvc

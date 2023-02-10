@@ -18,8 +18,8 @@ spec:
                 - python3
                 - train.py
                 - "--lr=0.0001"
-                - "--batch-size=32"
-                - "--eval-batch-size=32"
+                - "--batch-size=36"
+                - "--eval-batch-size=36"
                 - "--epochs=10"
                 - "--print-freq=50"
                 - "--dataset-path=/pvc/open_images"
@@ -43,7 +43,7 @@ spec:
                 - "--sync-after-graph-replay"
                 - "--async-coco"
               workingDir: /workspace/ssd
-              image: registry.tensorstack.cn/t9k/mlperf-nvidia:single_stage_detector
+              image: t9kpublic/mlperf-nvidia:single_stage_detector
               env:
                 - name: LOCAL_RANK
                   value: "0"
@@ -51,7 +51,7 @@ spec:
               resources:
                 limits:
                   cpu: 8
-                  memory: 64Gi
+                  memory: 80Gi
                   nvidia.com/gpu: 1
               volumeMounts:
                 - mountPath: /pvc
@@ -75,8 +75,8 @@ spec:
                 - python3
                 - train.py
                 - "--lr=0.0001"
-                - "--batch-size=32"
-                - "--eval-batch-size=32"
+                - "--batch-size=36"
+                - "--eval-batch-size=36"
                 - "--epochs=10"
                 - "--print-freq=50"
                 - "--dataset-path=/pvc/open_images"
@@ -100,7 +100,7 @@ spec:
                 - "--sync-after-graph-replay"
                 - "--async-coco"
               workingDir: /workspace/ssd
-              image: registry.tensorstack.cn/t9k/mlperf-nvidia:single_stage_detector
+              image: t9kpublic/mlperf-nvidia:single_stage_detector
               env:
                 - name: LOCAL_RANK
                   value: "0"
@@ -108,7 +108,7 @@ spec:
               resources:
                 limits:
                   cpu: 8
-                  memory: 64Gi
+                  memory: 80Gi
                   nvidia.com/gpu: 1
               volumeMounts:
                 - mountPath: /pvc

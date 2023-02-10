@@ -51,7 +51,7 @@ kubectl delete pod mlperf-nlp-download-dataset
 kubectl apply -f trainingjob.yaml
 ```
 
-当指标 `eval_accuracy` 达到 0.72 时训练结束。
+当指标 `eval_accuracy` 达到 0.72（Mask-LM accuracy）时训练结束。
 
 更多选项设置请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/bert/implementations/pytorch-22.09)的 README 以及源代码。
 
