@@ -6,14 +6,14 @@ spec:
   restartPolicy: Never
   containers:
     - name: worker
-      image: registry.tensorstack.cn/t9k/mlperf-nvidia:single_stage_detector
+      image: t9kpublic/mlperf-nvidia:single_stage_detector
       args:
         - sleep
         - "1000000"
       resources:
         limits:
           cpu: 2
-          memory: 16Gi
+          memory: 32Gi
       volumeMounts:
         - mountPath: /pvc
           name: data

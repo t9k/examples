@@ -6,19 +6,14 @@ spec:
   restartPolicy: Never
   containers:
     - name: worker
-      image: registry.tensorstack.cn/t9k/mlperf-nvidia:resnet50
+      image: t9kpublic/mlperf-nvidia:image_classification
       args:
         - sleep
         - "1000000"
       resources:
         limits:
-          cpu: 10
-          memory: 16Gi
-          nvidia.com/gpu: 1
-        requests:
-          cpu: 1
+          cpu: 2
           memory: 8Gi
-          nvidia.com/gpu: 1
       volumeMounts:
         - mountPath: /pvc
           name: data

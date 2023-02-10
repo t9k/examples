@@ -6,7 +6,7 @@ spec:
   restartPolicy: Never
   containers:
     - name: worker
-      image: registry.tensorstack.cn/t9k/mlperf-nvidia:language_model
+      image: t9kpublic/mlperf-nvidia:language_model
       args:
         - sleep
         - "1000000"

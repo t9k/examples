@@ -13,7 +13,7 @@ spec:
   seqPod:
     steps:
       - name: download-and-preprocess-dataset
-        image: registry.tensorstack.cn/t9k/mlperf-nvidia:image_segmentation_preprocessing
+        image: t9kpublic/mlperf-nvidia:image_segmentation_preprocessing
         resources:
           limits:
             cpu: 2
@@ -108,7 +108,7 @@ spec:
             spec:
               containers:
                 - name: mpi-worker
-                  image: registry.tensorstack.cn/t9k/mlperf-nvidia:image_segmentation
+                  image: t9kpublic/mlperf-nvidia:image_segmentation
                   workingDir: /workspace/unet3d/
                   env:
                     - name: LD_LIBRARY_PATH

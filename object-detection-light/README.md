@@ -47,12 +47,12 @@ kubectl delete pod mlperf-detector-download-dataset
 kubectl apply -f trainingjob.yaml
 ```
 
-<!-- 当指标 `eval_accuracy` -->
+当指标 `eval_accuracy`（mAP）达到 0.34 时训练结束。
 
 更多选项设置请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/ssd/implementations/pytorch-22.09)的 README 以及源代码。
 
 ## 资源需求和指标
 
-配置文件 `trainingjob.yaml` 需要 32 个 CPU（核心），256Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `batch_size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/ssd/implementations/pytorch-22.09)中针对不同硬件的配置。
+配置文件 `trainingjob.yaml` 需要 32 个 CPU（核心），320Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `batch_size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/ssd/implementations/pytorch-22.09)中针对不同硬件的配置。
 
-该配置的运行时间参考值为 ~6-8h，长于 [v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（NVIDIA A100-PCIe-80GB 300W x4，花费时间 ~3-4h）。
+该配置的运行时间参考值为 ~3.5h，接近 [v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（NVIDIA A100-PCIe-80GB x4，花费时间 ~3-3.5h）。
