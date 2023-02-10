@@ -12,7 +12,7 @@
 
 ```shell
 # cd into current directory
-cd ~/mlperf-examples/object-detection-light
+cd ~/examples/mlperf/object-detection-light
 kubectl apply -f download_dataset_pod.yaml
 ```
 
