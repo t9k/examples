@@ -14,7 +14,7 @@
 
 ```shell
 # cd into current directory
-cd ~/mlperf-examples/nlp
+cd ~/examples/mlperf/nlp
 kubectl apply -f download_dataset_pod.yaml
 ```
 

@@ -12,7 +12,7 @@
 
 ```shell
 # cd into current directory
-cd ~/mlperf-examples/reinforcement-learning
+cd ~/examples/mlperf/reinforcement-learning
 kubectl apply -f download_dataset_pod.yaml
 ```
 

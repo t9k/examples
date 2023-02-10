@@ -12,7 +12,7 @@
 
 ```shell
 # cd into current directory
-cd ~/mlperf-examples/image-segmentation
+cd ~/examples/mlperf/image-segmentation
 # vim workflow_DGXA100_40GB_4.yaml  # optionally uncomment config of scheduler (line 72-75)
                                     # and fill in name of queue (line 74) if use queue
 kubectl apply -f workflow_DGXA100_40GB_4.yaml
