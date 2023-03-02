@@ -1,0 +1,42 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: ColossalAIJob
+metadata:
+  name: colossal-opt
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  launcher:
+    image: tsz.io/t9k/colossalai:0.2.5-opt
+    workingDir: /workspace/ColossalAI/examples/language/opt
+  worker:
+    replicas: 4
+    procPerWorker: 1
+    command:
+      - train_gemini_opt.py
+      - "--model_name_or_path=facebook/opt-350m"
+      - "--batch_size=16"
+      - "--max_train_steps=100"
+      - "--mem_cap=0"
+    torchArgs: []
+    template:
+      spec:
+        restartPolicy: OnFailure
+        containers:
+          - image: tsz.io/t9k/colossalai:0.2.5-opt
+            name: worker
+            resources:
+              limits:
+                cpu: 4
+                memory: 8Gi
+                nvidia.com/gpu: "1"
+        #     volumeMounts:
+        #       - mountPath: /workspace/data
+        #         name: data
+        # volumes:
+        #   - name: data
+        #     persistentVolumeClaim:
+        #       claimName: facebook-opt-30b
+  runPolicy:
+    cleanUpWorkers: true
