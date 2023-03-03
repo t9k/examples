@@ -20,9 +20,9 @@
 kubectl create -f job.yaml
 ```
 
-## 模型参数和资源需求
+## 模型超参数和资源需求
 
-本示例设置的模型参数为：
+本示例设置的模型超参数为：
 
 ```python
 model = PaLM(num_tokens=20000, dim=512, depth=24, heads=8, dim_head=64)

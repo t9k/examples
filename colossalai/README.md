@@ -17,11 +17,11 @@ TensorStack AI 计算平台所在的 Kubernetes 集群需要：
 
     这里**充足的资源**指队列有足以运行相应示例的 CPU 额度、内存额度、扩展资源 `nvidia.com/gpu` 等资源配额。不同的示例以及不同的配置需要不同的资源配额，请参阅各个示例的 README 文档。
 
-    **适当的设置**指队列的优先级、是否可被抢占以及节点筛选的设置。节点筛选一般应添加适当的标签匹配规则，以限制队列可以使用的节点，例如可以匹配 `sched.tensorstack.dev/accelerator: nvidia-gpu`、`sched.tensorstack.dev/node-alloc-mode: nvidia`、`nvidia.com/gpu.product: NVIDIA-A100-SXM-80GB`、`nvidia.com/gpu.memory: 81920` 等标签。
+    **适当的设置**指队列的优先级、是否可被抢占以及通过节点筛选机制选择的 GPU 型号等。
 
     这一步是可选的，是否执行这一步取决于您是否需要对作业调度进行控制。例如，如果您不希望 Job 的工作器被调度到某一些节点上，那么这一步就是必要的。
 
-1. 在您的项目中创建一个名为 colossalai、大小 1 GiB 的 PVC，然后创建一个同样名为 colossalai 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
+1. 在您的项目中创建一个名为 colossalai、大小 500 GiB 的 PVC（可能需要存储一些模型检查点文件），然后创建一个同样名为 colossalai 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
 
 1. 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆此仓库。
 
