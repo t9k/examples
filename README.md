@@ -12,4 +12,5 @@
 
 ## 示例列表
 
+* [ColossalAI 示例](./colossalai/)
 * [MLPerf Training benchmark](./mlperf/)

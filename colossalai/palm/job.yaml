@@ -1,0 +1,34 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: ColossalAIJob
+metadata:
+  name: colossal-palm
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  launcher:
+    image: t9kpublic/colossalai:0.2.5-palm
+    workingDir: /workspace/ColossalAI/examples/language/palm
+  worker:
+    replicas: 4
+    procPerWorker: 1
+    command:
+      - train.py
+      - "--distplan=colossalai"
+      - "--batch_num=100"
+      # - "--dummy_data=True"
+    torchArgs: []
+    template:
+      spec:
+        restartPolicy: OnFailure
+        containers:
+          - image: t9kpublic/colossalai:0.2.5-palm
+            name: worker
+            resources:
+              limits:
+                cpu: 4
+                memory: 8Gi
+                nvidia.com/gpu: "1"
+  runPolicy:
+    cleanUpWorkers: true
