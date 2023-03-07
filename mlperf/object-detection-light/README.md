@@ -27,7 +27,7 @@ kubectl exec -it mlperf-detector-download-dataset -- bash
 
 # download dataset
 # take a very long time and take up 349GB of storage space
-pip install fiftyone
+pip install fiftyone==0.18.0
 mkdir /pvc/open_images
 cd ./public-scripts
 ./download_openimages_mlperf.sh -d /pvc/open_images
@@ -41,10 +41,10 @@ kubectl delete pod mlperf-detector-download-dataset
 
 ## 训练
 
-使用 `trainingjob.yaml` 创建 PyTorchTrainingJob 以启动训练（如果使用队列，取消对于调度器配置的注释（第 6-9 行），并修改队列名称（第 8 行，默认为 `default`））：
+使用 `job_<WORKER_NUM>GPU<GPU_MEMORY>.yaml` 创建 PyTorchTrainingJob 以启动训练（如果使用队列，取消对于调度器配置的注释（第 6-9 行），并修改队列名称（第 8 行，默认为 `default`））：
 
 ```shell
-kubectl apply -f trainingjob.yaml
+kubectl create -f job_<WORKER_NUM>GPU<GPU_MEMORY>.yaml
 ```
 
 当指标 `eval_accuracy`（mAP）达到 0.34 时训练结束。
@@ -53,6 +53,15 @@ kubectl apply -f trainingjob.yaml
 
 ## 资源需求和指标
 
-配置文件 `trainingjob.yaml` 需要 32 个 CPU（核心），320Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `batch_size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/ssd/implementations/pytorch-22.09)中针对不同硬件的配置。
+配置文件的名称服从格式 `job_<WORKER_NUM>GPU<GPU_MEMORY>.yaml`，例如 `job_4GPU40GB.yaml` 表示启动 4 个工作器，每个工作器需要 1 个至少 40GB 显存的 GPU。除此之外，每个工作器还需要 8 个 CPU（核心）以及 80Gi 内存。不同配置文件启动的训练只有 batch size 和工作器数量上的差别。
 
-该配置的运行时间参考值为 ~3.5h，接近 [v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（NVIDIA A100-PCIe-80GB x4，花费时间 ~3-3.5h）。
+下表给出了各个配置的总资源需求量以及参考运行时间：
+
+| 配置文件            | CPU 需求量（核心数） | 内存需求量 | GPU 需求量                                             | 参考运行时间                   |
+| ------------------- | -------------------- | ---------- | ------------------------------------------------------ | ------------------------------ |
+| `job_4GPU20GB.yaml` | 32                   | 320GiB     | 4 GPU with 24GB+ memory (e.g. RTX 3090, RTX 4090, A30) |                                |
+| `job_8GPU20GB.yaml` | 64                   | 640GiB     | 8 GPU with 24GB+ memory                                | ~4.5-5.5h (A30)                |
+| `job_4GPU40GB.yaml` | 32                   | 320GiB     | 4 GPU with 40GB+ memory (A100-40GB, A40)               | ~3.5h (A100-40GB), ~6-9h (A40) |
+| `job_8GPU40GB.yaml` | 64                   | 640GiB     | 8 GPU with 40GB+ memory                                | ~4.5-5.5h (A40)                |
+| `job_4GPU80GB.yaml` | 32                   | 320GiB     | 4 GPU with 80GB+ memory (A100-80GB)                    | ~3-3.5h                        |
+| `job_8GPU80GB.yaml` | 64                   | 640GiB     | 8 GPU with 80GB+ memory                                | ~80min-2h                      |

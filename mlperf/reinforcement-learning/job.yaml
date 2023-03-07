@@ -9,10 +9,10 @@ spec:
   mpiHome: /usr/local/mpi
   ssh:
     sshdPath: /usr/sbin/sshd
-  # scheduler:
-  #   t9kScheduler:
-  #     queue: default
-  #     priority: 50
+  scheduler:
+    t9kScheduler:
+      queue: mlperf
+      priority: 50
   runPolicy:
     cleanUpWorkers: true
   worker:
@@ -45,7 +45,7 @@ spec:
       spec:
         containers:
           - name: mpi-worker
-            image: t9kpublic/mlperf-minigo:v2.1
+            image: tsz.io/t9k/mlperf-nvidia:minigo
             imagePullPolicy: IfNotPresent
             workingDir: /opt/reinforcement/minigo/
             env:
@@ -67,7 +67,7 @@ spec:
               limits:
                 cpu: 16
                 memory: 96Gi
-                nvidia.com/gpu: 1
+                tensorstack.dev/nvidia-gpu: 1
             volumeMounts:
               - mountPath: /pvc
                 name: data

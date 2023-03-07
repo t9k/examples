@@ -18,8 +18,8 @@ spec:
                 - python3
                 - train.py
                 - "--lr=0.0001"
-                - "--batch-size=36"
-                - "--eval-batch-size=36"
+                - "--batch-size=72"
+                - "--eval-batch-size=72"
                 - "--epochs=10"
                 - "--print-freq=50"
                 - "--dataset-path=/pvc/open_images"
@@ -43,7 +43,7 @@ spec:
                 - "--sync-after-graph-replay"
                 - "--async-coco"
               workingDir: /workspace/ssd
-              image: t9kpublic/mlperf-nvidia:single_stage_detector
+              image: t9kpublic/mlperf-single-stage-detector:v2.1
               env:
                 - name: LOCAL_RANK
                   value: "0"
@@ -66,7 +66,7 @@ spec:
               emptyDir:
                 medium: Memory
     - type: worker
-      replicas: 3
+      replicas: 7
       restartPolicy: Never
       template:
         spec:
@@ -75,8 +75,8 @@ spec:
                 - python3
                 - train.py
                 - "--lr=0.0001"
-                - "--batch-size=36"
-                - "--eval-batch-size=36"
+                - "--batch-size=72"
+                - "--eval-batch-size=72"
                 - "--epochs=10"
                 - "--print-freq=50"
                 - "--dataset-path=/pvc/open_images"
@@ -100,7 +100,7 @@ spec:
                 - "--sync-after-graph-replay"
                 - "--async-coco"
               workingDir: /workspace/ssd
-              image: t9kpublic/mlperf-nvidia:single_stage_detector
+              image: t9kpublic/mlperf-single-stage-detector:v2.1
               env:
                 - name: LOCAL_RANK
                   value: "0"

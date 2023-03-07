@@ -61,7 +61,7 @@ kubectl delete pod mlperf-minigo-download-dataset
 
 ## 训练
 
-使用 `mpijob.yaml` 创建 MPIJob 以启动训练（如果使用队列，取消对于调度器配置的注释（第 12-15 行），并修改队列名称（第 14 行，默认为 `default`））：
+使用 `job_<GPU_NUM>GPU_<CPU_NUM>CPU.yaml` 创建 MPIJob 以启动训练（如果使用队列，取消对于调度器配置的注释（第 12-15 行），并修改队列名称（第 14 行，默认为 `default`））：
 
 ```shell
 kubectl apply -f mpijob.yaml
@@ -73,11 +73,13 @@ kubectl apply -f mpijob.yaml
 
 ## 资源需求和指标
 
-配置文件 `mpijob.yaml` 需要 64 个 CPU（核心）（若 CPU 核心数不足，则减小该值，通过修改第 68 行）、384 Gi 内存以及 4 个 GPU（显存不少于 20G）。训练此模型时主要瓶颈在于 CPU，可视具体情况适当修改以下参数：
+配置文件的名称服从格式 `job_<GPU_NUM>GPU_<CPU_NUM>CPU.yaml`，例如 `job_4GPU_32CPU.yaml` 表示启动 1 个工作器，其需要 32 个 CPU（核心）、384GiB 内存以及 4 个至少 20GB 显存的 GPU。不同配置文件启动的训练只有启动进程数量上的差别。
 
-* `procs_per_gpu`：若 CPU 未满载，且 GPU 有空余的显存，则可适当增大，否则适当减小。
-* `ranks_per_node`：固定为 `procs_per_gpu` + 1。
+下表给出了各个配置的总资源需求量以及参考运行时间：
 
-请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/minigo/implementations/tensorflow-22.09)中针对不同硬件的配置。
+| 配置文件              | CPU 需求量（核心数） | 内存需求量 | GPU 需求量              | 参考运行时间 |
+| --------------------- | -------------------- | ---------- | ----------------------- | ------------ |
+| `job_4GPU_32CPU.yaml` | 32                   | 384GiB     | 4 GPU with 20GB+ memory | ~8h          |
+| `job_8GPU_64CPU.yaml` | 64                   | 768GiB     | 8 GPU with 20GB+ memory | ~3h          |
 
-该配置的运行时间主要取决于 CPU 的性能。作为参考，[v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（Dell R750xax4A100-PCIE-80GB：Intel(R) Xeon(R) Gold 6338 CPU @ 2.00GHz x2，NVIDIA A100-PCIe-80GB x4）花费时间 516min。
+训练此模型时的主要瓶颈在于 CPU，运行时间主要取决于 CPU 的性能，因此实际运行时间可能远长于参考运行时间。若可用的 CPU 核心数不足，可以适当减小 CPU 需求量（通过修改配置文件的第 68 行），尽管这会降低训练速度。

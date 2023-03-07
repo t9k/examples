@@ -1,0 +1,124 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: retina-net
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  replicaSpecs:
+    - type: master
+      replicas: 1
+      restartPolicy: Never
+      template:
+        spec:
+          containers:
+            - command:
+                - python3
+                - train.py
+                - "--lr=0.0001"
+                - "--batch-size=36"
+                - "--eval-batch-size=36"
+                - "--epochs=10"
+                - "--print-freq=50"
+                - "--dataset-path=/pvc/open_images"
+                - "--warmup-epochs=0"
+                - "--jit"
+                - "--frozen-bn-opt"
+                - "--frozen-bn-fp16"
+                - "--apex-adam"
+                - "--apex-focal-loss"
+                - "--apex-head-fusion"
+                - "--disable-ddp-broadcast-buffers"
+                - "--fp16-allreduce"
+                - "--reg-head-pad"
+                - "--cls-head-pad"
+                - "--cuda-graphs"
+                - "--dali"
+                - "--dali-matched-idxs"
+                - "--dali-eval"
+                - "--skip-metric-loss"
+                - "--cuda-graphs-syn"
+                - "--sync-after-graph-replay"
+                - "--async-coco"
+              workingDir: /workspace/ssd
+              image: t9kpublic/mlperf-single-stage-detector:v2.1
+              env:
+                - name: LOCAL_RANK
+                  value: "0"
+              name: pytorch
+              resources:
+                limits:
+                  cpu: 8
+                  memory: 80Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /pvc
+                  name: data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: mlperf
+            - name: dshm
+              emptyDir:
+                medium: Memory
+    - type: worker
+      replicas: 7
+      restartPolicy: Never
+      template:
+        spec:
+          containers:
+            - command:
+                - python3
+                - train.py
+                - "--lr=0.0001"
+                - "--batch-size=36"
+                - "--eval-batch-size=36"
+                - "--epochs=10"
+                - "--print-freq=50"
+                - "--dataset-path=/pvc/open_images"
+                - "--warmup-epochs=0"
+                - "--jit"
+                - "--frozen-bn-opt"
+                - "--frozen-bn-fp16"
+                - "--apex-adam"
+                - "--apex-focal-loss"
+                - "--apex-head-fusion"
+                - "--disable-ddp-broadcast-buffers"
+                - "--fp16-allreduce"
+                - "--reg-head-pad"
+                - "--cls-head-pad"
+                - "--cuda-graphs"
+                - "--dali"
+                - "--dali-matched-idxs"
+                - "--dali-eval"
+                - "--skip-metric-loss"
+                - "--cuda-graphs-syn"
+                - "--sync-after-graph-replay"
+                - "--async-coco"
+              workingDir: /workspace/ssd
+              image: t9kpublic/mlperf-single-stage-detector:v2.1
+              env:
+                - name: LOCAL_RANK
+                  value: "0"
+              name: pytorch
+              resources:
+                limits:
+                  cpu: 8
+                  memory: 80Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /pvc
+                  name: data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: mlperf
+            - name: dshm
+              emptyDir:
+                medium: Memory

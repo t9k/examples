@@ -76,7 +76,7 @@ spec:
         runPolicy:
           cleanUpWorkers: true
         worker:
-          replicas: 4
+          replicas: 8
           processesPerWorker: 1
           processRecovery:
             enable: true
@@ -120,7 +120,7 @@ spec:
                   resources:
                     limits:
                       cpu: 4
-                      memory: 8Gi
+                      memory: 16Gi
                       nvidia.com/gpu: 1
                   volumeMounts:
                     - mountPath: /pvc
@@ -139,8 +139,6 @@ spec:
                 - name: results
                   emptyDir:
                     medium: Memory
-    successRules:
-      fieldSelector: status.phase==Completed
   results: []
   type: Resource
   workspaces: []
