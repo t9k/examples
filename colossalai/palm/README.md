@@ -28,7 +28,7 @@ kubectl create -f job.yaml
 model = PaLM(num_tokens=20000, dim=512, depth=24, heads=8, dim_head=64)
 ```
 
-训练时占用约 11000MiB 显存和 2.63GiB 内存。
+训练时每个工作器占用约 11000MiB 显存和 2.63GiB 内存。
 
 ## 参考
 
