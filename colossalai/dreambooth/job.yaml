@@ -1,0 +1,42 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: ColossalAIJob
+metadata:
+  name: colossal-dreambooth
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  launcher:
+    image: t9kpublic/colossalai:0.2.5-dreambooth
+    workingDir: /workspace/ColossalAI/examples/images/dreambooth
+  worker:
+    replicas: 2
+    procPerWorker: 1
+    command:
+      - train_dreambooth_colossalai.py
+      - "--pretrained_model_name_or_path=stabilityai/stable-diffusion-2"
+      - "--instance_data_dir=data/"
+      - "--output_dir=output/"
+      - "--instance_prompt='genshin impact character'"
+      - "--resolution=768"
+      - "--train_batch_size=1"
+      - "--learning_rate=5e-6"
+      - "--lr_scheduler=constant"
+      - "--lr_warmup_steps=0"
+      - "--max_train_steps=400"
+      - "--placement=cuda"
+    torchArgs: []
+    template:
+      spec:
+        restartPolicy: OnFailure
+        containers:
+          - image: t9kpublic/colossalai:0.2.5-dreambooth
+            name: worker
+            resources:
+              limits:
+                cpu: 4
+                memory: 16Gi
+                nvidia.com/gpu: "1"
+  runPolicy:
+    cleanUpWorkers: true

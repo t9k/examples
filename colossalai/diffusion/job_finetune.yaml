@@ -1,0 +1,35 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: ColossalAIJob
+metadata:
+  name: colossal-diffusion
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  launcher:
+    image: t9kpublic/colossalai:0.2.5-diffusion
+    workingDir: /workspace/ColossalAI/examples/images/diffusion
+  worker:
+    replicas: 2
+    procPerWorker: 1
+    command:
+      - main.py
+      - "--logdir=/tmp/"
+      - "--train"
+      - "--base=configs/Teyvat/train_colossalai_teyvat.yaml"
+      - "--ckpt=512-base-ema.ckpt"
+    torchArgs: []
+    template:
+      spec:
+        restartPolicy: OnFailure
+        containers:
+          - image: t9kpublic/colossalai:0.2.5-diffusion
+            name: worker
+            resources:
+              limits:
+                cpu: 4
+                memory: 32Gi
+                nvidia.com/gpu: "1"
+  runPolicy:
+    cleanUpWorkers: true
