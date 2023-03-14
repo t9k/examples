@@ -9,10 +9,10 @@ spec:
   mpiHome: /usr/local/mpi
   ssh:
     sshdPath: /usr/sbin/sshd
-  scheduler:
-    t9kScheduler:
-      queue: mlperf
-      priority: 50
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
   runPolicy:
     cleanUpWorkers: true
   worker:
@@ -71,7 +71,7 @@ spec:
                 value: "1"
             resources:
               limits:
-                cpu: 6
+                cpu: 16
                 memory: 96Gi
                 nvidia.com/gpu: 1
             volumeMounts:

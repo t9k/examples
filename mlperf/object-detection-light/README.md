@@ -59,8 +59,8 @@ kubectl create -f job_<WORKER_NUM>GPU<GPU_MEMORY>.yaml
 
 | 配置文件            | CPU 需求量（核心数） | 内存需求量 | GPU 需求量                                             | 参考运行时间                   |
 | ------------------- | -------------------- | ---------- | ------------------------------------------------------ | ------------------------------ |
-| `job_4GPU20GB.yaml` | 32                   | 320GiB     | 4 GPU with 24GB+ memory (e.g. RTX 3090, RTX 4090, A30) |                                |
-| `job_8GPU20GB.yaml` | 64                   | 640GiB     | 8 GPU with 24GB+ memory                                | ~4.5-5.5h (A30)                |
+| `job_4GPU24GB.yaml` | 32                   | 320GiB     | 4 GPU with 24GB+ memory (e.g. RTX 3090, RTX 4090, A30) |                                |
+| `job_8GPU24GB.yaml` | 64                   | 640GiB     | 8 GPU with 24GB+ memory                                | ~4.5-5.5h (A30)                |
 | `job_4GPU40GB.yaml` | 32                   | 320GiB     | 4 GPU with 40GB+ memory (A100-40GB, A40)               | ~3.5h (A100-40GB), ~6-9h (A40) |
 | `job_8GPU40GB.yaml` | 64                   | 640GiB     | 8 GPU with 40GB+ memory                                | ~4.5-5.5h (A40)                |
 | `job_4GPU80GB.yaml` | 32                   | 320GiB     | 4 GPU with 80GB+ memory (A100-80GB)                    | ~3-3.5h                        |
