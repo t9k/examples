@@ -1,0 +1,122 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: nanogpt
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  replicaSpecs:
+    - type: master
+      replicas: 1
+      restartPolicy: ExitCode
+      template:
+        spec:
+          securityContext:
+            runAsUser: 1000
+          # affinity:
+          #   podAffinity:
+          #     preferredDuringSchedulingIgnoredDuringExecution:
+          #     - podAffinityTerm:
+          #         labelSelector:
+          #           matchLabels:
+          #             tensorstack.dev/owner-name: nanogpt
+          #         topologyKey: kubernetes.io/hostname
+          #       weight: 100
+          containers:
+            - name: pytorch
+              command:
+                - python
+                - train.py
+                - config/train_gpt2_test.py
+              workingDir: /t9k/mnt/examples/nanoGPT/
+              image: t9kpublic/nanogpt:latest
+              env:
+                - name: LOCAL_RANK
+                  value: '0'
+                - name: NCCL_IB_HCA
+                  value: 'mlx5'
+                - name: NCCL_IB_DISABLE
+                  value: '0'
+                - name: NCCL_DEBUG
+                  value: 'INFO'
+                - name: NCCL_DEBUG_SUBSYS
+                  value: 'ALL'
+              securityContext:
+                capabilities:
+                  add: [ "IPC_LOCK" ]
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 4Gi
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+              volumeMounts:
+                - mountPath: /t9k/mnt
+                  name: data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: nanogpt
+    - type: worker
+      replicas: 7
+      restartPolicy: ExitCode
+      template:
+        spec:
+          securityContext:
+            runAsUser: 1000
+          # affinity:
+          #   podAffinity:
+          #     preferredDuringSchedulingIgnoredDuringExecution:
+          #     - podAffinityTerm:
+          #         labelSelector:
+          #           matchLabels:
+          #             tensorstack.dev/owner-name: nanogpt
+          #         topologyKey: kubernetes.io/hostname
+          #       weight: 100
+          containers:
+            - name: pytorch
+              command:
+                - python
+                - train.py
+                - config/train_gpt2_test.py
+              workingDir: /t9k/mnt/examples/nanoGPT/
+              image: t9kpublic/nanogpt:latest
+              env:
+                - name: LOCAL_RANK
+                  value: '0'
+                - name: NCCL_IB_HCA
+                  value: 'mlx5'
+                - name: NCCL_IB_DISABLE
+                  value: '0'
+                - name: NCCL_DEBUG
+                  value: 'INFO'
+                - name: NCCL_DEBUG_SUBSYS
+                  value: 'ALL'
+              securityContext:
+                capabilities:
+                  add: [ "IPC_LOCK" ]
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 4Gi
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+                  nvidia.com/gpu: 1
+                  rdma/rdma_shared_device_a: 1
+              volumeMounts:
+                - mountPath: /t9k/mnt
+                  name: data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: nanogpt
