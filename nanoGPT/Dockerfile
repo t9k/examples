@@ -1,5 +1,9 @@
 FROM pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime
 
+ENV DEBIAN_FRONTEND=noninteractive
+# TODO: Review if we really need all these libs.
+RUN apt update && apt install -y libibverbs1 librdmacm1 libibumad3 && rm -rf /var/lib/apt/lists/*
+
 RUN pip install --no-cache-dir -i https://pypi.douban.com/simple/ \
     transformers \
     datasets \
