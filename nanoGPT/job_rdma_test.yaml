@@ -13,8 +13,6 @@ spec:
       restartPolicy: ExitCode
       template:
         spec:
-          securityContext:
-            runAsUser: 1000
           # affinity:
           #   podAffinity:
           #     preferredDuringSchedulingIgnoredDuringExecution:
@@ -31,7 +29,7 @@ spec:
                 - train.py
                 - config/train_gpt2_test.py
               workingDir: /t9k/mnt/examples/nanoGPT/
-              image: t9kpublic/nanogpt:latest
+              image: t9kpublic/nanogpt:rdma-v1
               env:
                 - name: LOCAL_RANK
                   value: '0'
@@ -42,7 +40,7 @@ spec:
                 - name: NCCL_DEBUG
                   value: 'INFO'
                 - name: NCCL_DEBUG_SUBSYS
-                  value: 'ALL'
+                  value: 'INIT,ENV,NET,TUNING'
               securityContext:
                 capabilities:
                   add: [ "IPC_LOCK" ]
@@ -69,8 +67,6 @@ spec:
       restartPolicy: ExitCode
       template:
         spec:
-          securityContext:
-            runAsUser: 1000
           # affinity:
           #   podAffinity:
           #     preferredDuringSchedulingIgnoredDuringExecution:
@@ -87,7 +83,7 @@ spec:
                 - train.py
                 - config/train_gpt2_test.py
               workingDir: /t9k/mnt/examples/nanoGPT/
-              image: t9kpublic/nanogpt:latest
+              image: t9kpublic/nanogpt:rdma-v1
               env:
                 - name: LOCAL_RANK
                   value: '0'
@@ -98,7 +94,7 @@ spec:
                 - name: NCCL_DEBUG
                   value: 'INFO'
                 - name: NCCL_DEBUG_SUBSYS
-                  value: 'ALL'
+                  value: 'INIT,ENV,NET,TUNING'
               securityContext:
                 capabilities:
                   add: [ "IPC_LOCK" ]
