@@ -23,5 +23,5 @@ weight_decay = 1e-1
 # disable wandb
 wandb_log = False
 
-# PyTorch 2.0 can compile
-compile = True
+# PyTorch 1.x can not compile
+compile = False

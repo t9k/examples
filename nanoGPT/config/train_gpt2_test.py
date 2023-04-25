@@ -23,8 +23,8 @@ weight_decay = 1e-1
 # disable wandb
 wandb_log = False
 
-# PyTorch 1.x can not compile
-compile = False
+# PyTorch 2.0 can compile
+compile = True
 
 dataset = 'openwebtext-10k'
 out_dir = 'out-test'
