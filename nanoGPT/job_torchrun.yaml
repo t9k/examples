@@ -3,15 +3,15 @@ kind: PyTorchTrainingJob
 metadata:
   name: nanogpt
 spec:
-  # scheduler:
-  #   t9kScheduler:
-  #     queue: default
-  #     priority: 50
+  scheduler:
+    t9kScheduler:
+      queue: default
+      priority: 50
   torchrunConfig:
     enable: true
     minNodes: 1
     maxRestarts: 3
-    procPerNode: "1"
+    procPerNode: "8"
     rdzvBackend: c10d
   replicaSpecs:
     - type: node
@@ -31,17 +31,22 @@ spec:
                   add: [ "IPC_LOCK" ]
               resources:
                 requests:
-                  cpu: 8
+                  cpu: 16
                   memory: 32Gi
                   nvidia.com/gpu: 8
                 limits:
-                  cpu: 16
+                  cpu: 32
                   memory: 64Gi
                   nvidia.com/gpu: 8
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data
+                - mountPath: /dev/shm
+                  name: dshm  
           volumes:
             - name: data
               persistentVolumeClaim:
                 claimName: nanogpt
+            - name: dshm
+              emptyDir:
+                medium: Memory

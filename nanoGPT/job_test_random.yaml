@@ -27,7 +27,7 @@ spec:
               command:
                 - python
                 - train.py
-                - config/train_gpt2_test.py
+                - config/train_gpt2_test_random.py
               workingDir: /t9k/mnt/examples/nanoGPT/
               image: t9kpublic/nanogpt:test-v1
               env:
