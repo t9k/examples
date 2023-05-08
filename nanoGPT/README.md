@@ -38,18 +38,14 @@ python data/openwebtext/prepare.py
 
 使用 `job.yaml` 创建 PyTorchTrainingJob 以启动训练，您可以如下修改训练配置：
 
-* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
-* 工作器数量在第 12 行定义（默认为 `8`）。
+* 队列名称在第 8 行定义（默认为 `default`）。
+* 每个节点的进程数量在第 13 行定义（默认为 `"8"`）。
+* 节点数量在第 17 行定义（默认为 `1`）。
 
 `job.yaml` 有如下变体，您也可以使用这些配置文件来创建 PyTorchTrainingJob：
 
-* `job_rdma.yaml`：每个工作器请求一张 RDMA 网卡，利用 IB 网络加速训练。
+* `job_rdma.yaml`：在节点数量大于 1 的情况下，每个节点请求一张 RDMA 网卡，利用 IB 网络加速训练。
 * `job_torch1.yaml`：使用 PyTorch 1.13 版本（默认为 2.0 版本）。由于无法使用 `torch.compile()` 函数编译模型，训练速度会更慢。
-* `job_torchrun.yaml`：使用 `torchrun` 启动训练，其中：
-    * 每个 Pod 请求 8 个 GPU 以及更多的 CPU 和内存资源，相当于一个“节点”。
-    * `spec.replicaSpecs[0].replicas: 2` 声明最多 2 个节点，`spec.torchrunConfig.minNodes: 1` 声明最少 1 个节点，`spec.torchrunConfig.procPerNode: "8"` 声明每个节点启动 8 个进程。<!--（更多关于 `torchrun` 设置的细节请参阅） -->
-    * 需要使用队列（否则弹性伸缩可能出错）。
-    * 需要挂载内存到 `/dev/shm` 路径以增加共享内存。
 * `job_test_small.yaml` 和 `job_test_random.yaml`：请参阅[训练 GPT-2（测试）](#训练-gpt-2测试)
 
 ```shell
@@ -57,7 +53,6 @@ kubectl create -f job.yaml
 # or
 kubectl create -f job_rdma.yaml
 kubectl create -f job_torch1.yaml
-kubectl create -f job_torchrun.yaml
 ```
 
 ### 训练 GPT-2（测试）
@@ -87,8 +82,9 @@ python data/openwebtext-10k/prepare.py
 
 使用 `job_test_small.yaml` 或 `job_test_random.yaml` 创建 PyTorchTrainingJob 以启动训练，区别在于前者使用小型数据集而后者直接使用随机数作为数据集。您可以如下修改训练配置：
 
-* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
-* 工作器数量在第 12 行定义（默认为 `8`）。
+* 队列名称在第 8 行定义（默认为 `default`）。
+* 每个节点的进程数量在第 13 行定义（默认为 `"8"`）。
+* 节点数量在第 17 行定义（默认为 `1`）。
 
 ```shell
 kubectl create -f job_test_small.yaml

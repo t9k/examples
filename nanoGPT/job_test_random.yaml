@@ -3,52 +3,49 @@ kind: PyTorchTrainingJob
 metadata:
   name: nanogpt
 spec:
-  # scheduler:
-  #   t9kScheduler:
-  #     queue: default
-  #     priority: 50
+  scheduler:
+    t9kScheduler:
+      queue: default
+      priority: 50
+  torchrunConfig:
+    enable: true
+    maxRestarts: 3
+    procPerNode: "8"
+    rdzvBackend: c10d
   replicaSpecs:
-    - type: worker
-      replicas: 8
+    - type: node
+      replicas: 1
       restartPolicy: ExitCode
       template:
         spec:
-          affinity:
-            podAffinity:
-              preferredDuringSchedulingIgnoredDuringExecution:
-              - podAffinityTerm:
-                  labelSelector:
-                    matchLabels:
-                      tensorstack.dev/owner-name: nanogpt
-                  topologyKey: kubernetes.io/hostname
-                weight: 100
           containers:
             - name: pytorch
-              command:
-                - python
+              args:
                 - train.py
                 - config/train_gpt2_test_random.py
               workingDir: /t9k/mnt/examples/nanoGPT/
               image: t9kpublic/nanogpt:test-v1
-              env:
-                - name: LOCAL_RANK
-                  value: '0'
               securityContext:
                 capabilities:
                   add: [ "IPC_LOCK" ]
               resources:
                 requests:
-                  cpu: 2
-                  memory: 32Gi
-                  nvidia.com/gpu: 1
+                  cpu: 16
+                  memory: 256Gi
+                  nvidia.com/gpu: 8
                 limits:
-                  cpu: 4
-                  memory: 64Gi
-                  nvidia.com/gpu: 1
+                  cpu: 32
+                  memory: 512Gi
+                  nvidia.com/gpu: 8
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data
+                - mountPath: /dev/shm
+                  name: dshm  
           volumes:
             - name: data
               persistentVolumeClaim:
                 claimName: nanogpt
+            - name: dshm
+              emptyDir:
+                medium: Memory
