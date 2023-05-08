@@ -47,12 +47,12 @@ spec:
               resources:
                 requests:
                   cpu: 2
-                  memory: 4Gi
+                  memory: 32Gi
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1  # request RDMA networking card
                 limits:
                   cpu: 4
-                  memory: 8Gi
+                  memory: 64Gi
                   nvidia.com/gpu: 1
                   rdma/rdma_shared_device_a: 1
               volumeMounts:

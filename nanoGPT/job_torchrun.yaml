@@ -32,11 +32,11 @@ spec:
               resources:
                 requests:
                   cpu: 16
-                  memory: 32Gi
+                  memory: 256Gi
                   nvidia.com/gpu: 8
                 limits:
                   cpu: 32
-                  memory: 64Gi
+                  memory: 512Gi
                   nvidia.com/gpu: 8
               volumeMounts:
                 - mountPath: /t9k/mnt

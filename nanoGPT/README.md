@@ -50,10 +50,14 @@ python data/openwebtext/prepare.py
     * `spec.replicaSpecs[0].replicas: 2` 声明最多 2 个节点，`spec.torchrunConfig.minNodes: 1` 声明最少 1 个节点，`spec.torchrunConfig.procPerNode: "8"` 声明每个节点启动 8 个进程。<!--（更多关于 `torchrun` 设置的细节请参阅） -->
     * 需要使用队列（否则弹性伸缩可能出错）。
     * 需要挂载内存到 `/dev/shm` 路径以增加共享内存。
-* `job_test.yaml`：参见[训练 GPT-2（测试）](#训练-gpt-2测试)
+* `job_test_small.yaml` 和 `job_test_random.yaml`：请参阅[训练 GPT-2（测试）](#训练-gpt-2测试)
 
 ```shell
-kubectl create -f job.yaml # or use other variants
+kubectl create -f job.yaml
+# or
+kubectl create -f job_rdma.yaml
+kubectl create -f job_torch1.yaml
+kubectl create -f job_torchrun.yaml
 ```
 
 ### 训练 GPT-2（测试）
@@ -70,6 +74,8 @@ cd examples/nanoGPT
 
 #### 数据集
 
+如要使用随机数作为数据集，请跳过这一步。
+
 使用 [openwebtext-10k](https://huggingface.co/datasets/stas/openwebtext-10k) 作为训练数据集。安装必要的库，然后下载和预处理数据集：
 
 ```shell
@@ -79,16 +85,34 @@ python data/openwebtext-10k/prepare.py
 
 #### 训练
 
-使用 `job_test.yaml` 创建 PyTorchTrainingJob 以启动训练，您可以如下修改训练配置：
+使用 `job_test_small.yaml` 或 `job_test_random.yaml` 创建 PyTorchTrainingJob 以启动训练，区别在于前者使用小型数据集而后者直接使用随机数作为数据集。您可以如下修改训练配置：
 
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 工作器数量在第 12 行定义（默认为 `8`）。
 
 ```shell
-kubectl create -f job_test.yaml
+kubectl create -f job_test_small.yaml
+# or
+kubectl create -f job_test_random.yaml
 ```
 
 ### 模型超参数和资源需求
+
+本示例设置的模型超参数为：
+
+```python
+n_layer = 12
+n_head = 12
+n_embd = 768
+dropout = 0.0
+bias = False
+block_size = 1024
+vocab_size = 50304
+```
+
+总共 124M 个参数。
+
+训练时每个工作器（进程）占用约 13000MiB 显存（对于 PyTorch 1.13 版本为约 31000MiB 显存）。
 
 ## 参考
 
