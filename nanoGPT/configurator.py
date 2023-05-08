@@ -22,9 +22,9 @@ for arg in sys.argv[1:]:
         # assume it's the name of a config file
         assert not arg.startswith('--')
         config_file = arg
-        logger.info(f"Overriding config with {config_file}:")
+        print(f"Overriding config with {config_file}:")
         with open(config_file) as f:
-            logger.info(f.read())
+            print(f.read())
         exec(open(config_file).read())
     else:
         # assume it's a --key=value argument
@@ -41,7 +41,7 @@ for arg in sys.argv[1:]:
             # ensure the types match ok
             assert type(attempt) == type(globals()[key])
             # cross fingers
-            logger.info(f"Overriding: {key} = {attempt}")
+            print(f"Overriding: {key} = {attempt}")
             globals()[key] = attempt
         else:
             raise ValueError(f"Unknown config key: {key}")
