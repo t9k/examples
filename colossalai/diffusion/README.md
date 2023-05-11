@@ -12,7 +12,7 @@
 
 ## 微调
 
-使用 `job_finetune.yaml` 创建 ColossalAIJob 以启动微调，你可以如下修改训练配置：
+使用 `job_finetune.yaml` 创建 ColossalAIJob 以启动微调，您可以如下修改训练配置：
 
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 工作器数量在第 14 行定义（默认为 `2`）。

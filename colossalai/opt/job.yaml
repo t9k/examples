@@ -11,8 +11,8 @@ spec:
     image: t9kpublic/colossalai:0.2.5-opt
     workingDir: /workspace/ColossalAI/examples/language/opt
   worker:
-    replicas: 4
-    procPerWorker: 1
+    replicas: 1
+    procPerWorker: 4
     command:
       - train_gemini_opt.py
       - "--model_name_or_path=facebook/opt-350m"
@@ -28,9 +28,9 @@ spec:
             name: worker
             resources:
               limits:
-                cpu: 4
-                memory: 8Gi
-                nvidia.com/gpu: "1"
+                cpu: 16
+                memory: 32Gi
+                nvidia.com/gpu: 4
             volumeMounts:
               - mountPath: /root/.cache/huggingface
                 name: data

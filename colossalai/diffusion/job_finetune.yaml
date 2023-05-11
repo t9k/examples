@@ -11,8 +11,8 @@ spec:
     image: t9kpublic/colossalai:0.2.5-diffusion
     workingDir: /workspace/ColossalAI/examples/images/diffusion
   worker:
-    replicas: 2
-    procPerWorker: 1
+    replicas: 1
+    procPerWorker: 2
     command:
       - main.py
       - "--logdir=/tmp/"
@@ -28,8 +28,8 @@ spec:
             name: worker
             resources:
               limits:
-                cpu: 4
-                memory: 32Gi
-                nvidia.com/gpu: "1"
+                cpu: 8
+                memory: 64Gi
+                nvidia.com/gpu: 2
   runPolicy:
     cleanUpWorkers: true
