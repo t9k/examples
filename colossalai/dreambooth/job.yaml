@@ -11,8 +11,8 @@ spec:
     image: t9kpublic/colossalai:0.2.5-dreambooth
     workingDir: /workspace/ColossalAI/examples/images/dreambooth
   worker:
-    replicas: 2
-    procPerWorker: 1
+    replicas: 1
+    procPerWorker: 2
     command:
       - train_dreambooth_colossalai.py
       - "--pretrained_model_name_or_path=stabilityai/stable-diffusion-2"
@@ -35,8 +35,8 @@ spec:
             name: worker
             resources:
               limits:
-                cpu: 4
-                memory: 16Gi
-                nvidia.com/gpu: "1"
+                cpu: 8
+                memory: 32Gi
+                nvidia.com/gpu: 2
   runPolicy:
     cleanUpWorkers: true
