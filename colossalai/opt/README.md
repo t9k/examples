@@ -1,5 +1,17 @@
 # OPT with ColossalAI
 
+## 模型
+
+从 Hugging Face 下载 `facebook/opt-*` 系列模型之一，到 PVC `colossalai` 的 `opt-*` 路径下，例如：
+
+```shell
+cd
+git clone https://huggingface.co/facebook/opt-1.3b
+cd opt-1.3b/
+rm pytorch_model.bin 
+wget https://huggingface.co/facebook/opt-1.3b/resolve/main/pytorch_model.bin
+```
+
 ## 数据集
 
 使用随机数作为训练数据集（用于 benchmark）。
@@ -10,7 +22,7 @@
 
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 工作器数量在第 14 行定义（默认为 `4`）。
-* 模型名称或路径在第 18 行定义（应为 `facebook/opt-*`，其中 `*` 取 `125m`、`350m`、`1.3b`、`2.7b`、`6.7b`、`13b`、`30b` 或 `66b`，默认为 `facebook/opt-350m`）。
+* 模型名称或路径在第 18 行定义（应为 `/data/opt-*`，其中 `*` 取 `125m`、`350m`、`1.3b`、`2.7b`、`6.7b`、`13b`、`30b` 或 `66b`，应与[模型](#模型)部分保持一致）。
 * 批次大小在第 19 行定义（默认为 `16`）。
 * 最大训练步数在第 20 行定义（默认为 `100`）。
 * 工作器资源上限在第 31-33 行定义（默认为 `cpu: 4, memory: 8Gi, nvidia.com/gpu: "1"`，对于更大的模型应提供更大的内存，请参阅[资源需求](#资源需求)）。
@@ -18,8 +30,6 @@
 ```shell
 kubectl create -f job.yaml
 ```
-
-在训练开始之前，其中一个工作器会从 Hugging Face 下载模型检查点文件以初始化模型参数。文件会存储在 PVC `colossalai` 的 `hub/` 路径下。
 
 ## 资源需求
 

@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: ColossalAIJob
 metadata:
-  name: colossalai-opt
+  name: colossalai-opt-benchmark
 spec:
   # scheduler:
   #   t9kScheduler:
@@ -16,13 +16,9 @@ spec:
     command:
       - opt_train_demo.py
       - "--model_name_or_path=/t9k/mnt/opt-*"
-      - "--output_path=./output_model.bin"
       - "--plugin=gemini"
       - "--batch_size=16"
-      - "--num_epoch=10"
-      - "--learning_rate=5e-5"
-      - "--weight_decay=0.01"
-      - "--warmup_ratio=0.1"
+      - "--mem_cap=0"
     torchArgs: []
     template:
       spec:
