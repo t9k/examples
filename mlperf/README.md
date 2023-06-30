@@ -6,10 +6,10 @@ MLPerf™ Training benchmark 是一个机器学习领域的基准测试套件，
 
 ## 使用前提
 
-TensorStack AI 计算平台所在的 Kubernetes 集群需要：
+TensorStack AI 计算平台所在的集群需要：
 
-* 拥有足够的 AI 计算资源：拥有至少一个这样的节点，其拥有至少 4 个 A100 或同等级别的 GPU，一定量的 CPU（核心数）和内存（不同的 benchmark 使用的 CPU 和内存资源量不同，请参照各个 benchmark 的 README）。
-* 拥有足够的存储资源：数个 TiB 的存储容量。
+* 拥有至少 1 个这样的节点，其拥有至少 4 个数据中心级别的 GPU，一定量的 CPU（核心数）和内存（不同的 benchmark 使用的 CPU 和内存资源量不同，请参照各个 benchmark 的 README）。
+* 拥有数个 TiB 的存储容量。
 * 连接到互联网。
 
 ## 使用方法

@@ -46,7 +46,7 @@ python data/openwebtext/prepare.py
 
 * `job_rdma.yaml`：在节点数量大于 1 的情况下，每个节点请求一张 RDMA 网卡，利用 IB 网络加速训练。
 * `job_torch1.yaml`：使用 PyTorch 1.13 版本（默认为 2.0 版本）。由于无法使用 `torch.compile()` 函数编译模型，训练速度会更慢。
-* `job_test_small.yaml` 和 `job_test_random.yaml`：请参阅[训练 GPT-2（测试）](#训练-gpt-2测试)
+* `job_small_dataset.yaml` 和 `job_random_dataset.yaml`：请参阅[训练 GPT-2（测试）](#训练-gpt-2测试)
 
 ```shell
 kubectl create -f job.yaml
@@ -80,16 +80,16 @@ python data/openwebtext-10k/prepare.py
 
 #### 训练
 
-使用 `job_test_small.yaml` 或 `job_test_random.yaml` 创建 PyTorchTrainingJob 以启动训练，区别在于前者使用小型数据集而后者直接使用随机数作为数据集。您可以如下修改训练配置：
+使用 `job_small_dataset.yaml` 或 `job_random_dataset.yaml` 创建 PyTorchTrainingJob 以启动训练，区别在于前者使用小型数据集而后者直接使用随机数作为数据集。您可以如下修改训练配置：
 
 * 队列名称在第 8 行定义（默认为 `default`）。
 * 每个节点的进程数量在第 13 行定义（默认为 `"8"`）。
 * 节点数量在第 17 行定义（默认为 `1`）。
 
 ```shell
-kubectl create -f job_test_small.yaml
+kubectl create -f job_small_dataset.yaml
 # or
-kubectl create -f job_test_random.yaml
+kubectl create -f job_random_dataset.yaml
 ```
 
 ### 模型超参数和资源需求

@@ -2,7 +2,7 @@
 
 ## 模型
 
-从 Hugging Face 下载 `facebook/opt-*` 系列模型之一，到 PVC `colossalai` 的 `opt-*` 路径下，例如：
+从 Hugging Face 下载 `facebook/opt-*` 系列模型之一（其中 `*` 取 `125m`、`350m`、`1.3b`、`2.7b`、`6.7b`、`13b`、`30b` 或 `66b`），到 PVC `colossalai` 的 `opt-*` 路径下，例如：
 
 ```shell
 cd
@@ -16,13 +16,18 @@ wget https://huggingface.co/facebook/opt-1.3b/resolve/main/pytorch_model.bin
 
 使用随机数作为训练数据集（用于 benchmark）。
 
+```shell
+cd
+git clone https://huggingface.co/datasets/hugginglearners/netflix-shows
+```
+
 ## 训练
 
 使用 `job.yaml` 创建 ColossalAIJob 以启动训练，您可以如下修改训练配置：
 
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 工作器数量在第 14 行定义（默认为 `4`）。
-* 模型名称或路径在第 18 行定义（应为 `/data/opt-*`，其中 `*` 取 `125m`、`350m`、`1.3b`、`2.7b`、`6.7b`、`13b`、`30b` 或 `66b`，应与[模型](#模型)部分保持一致）。
+* 模型名称或路径在第 18 行定义（应为 `/t9k/mnt/opt-*`，与[模型](#模型)部分保持一致）。
 * 批次大小在第 19 行定义（默认为 `16`）。
 * 最大训练步数在第 20 行定义（默认为 `100`）。
 * 工作器资源上限在第 31-33 行定义（默认为 `cpu: 4, memory: 8Gi, nvidia.com/gpu: "1"`，对于更大的模型应提供更大的内存，请参阅[资源需求](#资源需求)）。
