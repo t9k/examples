@@ -1,0 +1,78 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: rlhf-multi-node
+spec:
+  config:
+    slotsPerWorker: 2
+    otherArgs: ["--master_port=12346"]
+    run:
+      python: [
+        "/t9k/mnt/chat/rlhf/main.py",
+        "--data_path", "Dahoas/rm-static", "Dahoas/full-hh-rlhf", "Dahoas/synthetic-instruct-gptj-pairwise", "yitingxie/rlhf-reward-datasets",
+        "--data_split=2,4,4",
+        "--actor_model_name_or_path=/t9k/mnt/output/multi-node/actor-models/1.3b",
+        "--critic_model_name_or_path=/t9k/mnt/output/multi-node/reward-models/350m",
+        "--num_padding_at_beginning=1",
+        "--per_device_train_batch_size=8",
+        "--per_device_mini_train_batch_size=2",
+        "--generation_batch_numbers=1",
+        "--ppo_epochs=1",
+        "--max_answer_seq_len=256",
+        "--max_prompt_seq_len=256",
+        "--actor_learning_rate=5e-4",
+        "--critic_learning_rate=5e-6",
+        "--actor_weight_decay=0.1",
+        "--critic_weight_decay=0.1",
+        "--num_train_epochs=1",
+        "--lr_scheduler_type=cosine",
+        "--gradient_accumulation_steps=1",
+        "--num_warmup_steps=100",
+        "--deepspeed",
+        "--seed=1234",
+        "--enable_hybrid_engine",
+        "--inference_tp_size=1",
+        "--actor_zero_stage=0",
+        "--critic_zero_stage=0",
+        "--actor_gradient_checkpointing",
+        "--actor_lora_dim=128",
+        "--actor_lora_module_name=decoder.layers.",
+        "--output_dir=/t9k/mnt/output/multi-node/step3-models/1.3b",
+      ]
+  worker:
+    replicas: 2
+    template:
+      spec:
+        containers:
+          - name: worker
+            workingDir: /t9k/mnt/
+            image: tsz.io/lmh/deepspeed-0.9.1-chat:0.0.1
+            env:
+            - name: TRANSFORMERS_CACHE
+              value: /t9k/mnt/hf-cache/hub
+            - name: HF_DATASETS_CACHE
+              value: /t9k/mnt/hf-cache/dataset
+            securityContext:
+              capabilities:
+                add: [ "IPC_LOCK" ]
+            resources:
+              requests:
+                cpu: 4
+                memory: 64Gi
+                nvidia.com/gpu: 2
+              limits:
+                cpu: 8
+                memory: 128Gi
+                nvidia.com/gpu: 2
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+              - mountPath: /dev/shm
+                name: dshm
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: gpt
+          - name: dshm
+            emptyDir:
+              medium: Memory
