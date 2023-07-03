@@ -13,7 +13,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/lmh/deepspeed-0.9.1-chat:0.0.1
+            image: tsz.io/t9k/deepspeed:chat-0.9.5
             env:
             - name: TRANSFORMERS_CACHE
               value: /t9k/mnt/hf-cache/hub
@@ -39,7 +39,7 @@ spec:
         volumes:
           - name: data
             persistentVolumeClaim:
-              claimName: gpt
+              claimName: chat
           - name: dshm
             emptyDir:
               medium: Memory

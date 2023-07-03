@@ -1,189 +1,105 @@
-# Chat
+# DeepSpeed-Chat
 
-## 介绍
+[DeepSpeed-Chat](https://github.com/microsoft/DeepSpeedExamples/tree/master/applications/DeepSpeed-Chat) 是 DeepSpeed 推出一个快速、经济实惠、可扩展且开放的系统框架，旨在实现端到端的强化学习人类反馈（RLHF）训练，以生成高质量的 ChatGPT 风格模型。该框架能够适应各种规模的训练需求。
 
-DeepSpeed Chat 是微软开发的一个通用系统框架，它可以方便地在多种预训练大型语言模型上实施 InstructGPT 风格的 3 阶段训练，生成高质量 ChatGPT 类型模型。 本文档使用 T9K 平台的 DeepSpeedJob 完成 DeepSpeed Chat。
+本项目使用 DeepSpeedJob 在 TensorStack AI 计算平台上完成 DeepSpeed-Chat 的训练。
 
-## 准备工作
+## 使用方法
 
-### 创建 PVC 和 Notebook
+训练越大的模型，所需要的计算资源越多，对应的分布式场景也不相同。本项目针对单 GPU、单副本多 GPU 和多副本多 GPU 这三种分布式场景分别提供不同的 DeepSpeedJob YAML 配置文件，其训练不同的 Actor 模型，请求不同的资源量，如下表所示：
 
-通过 Build Console 创建一个 PVC，用来存储训练脚本、实验数据和模型。
-PVC 创建信息如下：
-- 名称：`gpt`，用户也可以使用其他名称，但是在后续使用 PVC 的过程中需要同步修改
-- PVC 大小需要根据模型的规模来决定：
-  - facebook/opt-1.3b 至少 20 GiB
-  - facebook/opt-13b 至少 100 GiB
-  - facebook/opt-66b 至少 500 GiB
+| YAML 配置文件        | 分布式场景     | GPU          | Actor 模型 | Reward 模型 | PVC 大小 |
+| -------------------- | -------------- | ------------ | ---------- | ----------- | -------- |
+| `*-single-gpu.yaml`  | 单 GPU         | 1x A100 40G  | OPT-1.3B   | OPT-350M    | 20GiB    |
+| `*-single-node.yaml` | 单副本多 GPU | 4x A100 40G  | OPT-13B    | OPT-350M    | 100GiB   |
+| `*-multi-node.yaml`  | 多副本多 GPU | 16x A100 80G | OPT-66B    | OPT-350M    | 500GiB   |
 
-通过 Build Console 创建一个 Notebook，用来下载训练脚本、实验数据和启动训练。Notebook 需绑定上述创建的 PVC。
-后续操作全部是在 Notebook 中进行。
+> DeepSpeed-Chat 即将支持 LLaMA 模型的训练。
 
-### 下载训练脚本
+创建一个名为 chat、相应大小的 PVC，然后创建一个同样名为 chat 的 Notebook 挂载该 PVC，镜像选择带有 sudo 权限的类型，资源不限（如要使用远程操作，请开启 SSH）。
 
-进入 Notebook，启动一个 Terminal。
-输入如下命令，下载训练脚本：
+进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆此仓库：
 
-```
-git clone -b lmh/update https://gitlab.dev.tensorstack.net/t9k/ds-operator
+```bash
+cd ~
+git clone https://github.com/t9k/examples.git
 ```
 
-### [可选] 下载预训练模型和数据集
+### 准备模型和数据集
 
-在训练过程中，训练脚本会自动下载预训练模型和数据集，但是由于网络问题，下载过程经常被中断。用户可以按照本节操作下载模型和数据集，避免训练过程出错。
+安装 git-lfs，从 Hugging Face Hub 拉取要训练的 Actor 模型，这里以 [facebook/opt-13b](https://huggingface.co/facebook/opt-13b) 为例：
 
-启动一个 Debug 模式的 DeepSpeedJob：
-
-```
-kubectl create -f ./ds-operator/config/samples/chat/download/download-job.yaml
-```
-
-进入 DeepSpeedJob，并下载模型和数据集：
-   
-```
-# 进入 DeepSpeedJob 的工作负载
-kubectl exec -it download-worker-0 -- bash
-
-# 下载预训练模型
-transformers-cli download facebook/opt-1.3b
-# transformers-cli download facebook/opt-13b
-# transformers-cli download facebook/opt-66b
-
-# 下载数据集
-python /t9k/mnt/ds-operator/config/samples/chat/download/load_dataset.py Dahoas/rm-static [-o /t9k/mnt/hf-datasets/Dahoas_rm_static]
+```bash
+sudo apt install git-lfs  # password: tensorstack
+git lfs install
+mkdir models && cd models
+git clone https://huggingface.co/facebook/opt-13b
+cd ~
 ```
 
-- 下载过程中可能因为网络问题报错，可以通过多次尝试或设置代理的方式解决
-- 上述过程，只下载了 `Dahoas/rm-static` 数据集，如果您希望下载更多数据集，替换数据集名称 `Dahoas/rm-static` 和下载路径 `/t9k/mnt/hf-datasets/Dahoas_rm_static` 即可
+接着使用 `download_dataset.py` 脚本下载并保存数据集，这里以 [Dahoas/rm-static](https://huggingface.co/datasets/Dahoas/rm-static) 为例：
 
-#### 下载失败
-
-如果在上述步骤中一直失败，说明用户当前环境与 Huggingface 之间存在问题。用户可以尝试以下方式：
-- 访问 Huggingface 网页，找到对应文件的 URL
-- 使用 wget 来下载文件，下载时可以使用合适的 proxy
-
-以前面下载的模型和数据集为例：
-
-```
-# Dahoas/rm-static
-mkdir -p /t9k/mnt/hf-datasets/download/Dahoas_rm_static
-cd /t9k/mnt/hf-datasets/download/Dahoas_rm_static
-
-wget https://huggingface.co/datasets/Dahoas/rm-static/resolve/main/dataset_infos.json
-wget -P data https://huggingface.co/datasets/Dahoas/rm-static/resolve/main/data/train-00000-of-00001-2a1df75c6bce91ab.parquet
-wget -P data https://huggingface.co/datasets/Dahoas/rm-static/resolve/main/data/test-00000-of-00001-8c7c51afc6d45980.parquet
-
-# 手动下载的 dataset 文件需要使用脚本将其转换为适当的形式保存下来，才能用于后续训练
-# 此处 -o 指定的路径是后续训练时填写在 --data_path 的路径
-python /t9k/mnt/ds-operator/config/samples/chat/download/save_dataset.py /t9k/mnt/hf-datasets/download/Dahoas_rm_static [-o /t9k/mnt/hf-datasets/Dahoas_rm_static]
-
-# facebook/opt-1.3b
-mkdir -p /t9k/mnt/hf-models/facebook_opt_1.3b
-cd /t9k/mnt/hf-models/facebook_opt_1.3b
-
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/config.json
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/flax_model.msgpack
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/generation_config.json
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/tokenizer_config.json
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/pytorch_model.bin
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/vocab.json
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/merges.txt
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/special_tokens_map.json
-wget https://huggingface.co/facebook/opt-1.3b/resolve/main/tf_model.h5
+```bash
+python download_dataset.py Dahoas/rm-static
 ```
 
-## 训练
+如果模型或数据集下载失败，请过一段时间重试，或使用网络代理。
 
-训练分为三步执行，其中第一步和第二步可以同时进行。
+### 训练
 
-### Step 1 - SFT
+训练分为三步进行，其中第一步和第二步可以同时进行，第三步依赖前两步输出的模型。
 
-我们一共提供了三个训练部署脚本，用来应对三种不同的场景：
+#### Step 1: Supervised Finetuning
 
-```
-# 单 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/actor/actor-single-gpu.yaml
+使用合适的配置文件创建 DeepSpeedJob 以执行第一步训练（这里使用 `actor-single-node.yaml` 微调 LLaMA 7B 模型）：
 
-# 单节点多 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/actor/actor-single-node.yaml
+```bash
+cd examples/deepspeed/chat
 
-# 多节点多 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/actor/actor-multi-node.yaml
-```
-
-参考 actor-multi-node.yaml 做以下说明：
-- 如果希望使用已经下载下来的数据集，需要将 yaml 中的对应数据集替换成本地路径：`Dahoas/rm-static` -> `/t9k/mnt/hf-datasets/Dahoas_rm_static`。同理 `--model_name_or_path` 也可以替换成下载路径。
-- 训练中可以使用多个数据集，如上例中同时使用了四个数据集：`Dahoas/rm-static、Dahoas/full-hh-rlhf、Dahoas/synthetic-instruct-gptj-pairwise、yitingxie/rlhf-reward-datasets`，您也可以使用自己的训练集进行特性化调整。
-- 当前 DeepSpeedJob 会创建两个训练节点（由 spec.worker.replicas 字段指定），每个节点上有 2 个 GPU（由 nvidia.com/gpu 字段指定），训练时每个节点上会启动两个训练进程（由 spec.config.slotsPerWorker 字段指定）。这里需要注意，节点上的训练进程的数量不应大于 GPU 数量（要求：slotsPerWorker <= nvidia.com/gpu）。
-- 模型文件最后会输出到 /t9k/mnt/output/multi-node/actor-models/1.3b 中
-- 其他训练参数，请根据设置的资源数量自行调整。
-
-执行以下命令，持续监测任务的状态：
-
-```
-% k get pods actor-multi-node-worker-0 -w
-NAME                        READY   STATUS            RESTARTS   AGE
-actor-multi-node-worker-0   0/1     Init:0/1          0          8s
-actor-multi-node-worker-0   0/1     PodInitializing   0          8s
-actor-multi-node-worker-0   1/1     Running           0          9s
-actor-multi-node-worker-0   0/1     Completed         0          81m
+# 单 GPU 训练，OPT-1.3B 模型
+kubectl create -f actor/actor-single-gpu.yaml
+# 单副本多 GPU 训练，OPT-13B 模型
+kubectl create -f actor/actor-single-node.yaml
+# 多副本多 GPU 训练，OPT-66B 模型
+kubectl create -f actor/actor-multi-node.yaml
 ```
 
-当 Status 字段变为 Running，表示 Job 初始化完毕，开始训练
-当 Status 字段变为 Completed，表示 Job 执行完毕
+对于 `actor-single-node.yaml` 进行如下说明，其余配置文件也是类似的：
 
-执行以下命令，查看训练日志：
+* 训练副本（replica）数量为 1（第 32 行）。
+* 每个副本的进程数量（第 7 行）和 GPU 数量（第 46 和 50 行）同为 4。
+* 使用数据集 [Dahoas/rm-static](https://huggingface.co/datasets/Dahoas/rm-static)、[Dahoas/full-hh-rlhf](https://huggingface.co/datasets/Dahoas/full-hh-rlhf) 和 [Dahoas/synthetic-instruct-gptj-pairwise](https://huggingface.co/datasets/Dahoas/synthetic-instruct-gptj-pairwise)（第 11 行）；可以使用一个或多个数据集；所有可用的数据集请参考[这里](./utils/data/data_utils.py#L20)。
+* 模型文件会在训练完成后输出到 `output/multi-node/actor-models/13b` 路径下（第 29 行）。
+* 修改以下参数可以减小显存占用，以防止 OOM：
+    * 训练更小的模型（第 13 行）。
+    * 在多 GPU 训练的情况下，增大 `--zero_stage`（第 25 行，可以取 0、1、2 或 3），但可能损害性能。
+    * 减小批次规模（第 14 和 15 行），若不要影响收敛过程，则同时增大 `--gradient_accumulation_steps`（第 20 行）。
+* 镜像 `tsz.io/t9k/deepspeed:chat-0.9.5`（第 38 行）由 [Dockerfile](./Dockerfile) 定义。
 
-```
-% k logs actor-multi-node-worker-0 --tail=100
-...
-actor-multi-node-worker-0: [2023-06-21 03:45:55,424] [INFO] [timer.py:199:stop] epoch=1/micro_step=926/global_step=1880, RunningAvgSamplesPerSec=6.60372389313781, CurrSamplesPerSec=6.368302303901175, MemAllocated=7.79GB, MaxMemAllocated=10.55GB
-actor-multi-node-worker-0: [2023-06-21 03:46:19,251] [INFO] [logging.py:96:log_dist] [Rank 0] step=1890, skipped=19, lr=[9.275816201087529e-08, 9.275816201087529e-08], mom=[(0.9, 0.95), (0.9, 0.95)]
-actor-multi-node-worker-0: [2023-06-21 03:46:19,254] [INFO] [timer.py:199:stop] epoch=1/micro_step=936/global_step=1890, RunningAvgSamplesPerSec=6.604309943995918, CurrSamplesPerSec=6.809163050305052, MemAllocated=7.79GB, MaxMemAllocated=10.55GB
-actor-multi-node-worker-0: [2023-06-21 03:46:43,211] [INFO] [logging.py:96:log_dist] [Rank 0] step=1900, skipped=19, lr=[4.940137226560615e-08, 4.940137226560615e-08], mom=[(0.9, 0.95), (0.9, 0.95)]
-actor-multi-node-worker-0: [2023-06-21 03:46:43,214] [INFO] [timer.py:199:stop] epoch=1/micro_step=946/global_step=1900, RunningAvgSamplesPerSec=6.604702857325247, CurrSamplesPerSec=6.819754921642627, MemAllocated=7.79GB, MaxMemAllocated=10.55GB
-actor-multi-node-worker-0: ***** Evaluating perplexity, Epoch 2/2 *****
-actor-multi-node-worker-0: ppl: 2.159278392791748
-actor-multi-node-worker-0: saving the final model ...
-actor-multi-node-worker-1: [2023-06-21 03:47:13,571] [INFO] [launch.py:460:main] Process 123 exits successfully.
-actor-multi-node-worker-0: [2023-06-21 03:47:17,522] [INFO] [launch.py:460:main] Process 259 exits successfully.
-```
+#### Step 2: Reward Model Finetuning
 
-从日志中可以查看整个训练过程和训练指标。
+使用合适的配置文件创建 DeepSpeedJob 以执行第二步训练（这里使用 `actor-single-gpu.yaml` 训练 OPT 350M 模型）：
 
-### Step 2 - RW
-
-```
-# 单 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/reward/reward-single-gpu.yaml
-
-# 单节点多 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/reward/reward-single-node.yaml
-
-# 多节点多 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/reward/reward-multi-node.yaml
+```bash
+# 单 GPU 训练，OPT-1.3B 模型
+kubectl create -f reward/reward-single-gpu.yaml
+# 单副本多 GPU 训练，OPT-13B 模型
+kubectl create -f reward/reward-single-node.yaml
+# 多副本多 GPU 训练，OPT-66B 模型
+kubectl create -f reward/reward-multi-node.yaml
 ```
 
-相关说明，参考 Step 1
+配置与 Step 1 类似。
 
-检查训练进程和结果，参考 Step 1 。
+#### Step 3: RLHF finetuning
 
-
-### Step 3 - RLHF
-
-```
-# 单 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/rlhf/rlhf-single-gpu.yaml
-
-# 单节点多 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/rlhf/rlhf-single-node.yaml
-
-# 多节点多 gpu 训练
-kubectl create -f /t9k/mnt/ds-operator/config/samples/chat/rlhf/rlhf-multi-node.yaml
+```bash
+# 单 GPU 训练，OPT-1.3B 模型
+kubectl create -f rlhf/rlhf-single-gpu.yaml
+# 单副本多 GPU 训练，OPT-13B 模型
+kubectl create -f rlhf/rlhf-single-node.yaml
+# 多副本多 GPU 训练，OPT-66B 模型
+kubectl create -f rlhf/rlhf-multi-node.yaml
 ```
 
-actor_model_name_or_path 和 critic_model_name_or_path 分别使用 Step 1 和 2 中产生的模型
-其他说明，参考 Step 1
-
-检查训练进程和结果，参考 Step 1 。
-
+配置与 Step 1 类似，除了 `--actor_model_name_or_path`（第 14 行）和 `--critic_model_name_or_path`（第 15 行）分别为 Step 1 和 2 的输出路径。

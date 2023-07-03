@@ -6,36 +6,39 @@ spec:
   config:
     run:
       python: [
-        "/t9k/mnt/chat/rlhf/main.py",
-        "--data_path", "Dahoas/rm-static", "Dahoas/full-hh-rlhf", "Dahoas/synthetic-instruct-gptj-pairwise", "yitingxie/rlhf-reward-datasets",
-        "--data_split=2,4,4",
-        "--actor_model_name_or_path=/t9k/mnt/output/single-gpu/actor-models/1.3b",
-        "--critic_model_name_or_path=/t9k/mnt/output/single-gpu/reward-models/350m",
-        "--num_padding_at_beginning=1",
-        "--per_device_train_batch_size=8",
-        "--per_device_mini_train_batch_size=2",
-        "--generation_batch_numbers=1",
-        "--ppo_epochs=1",
-        "--max_answer_seq_len=256",
-        "--max_prompt_seq_len=256",
-        "--actor_learning_rate=5e-4",
-        "--critic_learning_rate=5e-6",
-        "--actor_weight_decay=0.1",
-        "--critic_weight_decay=0.1",
-        "--num_train_epochs=1",
-        "--lr_scheduler_type=cosine",
-        "--gradient_accumulation_steps=1",
-        "--num_warmup_steps=100",
+        "./chat/rlhf/main.py",
+        "--data_path", "./datasets/Dahoas/rm-static", "./datasets/Dahoas/full-hh-rlhf", "./datasets/Dahoas/synthetic-instruct-gptj-pairwise",
+        "--data_split", "2,4,4",
+        "--tokenizer_name_or_path", "./models/opt-1.3b",
+        "--actor_model_name_or_path", "./output/single-gpu/actor-models/1.3b",
+        "--critic_model_name_or_path", "./output/single-gpu/reward-models/350m",
+        "--num_padding_at_beginning", "1",
+        "--per_device_train_batch_size", "4",
+        "--per_device_mini_train_batch_size", "4",
+        "--generation_batch_numbers", "1",
+        "--ppo_epochs", "1",
+        "--max_answer_seq_len", "256",
+        "--max_prompt_seq_len", "256",
+        "--actor_learning_rate", "5e-4",
+        "--critic_learning_rate", "5e-6",
+        "--actor_weight_decay", "0.1",
+        "--critic_weight_decay", "0.1",
+        "--num_train_epochs", "1",
+        "--lr_scheduler_type", "cosine",
+        "--gradient_accumulation_steps", "1",
+        "--num_warmup_steps", "100",
         "--deepspeed",
-        "--seed=1234",
-        "--enable_hybrid_engine",
-        "--inference_tp_size=1",
-        "--actor_zero_stage=0",
-        "--critic_zero_stage=0",
+        "--seed", "1234",
+        # "--enable_hybrid_engine",  # https://github.com/microsoft/DeepSpeedExamples/issues/587
+        "--inference_tp_size", "1",
+        "--actor_zero_stage", "3",
+        "--critic_zero_stage", "3",
+        "--offload_reference_model",
         "--actor_gradient_checkpointing",
-        "--actor_lora_dim=128",
-        "--actor_lora_module_name=decoder.layers.",
-        "--output_dir=/t9k/mnt/output/single-gpu/step3-models/1.3b",
+        "--critic_gradient_checkpointing",
+        "--actor_lora_dim", "128",
+        "--actor_lora_module_name", "decoder.layers.",
+        "--output_dir", "./output/single-gpu/step3-models/1.3b",
       ]
   worker:
     replicas: 1
@@ -44,19 +47,14 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/lmh/deepspeed-0.9.1-chat:0.0.1
-            env:
-            - name: TRANSFORMERS_CACHE
-              value: /t9k/mnt/hf-cache/hub
-            - name: HF_DATASETS_CACHE
-              value: /t9k/mnt/hf-cache/dataset
+            image: tsz.io/t9k/deepspeed:chat-0.9.5
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]
             resources:
               requests:
                 cpu: 2
-                memory: 32Gi
+                memory: 64Gi
                 nvidia.com/gpu: 1
               limits:
                 cpu: 4
@@ -70,7 +68,7 @@ spec:
         volumes:
           - name: data
             persistentVolumeClaim:
-              claimName: gpt
+              claimName: chat
           - name: dshm
             emptyDir:
               medium: Memory

@@ -6,7 +6,7 @@ import requests
 from datasets import load_dataset
 
 HUGGING_FACE_HUB_RETRY = 3
-GIT_CLONE_RETRY = 10
+GIT_CLONE_RETRY = 3
 
 parser = argparse.ArgumentParser(
     description='Download and save a Hugging Face dataset')
