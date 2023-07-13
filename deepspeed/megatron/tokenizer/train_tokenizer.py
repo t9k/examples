@@ -24,4 +24,4 @@ training_corpus = get_training_corpus()
 
 gpt2_tokenizer = AutoTokenizer.from_pretrained('gpt2')
 tokenizer = gpt2_tokenizer.train_new_from_iterator(training_corpus, 52000)
-tokenizer.save_pretrained('my-gpt-tokenizer')
+tokenizer.save_pretrained(args.save_path)

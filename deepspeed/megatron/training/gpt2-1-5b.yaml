@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: gpt2-345m
+  name: gpt2-1-5b
 spec:
   # runMode:
   #   debug:
@@ -29,9 +29,9 @@ spec:
             - name: pytorch
               args:
                 - Megatron-LM/pretrain_gpt.py
-                - --num-layers 24
-                - --hidden-size 1024
-                - --num-attention-heads 16
+                - --num-layers 48
+                - --hidden-size 1600
+                - --num-attention-heads 25
                 - --seq-length 1024
                 - --max-position-embeddings 1024
                 - --micro-batch-size 4
@@ -54,8 +54,8 @@ spec:
                 - --save-interval 10000
                 - --eval-interval 1000
                 - --eval-iters 10
-                - --save output/gpt2-345m
-                - --load output/gpt2-345m
+                - --save output/gpt2-1-5b
+                - --load output/gpt2-1-5b
               workingDir: /t9k/mnt/
               image: tsz.io/t9k/nvidia-pytorch:23.05-py3
               securityContext:
@@ -63,12 +63,12 @@ spec:
                   add: [ "IPC_LOCK" ]
               resources:
                 requests:
-                  cpu: 2
-                  memory: 16Gi
-                  nvidia.com/gpu: 1
-                limits:
                   cpu: 4
                   memory: 32Gi
+                  nvidia.com/gpu: 1
+                limits:
+                  cpu: 8
+                  memory: 64Gi
                   nvidia.com/gpu: 1
               volumeMounts:
                 - mountPath: /t9k/mnt
@@ -78,7 +78,7 @@ spec:
           volumes:
             - name: data
               persistentVolumeClaim:
-                claimName: gpt
+                claimName: megatron
             - name: dshm
               emptyDir:
                 medium: Memory
