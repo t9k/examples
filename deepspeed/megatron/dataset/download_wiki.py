@@ -1,8 +1,5 @@
 import argparse
 import os
-import requests
-
-from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('language',
@@ -17,23 +14,7 @@ output_dir = f'wiki-{language}'
 output_file = f'{language}wiki-latest-pages-articles.xml.bz2'
 
 # 下载 Wikipedia dump 文件
-response = requests.get(url, stream=True)
-total_size = int(response.headers.get('content-length', 0))
-block_size = 1024
-progress_bar = tqdm(total=total_size,
-                    unit='B',
-                    unit_scale=True,
-                    unit_divisor=1024,
-                    desc=output_file,
-                    ncols=80,
-                    miniters=1)
-
-with open(output_file, 'wb') as file:
-    for data in response.iter_content(block_size):
-        progress_bar.update(len(data))
-        file.write(data)
-
-progress_bar.close()
+os.system(f'wget {url}')
 
 # 创建输出目录
 os.makedirs(output_dir, exist_ok=True)
