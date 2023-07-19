@@ -7,8 +7,8 @@ DISTRIBUTED_ARGS="--nproc_per_node 1 \
                   --master_port 6000"
 
 CHECKPOINT=output/gpt-1-3b/model
-VOCAB_FILE=examples/deepspeed/megatron/tokenizer/wiki-en-tokenizer/vocab.json
-MERGE_FILE=examples/deepspeed/megatron/tokenizer/wiki-en-tokenizer/merges.txt
+VOCAB_FILE=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/vocab.json
+MERGE_FILE=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/merges.txt
 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 

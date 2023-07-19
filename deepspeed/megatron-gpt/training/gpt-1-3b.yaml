@@ -44,7 +44,7 @@ spec:
         ########################################
         # Parallelism and DeepSpeed configs
         - "--deepspeed"
-        - "--deepspeed_config=examples/deepspeed/megatron/training/gpt-1-3b-ds-config.json"
+        - "--deepspeed_config=examples/deepspeed/megatron-gpt/training/gpt-1-3b-ds-config.json"
         - "--global-batch-size=512"
         - "--micro-batch-size=16"
         - "--zero-stage=2"
@@ -59,9 +59,9 @@ spec:
         ########################################
         # Data and output configs
         - "--seed=1234"
-        - "--vocab-file=examples/deepspeed/megatron/tokenizer/wiki-en-tokenizer/vocab.json"
-        - "--merge-file=examples/deepspeed/megatron/tokenizer/wiki-en-tokenizer/merges.txt"
-        - "--data-path=examples/deepspeed/megatron/dataset/wiki-en/gpt_text_document"
+        - "--vocab-file=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/vocab.json"
+        - "--merge-file=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/merges.txt"
+        - "--data-path=examples/deepspeed/megatron-gpt/dataset/wiki-en/gpt_text_document"
         - "--data-impl=mmap"
         - "--split=949,50,1"
         - "--num-workers=8"

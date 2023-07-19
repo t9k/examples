@@ -38,7 +38,7 @@ git clone https://github.com/t9k/examples.git
 
 ```shell
 pip install wikiextractor
-cd examples/deepspeed/megatron/dataset
+cd examples/deepspeed/megatron-gpt/dataset
 python download_wiki.py en
 ```
 
@@ -64,7 +64,7 @@ python train_tokenizer.py ../dataset/wiki-en/all wiki-en-tokenizer
 使用 `gpt-125m.yaml` 创建 DeepSpeedJob 以执行训练：
 
 ```shell
-cd ~/examples/deepspeed/megatron/training
+cd ~/examples/deepspeed/megatron-gpt/training
 kubectl create -f gpt-125m.yaml
 ```
 
@@ -120,8 +120,8 @@ kubectl create -f gpt-13b.yaml
 
 ```shell
 cd ~
-cp examples/deepspeed/megatron/inference/run_text_generation_server.py Megatron-LM/tools/run_text_generation_server.py
-./examples/deepspeed/megatron/inference/server-125m.sh
+cp examples/deepspeed/megatron-gpt/inference/run_text_generation_server.py Megatron-LM/tools/run_text_generation_server.py
+./examples/deepspeed/megatron-gpt/inference/server-125m.sh
 ```
 
 在第二个终端中发送推理请求：
