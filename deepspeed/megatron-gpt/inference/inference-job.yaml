@@ -1,0 +1,56 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: gpt-inference
+spec:
+  runMode:
+    debug:
+      enable: true
+      replicaSpecs:
+        - type: worker
+          skipInitContainer: true
+          command: ["sleep", "inf"]
+  scheduler:
+    t9kScheduler:
+      queue: default
+      priority: 50
+  config:
+    localRank: true
+    slotsPerWorker: 1
+    run:
+      python: []
+  worker:
+    replicas: 1
+    template:
+      spec:
+        containers:
+          - name: worker
+            image: t9kpublic/megatron-deepspeed:23.05-py3
+            workingDir: /t9k/mnt/
+            securityContext:
+              capabilities:
+                add: [ "IPC_LOCK" ]
+            env:
+              - name: CUDA_DEVICE_MAX_CONNECTIONS
+                value: "1"
+            resources:
+              requests:
+                cpu: 2
+                memory: 8Gi
+                nvidia.com/gpu: 1
+              limits:
+                cpu: 4
+                memory: 16Gi
+                nvidia.com/gpu: 1
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+              - mountPath: /dev/shm
+                name: dshm  
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: megatron
+          - name: dshm
+            emptyDir:
+              medium: Memory

@@ -4,7 +4,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir deepspeed flash-attn
 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
-  openssh-server
+    openssh-server \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /run/sshd
 RUN chown root:root /usr/lib

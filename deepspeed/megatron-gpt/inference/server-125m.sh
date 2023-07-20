@@ -12,7 +12,7 @@ MERGE_FILE=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/merges.tx
 
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 
-pip install flask-restful
+pip install pybind11 Ninja flask-restful
 
 torchrun $DISTRIBUTED_ARGS Megatron-LM/tools/run_text_generation_server.py   \
        --tensor-model-parallel-size 1  \
