@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: colossalai-llama
+spec:
+  restartPolicy: Never
+  nodeName: sm02
+  containers:
+    - name: worker
+      image: pytorch/pytorch:1.13.1-cuda11.6-cudnn8-devel
+      args:
+        - sleep
+        - "infinity"
+      resources:
+        limits:
+          cpu: 4
+          memory: 64Gi
+          nvidia.com/gpu: 1
+      volumeMounts:
+        - mountPath: /t9k/mnt
+          name: data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: llama
+
+
+# colossalai run --nproc_per_node 4 pretrain.py -c 7b -p gemini -g -a
