@@ -3,12 +3,19 @@ kind: ColossalAIJob
 metadata:
   name: colossalai-llama
 spec:
+  # runMode:
+  #   debug:
+  #     enable: true
+  #     replicaSpecs:
+  #       - type: worker
+  #         skipInitContainer: true
+  #         command: ["sleep", "inf"]
   scheduler:
     t9kScheduler:
       queue: mlperf
       priority: 50
   launcher:
-    image: tsz.io/xyx/colossalai-llama:test1
+    image: tsz.io/xyx/colossalai-llama:test4
     workingDir: /t9k/mnt/ColossalAI/examples/language/llama
   worker:
     replicas: 1
@@ -17,14 +24,14 @@ spec:
       - pretrain.py
       - "--config=7b"
       - "--plugin=gemini"
-      - "--gradient_checkpoint"
+      - "--grad_checkpoint"
       - "--flash_attention"
     torchArgs: []
     template:
       spec:
         restartPolicy: OnFailure
         containers:
-          - image: tsz.io/xyx/colossalai-llama:test1
+          - image: tsz.io/xyx/colossalai-llama:test4
             name: worker
             resources:
               limits:
