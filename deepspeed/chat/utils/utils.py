@@ -6,7 +6,8 @@ import os
 import torch
 import random
 import numpy as np
-from transformers import set_seed
+from transformers import set_seed, AutoTokenizer
+import json
 import deepspeed
 from deepspeed.runtime.zero.partition_parameters import ZeroParamStatus
 
@@ -39,6 +40,21 @@ class MovingAverage:
         self.mean = self.total / self.count
 
         return self.mean
+
+
+def load_hf_tokenizer(model_name_or_path, fast_tokenizer=True):
+    if os.path.exists(model_name_or_path):
+        # Locally tokenizer loading has some issue, so we need to force download
+        model_json = os.path.join(model_name_or_path, "config.json")
+        if os.path.exists(model_json):
+            model_json_file = json.load(open(model_json))
+            model_name = model_json_file["_name_or_path"]
+            tokenizer = AutoTokenizer.from_pretrained(
+                model_name, fast_tokenizer=fast_tokenizer)
+    else:
+        tokenizer = AutoTokenizer.from_pretrained(
+            model_name_or_path, fast_tokenizer=fast_tokenizer)
+    return tokenizer
 
 
 def save_hf_format(model, tokenizer, args, sub_folder=""):
@@ -74,20 +90,35 @@ def get_all_reduce_mean(tensor):
     return tensor
 
 
-def get_optimizer_grouped_parameters(model,
-                                     weight_decay,
-                                     no_decay_name_list=[
-                                         "bias", "LayerNorm.weight"
-                                     ]):
+def get_optimizer_grouped_parameters(
+    model,
+    weight_decay,
+    lora_lr=5e-4,
+    no_decay_name_list=["bias", "LayerNorm.weight"],
+    lora_name_list=["lora_right_weight", "lora_left_weight"],
+):
     optimizer_grouped_parameters = [
         {
             "params": [
                 p for n, p in model.named_parameters()
-                if (not any(nd in n
-                            for nd in no_decay_name_list) and p.requires_grad)
+                if (not any(nd in n for nd in no_decay_name_list)
+                    and p.requires_grad and not any(nd in n
+                                                    for nd in lora_name_list))
             ],
             "weight_decay":
             weight_decay,
+        },
+        {
+            "params": [
+                p for n, p in model.named_parameters()
+                if (not any(nd in n for nd in no_decay_name_list)
+                    and p.requires_grad and any(nd in n
+                                                for nd in lora_name_list))
+            ],
+            "weight_decay":
+            weight_decay,
+            "lr":
+            lora_lr
         },
         {
             "params": [
@@ -99,6 +130,8 @@ def get_optimizer_grouped_parameters(model,
             0.0,
         },
     ]
+    if not optimizer_grouped_parameters[1]["params"]:
+        optimizer_grouped_parameters.pop(1)
     return optimizer_grouped_parameters
 
 

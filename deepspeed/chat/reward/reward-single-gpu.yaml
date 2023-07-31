@@ -54,7 +54,7 @@ spec:
         volumes:
           - name: data
             persistentVolumeClaim:
-              claimName: chat
+              claimName: dschat
           - name: dshm
             emptyDir:
               medium: Memory

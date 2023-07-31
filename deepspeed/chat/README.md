@@ -81,11 +81,11 @@ kubectl create -f actor/actor-multi-node.yaml
 使用合适的配置文件创建 DeepSpeedJob 以执行第二步训练（这里使用 `actor-single-gpu.yaml` 训练 OPT-350M 模型）：
 
 ```bash
-# 单 GPU 训练，OPT-1.3B 模型
+# 单 GPU 训练，OPT-350M 模型
 kubectl create -f reward/reward-single-gpu.yaml
-# 单副本多 GPU 训练，OPT-13B 模型
+# 单副本多 GPU 训练，OPT-350M 模型
 kubectl create -f reward/reward-single-node.yaml
-# 多副本多 GPU 训练，OPT-66B 模型
+# 多副本多 GPU 训练，OPT-350M 模型
 kubectl create -f reward/reward-multi-node.yaml
 ```
 
