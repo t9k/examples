@@ -6,17 +6,17 @@
 
 ## 使用方法
 
-训练越大的模型，所需要的计算资源越多，对应的分布式场景也不相同。本项目针对单 GPU、单副本多 GPU 和多副本多 GPU 这三种分布式场景分别提供不同的 DeepSpeedJob YAML 配置文件，其训练不同的 Actor 模型，请求不同的资源量，如下表所示：
+训练越大的模型，所需要的计算资源越多，对应的分布式场景也不相同。本项目针对单 GPU、单节点多 GPU 和多节点多 GPU 这三种分布式场景分别提供不同的 DeepSpeedJob YAML 配置文件，其训练不同的 Actor 模型，请求不同的资源量，如下表所示：
 
-| YAML 配置文件        | 分布式场景     | GPU          | Actor 模型 | Reward 模型 | PVC 大小 |
-| -------------------- | -------------- | ------------ | ---------- | ----------- | -------- |
-| `*-single-gpu.yaml`  | 单 GPU         | 1x A100 40G  | OPT-1.3B   | OPT-350M    | 20GiB    |
-| `*-single-node.yaml` | 单副本多 GPU | 4x A100 40G  | OPT-13B    | OPT-350M    | 100GiB   |
-| `*-multi-node.yaml`  | 多副本多 GPU | 16x A100 80G | OPT-66B    | OPT-350M    | 500GiB   |
+| YAML 配置文件        | 分布式场景   | GPU            | Actor 模型 | Reward 模型 | PVC 大小 |
+| -------------------- | ------------ | -------------- | ---------- | ----------- | -------- |
+| `*-single-gpu.yaml`  | 单 GPU       | 1x A100 40G    | OPT-1.3B   | OPT-350M    | 20GiB    |
+| `*-single-node.yaml` | 单节点多 GPU | 4x A100 40G    | OPT-13B    | OPT-350M    | 100GiB   |
+| `*-multi-node.yaml`  | 多节点多 GPU | 2x 8x A100 80G | OPT-66B    | OPT-350M    | 500GiB   |
 
-> DeepSpeed-Chat 即将支持 LLaMA 模型的训练。
+> DeepSpeed-Chat 即将支持 LLaMA 模型的微调。
 
-创建一个名为 chat、相应大小的 PVC，然后创建一个同样名为 chat 的 Notebook 挂载该 PVC，镜像选择带有 sudo 权限的类型，资源不限（如要使用远程操作，请开启 SSH）。
+创建一个名为 dschat、相应大小的 PVC，然后创建一个同样名为 dschat 的 Notebook 挂载该 PVC，镜像选择带有 sudo 权限的类型，资源不限（如要使用远程操作，请开启 SSH）。
 
 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆此仓库：
 
@@ -27,19 +27,19 @@ git clone https://github.com/t9k/examples.git
 
 ### 准备模型和数据集
 
-安装 git-lfs，从 Hugging Face Hub 拉取要训练的 Actor 模型，这里以 [facebook/opt-13b](https://huggingface.co/facebook/opt-13b) 为例：
+安装 git-lfs，从 Hugging Face Hub 拉取要训练的 Actor 模型和 Reward 模型，这里以 [facebook/opt-13b](https://huggingface.co/facebook/opt-13b) 为例：
 
 ```bash
-sudo apt install git-lfs  # password: tensorstack
+sudo apt update && sudo apt install git-lfs  # password: tensorstack
 git lfs install
 mkdir models && cd models
 git clone https://huggingface.co/facebook/opt-13b
-cd ~
 ```
 
 接着使用 `download_dataset.py` 脚本下载并保存数据集，这里以 [Dahoas/rm-static](https://huggingface.co/datasets/Dahoas/rm-static) 为例：
 
 ```bash
+cd ~/examples/deepspeed/chat
 python download_dataset.py Dahoas/rm-static
 ```
 
@@ -51,10 +51,10 @@ python download_dataset.py Dahoas/rm-static
 
 #### Step 1: Supervised Finetuning
 
-使用合适的配置文件创建 DeepSpeedJob 以执行第一步训练（这里使用 `actor-single-node.yaml` 微调 LLaMA 7B 模型）：
+使用合适的配置文件创建 DeepSpeedJob 以执行第一步训练（这里使用 `actor-single-node.yaml` 微调 OPT-13B 模型）：
 
 ```bash
-cd examples/deepspeed/chat
+cd ~/examples/deepspeed/chat
 
 # 单 GPU 训练，OPT-1.3B 模型
 kubectl create -f actor/actor-single-gpu.yaml
@@ -78,7 +78,7 @@ kubectl create -f actor/actor-multi-node.yaml
 
 #### Step 2: Reward Model Finetuning
 
-使用合适的配置文件创建 DeepSpeedJob 以执行第二步训练（这里使用 `actor-single-gpu.yaml` 训练 OPT 350M 模型）：
+使用合适的配置文件创建 DeepSpeedJob 以执行第二步训练（这里使用 `actor-single-gpu.yaml` 训练 OPT-350M 模型）：
 
 ```bash
 # 单 GPU 训练，OPT-1.3B 模型

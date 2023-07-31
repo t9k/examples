@@ -8,12 +8,12 @@ spec:
     otherArgs: ["--master_port", "12346"]
     run:
       python: [
-        "./chat/rlhf/main.py",
-        "--data_path", "./datasets/Dahoas/rm-static", "./datasets/Dahoas/full-hh-rlhf", "./datasets/Dahoas/synthetic-instruct-gptj-pairwise",
+        "examples/deepspeed/chat/rlhf/main.py",
+        "--data_path", "datasets/Dahoas/rm-static", "datasets/Dahoas/full-hh-rlhf", "datasets/Dahoas/synthetic-instruct-gptj-pairwise",
         "--data_split", "2,4,4",
-        "--tokenizer_name_or_path", "./models/opt-13b",
-        "--actor_model_name_or_path", "./output/single-node/actor-models/13b",
-        "--critic_model_name_or_path", "./output/single-gpu/reward-models/350m",
+        "--tokenizer_name_or_path", "models/opt-13b",
+        "--actor_model_name_or_path", "output/single-node/actor-models/13b",
+        "--critic_model_name_or_path", "output/single-gpu/reward-models/350m",
         "--num_padding_at_beginning", "1",
         "--per_device_train_batch_size", "4",
         "--per_device_mini_train_batch_size", "4",
@@ -40,7 +40,7 @@ spec:
         "--critic_gradient_checkpointing",
         "--actor_lora_dim", "128",
         "--actor_lora_module_name", "decoder.layers.",
-        "--output_dir", "./output/single-node/step3-models/13b",
+        "--output_dir", "output/single-node/step3-models/13b",
       ]
   worker:
     replicas: 1
