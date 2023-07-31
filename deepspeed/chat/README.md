@@ -78,7 +78,7 @@ kubectl create -f actor/actor-multi-node.yaml
 
 #### Step 2: Reward Model Finetuning
 
-使用合适的配置文件创建 DeepSpeedJob 以执行第二步训练（这里使用 `actor-single-gpu.yaml` 训练 OPT-350M 模型）：
+使用合适的配置文件创建 DeepSpeedJob 以执行第二步训练（这里使用 `reward-single-node.yaml` 训练 OPT-350M 模型）：
 
 ```bash
 # 单 GPU 训练，OPT-350M 模型

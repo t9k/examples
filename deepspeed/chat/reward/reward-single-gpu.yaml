@@ -24,7 +24,7 @@ spec:
         "--seed", "1234",
         "--zero_stage", "0",
         "--deepspeed",
-        "--output_dir=output/single-gpu/reward-models/350m"
+        "--output_dir", "./output/single-gpu/reward-models/350m"
       ]
   worker:
     replicas: 1
