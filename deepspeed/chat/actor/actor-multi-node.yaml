@@ -22,7 +22,7 @@ spec:
         "--num_warmup_steps", "0",
         "--seed", "1234",
         "--gradient_checkpointing",
-        "--zero_stage", "0",
+        "--zero_stage", "2",
         "--lora_dim", "128",
         "--lora_module_name", "decoder.layers.",
         "--deepspeed",
@@ -35,7 +35,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/t9k/deepspeed:chat-0.9.5
+            image: tsz.io/t9k/deepspeed:chat-0.10.0
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]

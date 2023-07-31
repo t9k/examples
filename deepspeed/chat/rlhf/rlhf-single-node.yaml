@@ -31,7 +31,7 @@ spec:
         "--num_warmup_steps", "100",
         "--deepspeed",
         "--seed", "1234",
-        # "--enable_hybrid_engine",  # https://github.com/microsoft/DeepSpeedExamples/issues/587
+        # "--enable_hybrid_engine",
         "--inference_tp_size", "1",
         "--actor_zero_stage", "3",
         "--critic_zero_stage", "3",
@@ -49,7 +49,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/t9k/deepspeed:chat-0.9.5
+            image: tsz.io/t9k/deepspeed:chat-0.10.0
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]
@@ -64,13 +64,13 @@ spec:
                 nvidia.com/gpu: 4
             volumeMounts:
               - mountPath: /t9k/mnt
-                name: data
+                name: code
               - mountPath: /dev/shm
                 name: dshm
         volumes:
-          - name: data
+          - name: code
             persistentVolumeClaim:
-              claimName: chat
+              claimName: gpt
           - name: dshm
             emptyDir:
               medium: Memory

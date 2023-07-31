@@ -35,7 +35,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/t9k/deepspeed:chat-0.9.5
+            image: tsz.io/t9k/deepspeed:chat-0.10.0
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]
@@ -46,7 +46,7 @@ spec:
                 nvidia.com/gpu: 1
               limits:
                 cpu: 4
-                memory: 128Gi
+                memory: 64Gi
                 nvidia.com/gpu: 1
             volumeMounts:
               - mountPath: /t9k/mnt

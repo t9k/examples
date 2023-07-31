@@ -69,12 +69,12 @@ kubectl create -f actor/actor-multi-node.yaml
 * 训练副本（replica）数量为 1（第 32 行）。
 * 每个副本的进程数量（第 7 行）和 GPU 数量（第 46 和 50 行）同为 4。
 * 使用数据集 [Dahoas/rm-static](https://huggingface.co/datasets/Dahoas/rm-static)、[Dahoas/full-hh-rlhf](https://huggingface.co/datasets/Dahoas/full-hh-rlhf) 和 [Dahoas/synthetic-instruct-gptj-pairwise](https://huggingface.co/datasets/Dahoas/synthetic-instruct-gptj-pairwise)（第 11 行）；可以使用一个或多个数据集；所有可用的数据集请参考[这里](./utils/data/data_utils.py#L20)。
-* 模型文件会在训练完成后输出到 `output/multi-node/actor-models/13b` 路径下（第 29 行）。
+* 模型文件会在训练完成后输出到 `output/single-node/actor-models/13b` 路径下（第 29 行）。
 * 修改以下参数可以减小显存占用，以防止 OOM：
     * 训练更小的模型（第 13 行）。
     * 在多 GPU 训练的情况下，增大 `--zero_stage`（第 25 行，可以取 0、1、2 或 3），但可能损害性能。
     * 减小批次规模（第 14 和 15 行），若不要影响收敛过程，则同时增大 `--gradient_accumulation_steps`（第 20 行）。
-* 镜像 `tsz.io/t9k/deepspeed:chat-0.9.5`（第 38 行）由 [Dockerfile](./Dockerfile) 定义。
+* 镜像 `tsz.io/t9k/deepspeed:chat-0.10.0`（第 38 行）由 [Dockerfile](./Dockerfile) 定义。
 
 #### Step 2: Reward Model Finetuning
 
