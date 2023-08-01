@@ -10,8 +10,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     datasets \
     sentencepiece \
     # require update: https://github.com/microsoft/DeepSpeed/issues/3156
-    deepspeed==0.10.0 \
-    transformers \
+    deepspeed==0.9.0 \
+    transformers==4.30.2 \
     tabulate \
     evaluate
 
