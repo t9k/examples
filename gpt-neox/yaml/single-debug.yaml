@@ -1,0 +1,36 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: neox-single-debug
+spec:
+  config:
+    slotsPerWorker: 1
+    localRank: true
+    run:
+      python: []
+  runMode:
+    debug:
+      enable: true
+  worker:
+    replicas: 1
+    template:
+      spec:
+        containers:
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230807
+            imagePullPolicy: IfNotPresent
+            name: worker
+            resources:
+              limits:
+                cpu: "2"
+                memory: 8Gi
+                nvidia.com/gpu: 1
+              requests:
+                cpu: "1"
+                memory: 4Gi
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: neox

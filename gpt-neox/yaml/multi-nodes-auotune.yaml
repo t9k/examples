@@ -1,0 +1,53 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: neox-autotune
+spec:
+  config:
+    slotsPerWorker: 2
+    localRank: true
+    autotune: tune
+    run:
+      python:
+        - "train.py"
+        - "configs/125M_autotune.yml"
+        - "--vocab_file"
+        - "/t9k/mnt/data/gpt2-vocab.json"
+        - "--merge_file"
+        - "/t9k/mnt/data/gpt2-merges.txt"
+        - "--data_path"
+        - "/t9k/mnt/data/enwik8/enwik8_text_document"
+        - "--deepspeed_config"
+        - "configs/125M_autotune.json"
+  worker:
+    replicas: 2
+    template:
+      spec:
+        containers:
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230807
+            imagePullPolicy: IfNotPresent
+            name: worker
+            securityContext:
+              capabilities:
+                add: ["IPC_LOCK"]
+            resources:
+              limits:
+                cpu: "8"
+                memory: 32Gi
+                nvidia.com/gpu: 2
+                rdma/rdma_shared_device_a: 1
+              requests:
+                cpu: "4"
+                memory: 16Gi
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+              - mountPath: /dev/shm
+                name: shm
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: neox
+          - name: shm
+            emptyDir:
+              medium: Memory

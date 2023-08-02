@@ -1,0 +1,48 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: neox-checkpoint
+spec:
+  config:
+    slotsPerWorker: 4
+    localRank: true
+    run:
+      python:
+        - "train.py"
+        - "configs/1-3B_checkpoint.yml"
+        - "--vocab_file"
+        - "/t9k/mnt/data/gpt2-vocab.json"
+        - "--merge_file"
+        - "/t9k/mnt/data/gpt2-merges.txt"
+        - "--data_path"
+        - "/t9k/mnt/data/enwik8/enwik8_text_document"
+        - "--checkpoint_dir"
+        - "/t9k/mnt/checkpoint"
+  worker:
+    replicas: 1
+    template:
+      spec:
+        containers:
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230807
+            imagePullPolicy: IfNotPresent
+            name: worker
+            resources:
+              limits:
+                cpu: "8"
+                memory: 32Gi
+                nvidia.com/gpu: 4
+              requests:
+                cpu: "4"
+                memory: 16Gi
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+              - mountPath: /dev/shm
+                name: shm
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: neox
+          - name: shm
+            emptyDir:
+              medium: Memory
