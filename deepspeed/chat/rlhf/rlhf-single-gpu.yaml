@@ -18,7 +18,7 @@ spec:
         "--ppo_epochs", "1",
         "--max_answer_seq_len", "256",
         "--max_prompt_seq_len", "256",
-        "--actor_learning_rate", "5e-4",
+        "--actor_learning_rate", "9.65e-6",
         "--critic_learning_rate", "5e-6",
         "--num_train_epochs", "1",
         "--lr_scheduler_type", "cosine",
