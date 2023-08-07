@@ -3,6 +3,10 @@ kind: DeepSpeedJob
 metadata:
   name: rlhf-single-gpu
 spec:
+  scheduler:
+    t9kScheduler:
+      queue: default
+      priority: 50
   config:
     run:
       python: [
@@ -43,7 +47,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/t9k/deepspeed:chat-0.9.0
+            image: t9kpublic/deepspeed:chat-0.9.0
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]

@@ -10,7 +10,7 @@
 
 | YAML 配置文件        | 分布式场景   | GPU 使用（参考） | Actor 模型 | Reward 模型 | 需要 PVC 大小 | 预计时间        |
 | -------------------- | ------------ | ---------------- | ---------- | ----------- | ------------- | --------------- |
-| `*-single-gpu.yaml`  | 单 GPU       | 1x A100 40G      | OPT-1.3B   | OPT-350M    | 20GiB         | ~               |
+| `*-single-gpu.yaml`  | 单 GPU       | 1x A100 40G      | OPT-1.3B   | OPT-350M    | 20GiB         | ~1.5h+1h+2h     |
 | `*-single-node.yaml` | 单节点多 GPU | 4x A100 40G      | OPT-13B    | OPT-350M    | 100GiB        | ~2.5h+20min+11h |
 | `*-multi-node.yaml`  | 多节点多 GPU | 2x 8x A100 80G   | OPT-66B    | OPT-350M    | 500GiB        |                 |
 
@@ -76,7 +76,7 @@ kubectl create -f actor/actor-multi-node.yaml
     * 训练更小的模型（第 13 行）。
     * 在多 GPU 训练的情况下，增大 `--zero_stage`（第 25 行，可以取 0、1、2 或 3）。
     * 减小批次规模（第 14 和 15 行），若不要影响收敛过程，则同时增大 `--gradient_accumulation_steps`（第 20 行）。
-* 镜像 `tsz.io/t9k/deepspeed:chat-0.9.0`（第 38 行）由 [Dockerfile](./Dockerfile) 定义。
+* 镜像 `t9kpublic/deepspeed:chat-0.9.0`（第 38 行）由 [Dockerfile](./Dockerfile) 定义。
 
 #### Step 2: Reward Model Finetuning
 

@@ -13,7 +13,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: tsz.io/t9k/deepspeed:chat-0.9.0
+            image: t9kpublic/deepspeed:chat-0.9.0
             env:
             - name: TRANSFORMERS_CACHE
               value: /t9k/mnt/hf-cache/hub
