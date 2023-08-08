@@ -115,9 +115,40 @@ kubectl create -f gpt-13b.yaml
 
 ### 175B
 
+### 训练日志
+
+训练过程中会记录训练和验证损失、学习率/损失缩放倍数/运行时间等变量随步数的变化、所有超参数（命令行参数）的值等信息，并保存为 TensorBoard 日志文件。这里以 125M 为例，查看其训练日志。启动训练之后，操作 Notebook 的左侧导航目录中来到 `output/gpt-125m/tensorboard` 路径，可以看到这里存在一个刚创建的日志文件，然后创建 TensorBoard 实例以查看可视化内容：
+
+![](./assets/create-tensorboard.png)
+
+![](./assets/view-tensorboard.png)
+
+关于所有 TensorBoard 日志相关的命令行参数以及它们的含义，请参考[这里](https://github.com/microsoft/Megatron-DeepSpeed/blob/main/megatron/arguments.py#L687-L718)。
+
+### 性能分析
+
+PyTorch 提供的 [Profiler](https://pytorch.org/docs/stable/profiler.html) 工具允许在训练和推断过程中收集性能指标，从而帮助用户更好地理解哪些模型运算最耗费计算和内存资源，检查它们的输入形状和堆栈跟踪，研究设备内核活动并可视化执行追踪。
+
+这里以 125M 为例，使用 PyTorch Profiler 对其训练进行性能分析。在训练之前，先 hack Megatron-DeepSpeed 的训练代码以增加 Profiler 的上下文管理器（将记录 training step 2-4 以及 7-9 的算子执行、GPU 内核时间、内存分配、调用栈、FLOPS、模块等信息，并生成 TensorBoard 日志文件）：
+
+```shell
+cd ~
+cp examples/deepspeed/megatron-gpt/profiling/training.py Megatron-DeepSpeed/megatron/training.py
+```
+
+启动训练之后，操作 Notebook 的左侧导航目录中来到 `output/gpt-125m/profiling` 路径，可以看到这里存在两个刚创建的日志文件，然后创建 TensorBoard 实例以查看可视化内容：
+
+![](./assets/create-profiling.png)
+
+![](./assets/view-profiling-overview.png)
+
+![](./assets/view-profiling-gpu-kernel.png)
+
+![](./assets/view-profiling-memory.png)
+
 ## 文本生成
 
-训练完成之后可以使用保存的检查点进行文本生成。这里以 125M 为例。首先 hack Megatron-LM 的文本生成相关的代码，并复制检查点文件到指定位置：
+训练完成之后可以使用保存的检查点进行文本生成，还是以 125M 为例。首先 hack Megatron-LM 的文本生成相关的代码，并复制检查点文件到指定位置：
 
 ```shell
 cd ~
