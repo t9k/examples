@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: DeepSpeedJob
 metadata:
-  name: neox-rdma
+  name: neox-checkpoint
 spec:
   config:
     slotsPerWorker: 4
@@ -9,30 +9,28 @@ spec:
     run:
       python:
         - "train.py"
-        - "configs/1-3B.yml"
+        - "configs/1-3B_checkpoint.yml"
         - "--vocab_file"
         - "/t9k/mnt/data/gpt2-vocab.json"
         - "--merge_file"
         - "/t9k/mnt/data/gpt2-merges.txt"
         - "--data_path"
         - "/t9k/mnt/data/enwik8/enwik8_text_document"
+        - "--checkpoint_dir"
+        - "/t9k/mnt/checkpoint"
   worker:
-    replicas: 2
+    replicas: 1
     template:
       spec:
         containers:
-          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230807
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230814
             imagePullPolicy: IfNotPresent
             name: worker
-            securityContext:
-              capabilities:
-                add: ["IPC_LOCK"]
             resources:
               limits:
                 cpu: "8"
                 memory: 32Gi
                 nvidia.com/gpu: 4
-                rdma/rdma_shared_device_a: 1
               requests:
                 cpu: "4"
                 memory: 16Gi

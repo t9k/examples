@@ -3,20 +3,21 @@ FROM nvcr.io/nvidia/pytorch:23.02-py3
 # DeepSpeed basic packages
 RUN apt-get update && apt-get install -yq --no-install-recommends \
     openssh-server \
-    pdsh
+    pdsh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir -i https://pypi.douban.com/simple/ \
-    accelerate \
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir  accelerate \
     datasets \
     sentencepiece \
     transformers \
     tabulate \
-    evaluate
-
-RUN pip install --no-cache-dir deepspeed==0.10.0
+    evaluate \
+    deepspeed==0.10.0
 
 # Packages for GPT NeoX
-RUN pip install --no-cache-dir -i https://pypi.douban.com/simple/ \
+RUN pip install --no-cache-dir  \
     best_download \
     ftfy>=6.0.1 \
     huggingface_hub>=0.11.0 \
@@ -29,9 +30,7 @@ RUN pip install --no-cache-dir -i https://pypi.douban.com/simple/ \
     six \
     tiktoken>=0.1.2 \
     tokenizers>=0.12.1 \
-    tensorboard==2.13.0
-
-RUN pip install \
+    tensorboard==2.13.0 \
     git+https://github.com/EleutherAI/lm_dataformat.git@4eec05349977071bf67fc072290b95e31c8dd836
 
 # Download and modify GPT NeoX training script.

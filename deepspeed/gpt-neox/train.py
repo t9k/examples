@@ -14,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """Train"""
 from megatron.neox_arguments import NeoXArgs
 from megatron.training import pretrain
@@ -21,6 +22,6 @@ from megatron.training import pretrain
 if __name__ == "__main__":
     neox_args = NeoXArgs.consume_t9kdj_args()
     neox_args.configure_distributed_args()
-    neox_args.build_tokenizer()
-    neox_args.initialize_tensorboard_writer()
+    neox_args.build_tokenizer()  # tokenizer needs to be build in training in order to set the padding vocab
+    neox_args.initialize_tensorboard_writer()  # is initialized if tensorboard directory is defined
     pretrain(neox_args=neox_args)

@@ -12,35 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import argparse
 import base64
-import copy
+import os
+from pathlib import Path
+import yaml
 import json
 import logging
-import os
-from dataclasses import dataclass
-from pathlib import Path
-from socket import gethostname
-from typing import Dict, List
-
+import copy
 import torch
-import yaml
+import argparse
+
+from dataclasses import dataclass
+from typing import List, Dict
+from socket import gethostname
 
 try:
     from typing import Literal, Union
 except ImportError:
     from typing_extensions import Literal, Union
-
 from deepspeed.launcher.runner import DLTS_HOSTFILE
 from megatron.logging import Tee
 from megatron.tokenizer import build_tokenizer
-from megatron.utils import expand_attention_types, obtain_resource_pool
-
+from megatron.utils import obtain_resource_pool, expand_attention_types
 from .deepspeed_args import NeoXArgsDeepspeedConfig, NeoXArgsDeepspeedRunner
-from .neox_args import (ATTENTION_TYPE_CHOICES, NeoXArgsLogging,
-                        NeoXArgsLRScheduler, NeoXArgsModel, NeoXArgsOptimizer,
-                        NeoXArgsOther, NeoXArgsParallelism, NeoXArgsTextgen,
-                        NeoXArgsTokenizer, NeoXArgsTraining)
+from .neox_args import (
+    NeoXArgsModel,
+    NeoXArgsTokenizer,
+    NeoXArgsTraining,
+    NeoXArgsParallelism,
+    NeoXArgsLogging,
+    NeoXArgsOther,
+    NeoXArgsTextgen,
+    NeoXArgsOptimizer,
+    NeoXArgsLRScheduler,
+    ATTENTION_TYPE_CHOICES,
+)
 
 # ZERO defaults by deespeed
 # These values should not be changed unless defaults in deepspeed are changed
@@ -67,6 +73,7 @@ OPT_PARAMS_DEFAULTS = {
     "momentum": 0.0,
     "cuda_aware": False,
 }
+
 
 AUTOTUNING_ARGS = (
     "train_batch_size",
@@ -116,8 +123,9 @@ class NeoXArgs(*BASE_CLASSES):
         """
         if not NeoXArgs.validate_keys():
             raise ValueError(
-                self.__class__.__name__ +
-                ".__post_init__() NeoXArgs keys cannot be validated")
+                self.__class__.__name__
+                + ".__post_init__() NeoXArgs keys cannot be validated"
+            )
 
         self.enable_logging()
 
@@ -125,13 +133,15 @@ class NeoXArgs(*BASE_CLASSES):
 
         if not self.validate_types():
             raise ValueError(
-                self.__class__.__name__ +
-                ".__post_init__() NeoXArgs types cannot be validated")
+                self.__class__.__name__
+                + ".__post_init__() NeoXArgs types cannot be validated"
+            )
 
         if not self.validate_values():
             raise ValueError(
-                self.__class__.__name__ +
-                ".__post_init__() NeoXArgs values cannot be validated")
+                self.__class__.__name__
+                + ".__post_init__() NeoXArgs values cannot be validated"
+            )
 
     def build_tokenizer(self):
         self.tokenizer = build_tokenizer(self)
@@ -142,8 +152,7 @@ class NeoXArgs(*BASE_CLASSES):
                 from torch.utils.tensorboard import SummaryWriter
 
                 print("> setting tensorboard ...")
-                self.tensorboard_writer = SummaryWriter(
-                    log_dir=self.tensorboard_dir)
+                self.tensorboard_writer = SummaryWriter(log_dir=self.tensorboard_dir)
             except (ModuleNotFoundError, ImportError):
                 print(
                     "WARNING: TensorBoard writing requested but is not "
@@ -153,9 +162,7 @@ class NeoXArgs(*BASE_CLASSES):
                 )
 
     @classmethod
-    def from_ymls(cls,
-                  paths_to_yml_files: List[str],
-                  overwrite_values: Dict = None):
+    def from_ymls(cls, paths_to_yml_files: List[str], overwrite_values: Dict = None):
         """
         instantiates NeoXArgs while reading values from yml files
 
@@ -164,8 +171,7 @@ class NeoXArgs(*BASE_CLASSES):
         overwrite_values: If provided, overwrite any values in the yamls with these values
         """
 
-        print(cls.__name__ + ".from_ymls() " + str(paths_to_yml_files),
-              flush=True)
+        print(cls.__name__ + ".from_ymls() " + str(paths_to_yml_files), flush=True)
 
         # initialize an empty config dictionary to be filled by yamls
         config = dict()
@@ -185,8 +191,8 @@ class NeoXArgs(*BASE_CLASSES):
                     )
 
                 conf_key_converted = conf_key.replace(
-                    "-",
-                    "_")  # TODO remove replace and update configuration files?
+                    "-", "_"
+                )  # TODO remove replace and update configuration files?
                 config[conf_key_converted] = conf_value
 
             # load original config files to save unchanged with checkpoint
@@ -203,12 +209,14 @@ class NeoXArgs(*BASE_CLASSES):
 
         # Configuration parameters not specified
         params_not_in_config = sorted(
-            list(set(cls.__dataclass_fields__.keys()) - set(config.keys())))
+            list(set(cls.__dataclass_fields__.keys()) - set(config.keys()))
+        )
         if len(params_not_in_config) > 0:
             logging.debug(
-                cls.__name__ +
-                ".from_ymls() Configuration parameters not specified (using defaults): "
-                + ", ".join(params_not_in_config))
+                cls.__name__
+                + ".from_ymls() Configuration parameters not specified (using defaults): "
+                + ", ".join(params_not_in_config)
+            )
 
         if overwrite_values is not None:
             for k, v in overwrite_values.items():
@@ -236,16 +244,16 @@ class NeoXArgs(*BASE_CLASSES):
         We can use `--wandb_group` / `--wandb_team` to overwrite those args from the command line, otherwise the value from the config is taken.
         """
 
-        parser = argparse.ArgumentParser(description="GPT-NeoX Configuration",
-                                         allow_abbrev=False)
+        parser = argparse.ArgumentParser(
+            description="GPT-NeoX Configuration", allow_abbrev=False
+        )
 
         group = parser.add_argument_group(title="Training Configuration")
 
         group.add_argument(
             "user_script",
             type=str,
-            help="User script to launch, followed by any required "
-            "arguments.",
+            help="User script to launch, followed by any required " "arguments.",
         )
 
         group.add_argument(
@@ -260,12 +268,10 @@ class NeoXArgs(*BASE_CLASSES):
             "conf_file",
             type=str,
             nargs="+",
-            help=
-            "Configuration file path. Multiple files can be provided and will be merged.",
+            help="Configuration file path. Multiple files can be provided and will be merged.",
         )
 
-        group = parser.add_argument_group(
-            title="Weights and Biases monitoring args")
+        group = parser.add_argument_group(title="Weights and Biases monitoring args")
 
         group.add_argument(
             "--wandb_group",
@@ -293,8 +299,7 @@ class NeoXArgs(*BASE_CLASSES):
             "--iteration",
             type=int,
             default=None,
-            help=
-            "Iteration to load checkpoint from in evaluate.py / generate.py. If None is provided, uses the latest iteration.",
+            help="Iteration to load checkpoint from in evaluate.py / generate.py. If None is provided, uses the latest iteration.",
         )
         group.add_argument(
             "--eval_results_prefix",
@@ -332,8 +337,7 @@ class NeoXArgs(*BASE_CLASSES):
             type=str,
             default=None,
             choices=("tune", "run"),
-            help=
-            "Use DeepSpeed's autotuning feature to optimize certain hyperparameters. For more details refer to documentation here: https://www.deepspeed.ai/tutorials/autotuning/",
+            help="Use DeepSpeed's autotuning feature to optimize certain hyperparameters. For more details refer to documentation here: https://www.deepspeed.ai/tutorials/autotuning/",
         )
 
         args_parsed = parser.parse_args()
@@ -346,14 +350,11 @@ class NeoXArgs(*BASE_CLASSES):
         # load config files
         conf_files = args_parsed.conf_file
         if args_parsed.conf_dir:
-            conf_files = [
-                os.path.join(args_parsed.conf_dir, f) for f in conf_files
-            ]
+            conf_files = [os.path.join(args_parsed.conf_dir, f) for f in conf_files]
 
         # enables us to pass in `125M` instead of `125M.yml`
         conf_files = [
-            (cf if
-             (cf.endswith(".yml") or cf.endswith(".json")) else cf + ".yml")
+            (cf if (cf.endswith(".yml") or cf.endswith(".json")) else cf + ".yml")
             for cf in conf_files
         ]
 
@@ -366,8 +367,9 @@ class NeoXArgs(*BASE_CLASSES):
                 overwrite_values[k] = v
 
         # load args
-        neox_args = cls.from_ymls(paths_to_yml_files=conf_files,
-                                  overwrite_values=overwrite_values)
+        neox_args = cls.from_ymls(
+            paths_to_yml_files=conf_files, overwrite_values=overwrite_values
+        )
 
         if neox_args.use_wandb:
             try:
@@ -379,8 +381,7 @@ class NeoXArgs(*BASE_CLASSES):
                     neox_args.wandb_group = wandb.sdk.lib.runid.generate_id()
                 else:
                     # Concatenate the W&B group name with a randomized string to ensure uniqueness.
-                    neox_args.wandb_group += "_" + wandb.sdk.lib.runid.generate_id(
-                    )
+                    neox_args.wandb_group += "_" + wandb.sdk.lib.runid.generate_id()
             except ModuleNotFoundError as e:
                 if e.name == "wandb":
                     e.msg += "\nWeights & Biases monitoring was requested but `wandb` was not found. Install `wandb` to use Weights & Biases, or set the `use_wandb` configuration option to a boolean false to disable Weights & Biases logging."
@@ -496,14 +497,14 @@ class NeoXArgs(*BASE_CLASSES):
         We then instantiate a new NeoXArgs from the dictionary (`.from_dict`). This should ensure args are never inconsistent across machines.
         """
 
-        parser = argparse.ArgumentParser(description="GPT-NeoX Configuration",
-                                         allow_abbrev=False)
+        parser = argparse.ArgumentParser(
+            description="GPT-NeoX Configuration", allow_abbrev=False
+        )
         parser.add_argument(
             "--megatron_config",
             type=str,
             default=None,
-            help=
-            "json dict dumped as string in NeoXArgs.get_deepspeed_main_args()",
+            help="json dict dumped as string in NeoXArgs.get_deepspeed_main_args()",
         )
         parser.add_argument(
             "--deepspeed_config",
@@ -513,19 +514,19 @@ class NeoXArgs(*BASE_CLASSES):
         )
         args_parsed, _ = parser.parse_known_args()
         megatron_config = json.loads(
-            base64.urlsafe_b64decode(
-                args_parsed.megatron_config).decode("utf-8"))
+            base64.urlsafe_b64decode(args_parsed.megatron_config).decode("utf-8")
+        )
         if args_parsed.deepspeed_config is not None:
             overwrite_values = cls.set_up_autotuning(
-                args_parsed.deepspeed_config, overwrite_values)
+                args_parsed.deepspeed_config, overwrite_values
+            )
         if overwrite_values is not None:
             megatron_config.update(overwrite_values)
         return cls.from_dict(args_dict=megatron_config)
 
     @staticmethod
     def set_up_autotuning(encoded_config, overwrite_values):
-        config = json.loads(
-            base64.urlsafe_b64decode(encoded_config).decode("utf-8"))
+        config = json.loads(base64.urlsafe_b64decode(encoded_config).decode("utf-8"))
         overwrite_values = overwrite_values if overwrite_values else {}
         for tuning_param in AUTOTUNING_ARGS:
             # TODO: This is for autotuning specifically, may cause surprises for someone with a weird setup
@@ -549,8 +550,9 @@ class NeoXArgs(*BASE_CLASSES):
         Sets up the extra arguments for deepspeed. This is done by reading in the `deepspeed_extra_args` dictionary from
             the configuration file, and then adding any arguments where values differ from those specified in the dataclass.
         """
-        neox_args = self.get_parent_class_value_dict(*self.__class__.__bases__,
-                                                     only_non_defaults=True)
+        neox_args = self.get_parent_class_value_dict(
+            *self.__class__.__bases__, only_non_defaults=True
+        )
 
         extra_ds_args = dict()
 
@@ -573,7 +575,9 @@ class NeoXArgs(*BASE_CLASSES):
         if self.autotuning_run is not None:
             args_list.extend(
                 self.convert_key_value_to_command_line_arg(
-                    "autotuning", self.autotuning_run))
+                    "autotuning", self.autotuning_run
+                )
+            )
 
         # get deepspeed runner args, and only pass them in to deepspeed launcher if they differ from defaults
         for key, default_value in NeoXArgsDeepspeedRunner().defaults():
@@ -586,15 +590,15 @@ class NeoXArgs(*BASE_CLASSES):
                     configured_value = True
             if configured_value != default_value:
                 args_list.extend(
-                    self.convert_key_value_to_command_line_arg(
-                        key, configured_value))
+                    self.convert_key_value_to_command_line_arg(key, configured_value)
+                )
 
         if self.deepspeed_slurm:
             comment = getattr(self, "comment")
             if comment:
                 args_list.extend(
-                    self.convert_key_value_to_command_line_arg(
-                        "comment", comment))
+                    self.convert_key_value_to_command_line_arg("comment", comment)
+                )
             # master_address = os.environ['SLURM_JOB_NODELIST'].split('\n')[0]
             # args_list.extend(
             #    self.convert_key_value_to_command_line_arg('master_addr', master_address)
@@ -603,15 +607,20 @@ class NeoXArgs(*BASE_CLASSES):
         if "DLTS_HOSTFILE" in os.environ:
             args_list.extend(
                 self.convert_key_value_to_command_line_arg(
-                    "hostfile", os.environ["DLTS_HOSTFILE"]))
+                    "hostfile", os.environ["DLTS_HOSTFILE"]
+                )
+            )
 
         if "MASTER_ADDR" in os.environ:
             args_list.extend(
                 self.convert_key_value_to_command_line_arg(
-                    "master_addr", os.environ["MASTER_ADDR"]))
+                    "master_addr", os.environ["MASTER_ADDR"]
+                )
+            )
 
-        if ("--include" in args_list
-                or "--exclude" in args_list) and "--num_gpus" in args_list:
+        if (
+            "--include" in args_list or "--exclude" in args_list
+        ) and "--num_gpus" in args_list:
             print(
                 "WARNING: both --include/--exclude and num_gpus were specified simultaneously - overriding num_gpus with --include/--exclude"
             )
@@ -638,16 +647,18 @@ class NeoXArgs(*BASE_CLASSES):
             args_list.append(str(ds_fp))
         else:
             encoded_ds_config = base64.urlsafe_b64encode(
-                json.dumps(
-                    self.deepspeed_config).encode("utf-8")).decode("utf-8")
+                json.dumps(self.deepspeed_config).encode("utf-8")
+            ).decode("utf-8")
             args_list.append(encoded_ds_config)
 
         # get all config values
         args_list.append("--megatron_config")
-        neox_args = self.get_parent_class_value_dict(*self.__class__.__bases__,
-                                                     only_non_defaults=True)
+        neox_args = self.get_parent_class_value_dict(
+            *self.__class__.__bases__, only_non_defaults=True
+        )
         encoded_mega_config = base64.urlsafe_b64encode(
-            json.dumps(neox_args).encode("utf-8")).decode("utf-8")
+            json.dumps(neox_args).encode("utf-8")
+        ).decode("utf-8")
         args_list.append(str(encoded_mega_config))
         return args_list
 
@@ -660,7 +671,8 @@ class NeoXArgs(*BASE_CLASSES):
         returns a dict containing variables within deepspeed config
         """
         config = self.get_parent_class_value_dict_extra_ds(
-            NeoXArgsDeepspeedConfig, only_non_defaults=True)
+            NeoXArgsDeepspeedConfig, only_non_defaults=True
+        )
         return config
 
     @property
@@ -684,9 +696,9 @@ class NeoXArgs(*BASE_CLASSES):
         """
         return self.get_parent_class_value_dict(*BASE_CLASSES)
 
-    def get_parent_class_value_dict(self,
-                                    *parent_classes,
-                                    only_non_defaults=False) -> dict:
+    def get_parent_class_value_dict(
+        self, *parent_classes, only_non_defaults=False
+    ) -> dict:
         """
         takes a sequence of parent classes and returns corresponding values (with defaults set)
         """
@@ -694,10 +706,7 @@ class NeoXArgs(*BASE_CLASSES):
         result = dict()
         for parent in parent_classes:
             for key, default_value in parent().defaults():
-                if key in [
-                        "tokenizer", "tensorboard_writer",
-                        "adlr_autoresume_object"
-                ]:
+                if key in ["tokenizer", "tensorboard_writer", "adlr_autoresume_object"]:
                     continue
                 if only_non_defaults:
                     value = getattr(self, key)
@@ -706,9 +715,9 @@ class NeoXArgs(*BASE_CLASSES):
                 result[key] = getattr(self, key)
         return result
 
-    def get_parent_class_value_dict_extra_ds(self,
-                                             *parent_classes,
-                                             only_non_defaults=False) -> dict:
+    def get_parent_class_value_dict_extra_ds(
+        self, *parent_classes, only_non_defaults=False
+    ) -> dict:
         """
         Takes a sequence of parent classes and returns corresponding values (with defaults set).
         Also adds in any extra deepspeed arguments that are specified in the configuration file.
@@ -726,10 +735,10 @@ class NeoXArgs(*BASE_CLASSES):
         for parent in parent_classes:
             for key, default_value in parent().defaults():
                 if key in [
-                        "tokenizer",
-                        "tensorboard_writer",
-                        "adlr_autoresume_object",
-                        "deepspeed_extra_args",
+                    "tokenizer",
+                    "tensorboard_writer",
+                    "adlr_autoresume_object",
+                    "deepspeed_extra_args",
                 ]:
                     continue
                 if only_non_defaults:
@@ -773,8 +782,7 @@ class NeoXArgs(*BASE_CLASSES):
     def print(self):
         """Print arguments."""
         if self.rank == 0 or self.rank is None:
-            print("-------------------- arguments --------------------",
-                  flush=True)
+            print("-------------------- arguments --------------------", flush=True)
             str_list = []
             for arg in vars(self):
                 # add arg + value
@@ -785,25 +793,22 @@ class NeoXArgs(*BASE_CLASSES):
                 # add info 'default or updated'
                 field_def = self.__dataclass_fields__.get(arg)
                 if field_def is not None:
-                    default_info = ("default" if value == field_def.default
-                                    else "updated")
+                    default_info = (
+                        "default" if value == field_def.default else "updated"
+                    )
                 else:
                     default_info = ""
                 dots = "." * (64 - len(print_str))
                 print_str += dots
-                str_list.append({
-                    "print_str": print_str,
-                    "default_info": default_info
-                })
+                str_list.append({"print_str": print_str, "default_info": default_info})
 
             for arg in sorted(
-                    sorted(str_list, key=lambda x: x["print_str"].lower()),
-                    key=lambda x: x["default_info"],
-                    reverse=True,
+                sorted(str_list, key=lambda x: x["print_str"].lower()),
+                key=lambda x: x["default_info"],
+                reverse=True,
             ):
                 print(arg["print_str"] + arg["default_info"], flush=True)
-            print("---------------- end of arguments ----------------",
-                  flush=True)
+            print("---------------- end of arguments ----------------", flush=True)
 
     ############################################################################################################################
     # start of calculations and derived values
@@ -828,17 +833,17 @@ class NeoXArgs(*BASE_CLASSES):
 
         if self.rank == 0:
             print(
-                self.__class__.__name__ +
-                ".configure_distributed_args() using world size: {} and model-parallel size: {} "
-                .format(self.world_size, self.model_parallel_size),
+                self.__class__.__name__
+                + ".configure_distributed_args() using world size: {} and model-parallel size: {} ".format(
+                    self.world_size, self.model_parallel_size
+                ),
                 flush=True,
             )
 
     @staticmethod
-    def calculate_batch_parameters(dp_world_size,
-                                   train_batch=None,
-                                   micro_batch=None,
-                                   grad_acc=None):
+    def calculate_batch_parameters(
+        dp_world_size, train_batch=None, micro_batch=None, grad_acc=None
+    ):
         # all values are provided nothing needs to be set
         if train_batch is not None and micro_batch is not None and grad_acc is not None:
             return train_batch, micro_batch, grad_acc
@@ -876,11 +881,11 @@ class NeoXArgs(*BASE_CLASSES):
         return int(train_batch), int(micro_batch), int(grad_acc)
 
     @staticmethod
-    def check_batch_parameters(dp_world_size, train_batch, micro_batch,
-                               grad_acc):
+    def check_batch_parameters(dp_world_size, train_batch, micro_batch, grad_acc):
 
-        assert (train_batch >
-                0), f"Train batch size: {train_batch} has to be greater than 0"
+        assert (
+            train_batch > 0
+        ), f"Train batch size: {train_batch} has to be greater than 0"
 
         assert (
             micro_batch > 0
@@ -893,7 +898,8 @@ class NeoXArgs(*BASE_CLASSES):
         assert train_batch == micro_batch * grad_acc * dp_world_size, (
             f"Check batch related parameters. train_batch_size is not equal"
             " to micro_batch_per_gpu * gradient_acc_step * world_size \n"
-            f"{train_batch} != {micro_batch} * {grad_acc} * {dp_world_size}")
+            f"{train_batch} != {micro_batch} * {grad_acc} * {dp_world_size}"
+        )
 
     def calculate_derived(self):
         """
@@ -915,13 +921,14 @@ class NeoXArgs(*BASE_CLASSES):
         dp_world_size = (dist_world_size / pp_size) / mp_size
         if not (dp_world_size % 1 == 0):
             error_message = (
-                self.__class__.__name__ + ".calculate_derived() " +
-                f"(dist_world_size / pp_size) / mp_size [({dist_world_size} / {pp_size}) / {mp_size}] must be a whole number"
+                self.__class__.__name__
+                + ".calculate_derived() "
+                + f"(dp_world_size / pp_size) / mp_size [({dp_world_size} / {pp_size}) / {mp_size}] must be a whole number"
             )
             logging.error(error_message)
             raise AssertionError(error_message)
 
-            # Automatically derive train_batch_size = train_micro_batch_size_per_gpu*dist_world_size*gradient_accumulation_steps
+            # Automatically derive train_batch_size = train_micro_batch_size_per_gpu*dp_world_size*gradient_accumulation_steps
         (
             train_batch_size,
             train_micro_batch_size_per_gpu,
@@ -938,16 +945,18 @@ class NeoXArgs(*BASE_CLASSES):
             micro_batch=train_micro_batch_size_per_gpu,
             grad_acc=gradient_accumulation_steps,
         )
-        self.update_values({
-            # batch size params
-            "train_batch_size": train_batch_size,
-            "train_micro_batch_size_per_gpu": train_micro_batch_size_per_gpu,
-            "gradient_accumulation_steps": gradient_accumulation_steps,
-            "batch_size": train_micro_batch_size_per_gpu,
-            # duplicate items
-            "gas": self.gradient_accumulation_steps,
-            "clip_grad": self.gradient_clipping,
-        })
+        self.update_values(
+            {
+                # batch size params
+                "train_batch_size": train_batch_size,
+                "train_micro_batch_size_per_gpu": train_micro_batch_size_per_gpu,
+                "gradient_accumulation_steps": gradient_accumulation_steps,
+                "batch_size": train_micro_batch_size_per_gpu,
+                # duplicate items
+                "gas": self.gradient_accumulation_steps,
+                "clip_grad": self.gradient_clipping,
+            }
+        )
 
         # derive steps where checkpoint should be saved
         if self.checkpoint_factor or self.extra_save_iters:
@@ -967,9 +976,11 @@ class NeoXArgs(*BASE_CLASSES):
             save_iters = list(save_iters)
             save_iters.sort()
 
-            self.update_values({
-                "save_iters": save_iters,
-            })
+            self.update_values(
+                {
+                    "save_iters": save_iters,
+                }
+            )
 
         # derive precision
         fp16_conflict = "DeepSpeed fp16 field was set but precision conflicts"
@@ -1005,28 +1016,27 @@ class NeoXArgs(*BASE_CLASSES):
         try:
             stage = self.zero_optimization["stage"]
             if stage in (0, 1, 2, 3):
-                self.update_values({
-                    "zero_stage":
-                    self.zero_optimization.get("stage",
-                                               ZERO_DEFAULTS["stage"]),
-                    "zero_reduce_scatter":
-                    self.zero_optimization.get(
-                        "reduce_scatter", ZERO_DEFAULTS["reduce_scatter"]),
-                    "zero_contiguous_gradients":
-                    self.zero_optimization.get(
-                        "contiguous_gradients",
-                        ZERO_DEFAULTS["contiguous_gradients"],
-                    ),
-                    "zero_reduce_bucket_size":
-                    self.zero_optimization.get(
-                        "reduce_bucket_size",
-                        ZERO_DEFAULTS["reduce_bucket_size"]),
-                    "zero_allgather_bucket_size":
-                    self.zero_optimization.get(
-                        "allgather_bucket_size",
-                        ZERO_DEFAULTS["allgather_bucket_size"],
-                    ),
-                })
+                self.update_values(
+                    {
+                        "zero_stage": self.zero_optimization.get(
+                            "stage", ZERO_DEFAULTS["stage"]
+                        ),
+                        "zero_reduce_scatter": self.zero_optimization.get(
+                            "reduce_scatter", ZERO_DEFAULTS["reduce_scatter"]
+                        ),
+                        "zero_contiguous_gradients": self.zero_optimization.get(
+                            "contiguous_gradients",
+                            ZERO_DEFAULTS["contiguous_gradients"],
+                        ),
+                        "zero_reduce_bucket_size": self.zero_optimization.get(
+                            "reduce_bucket_size", ZERO_DEFAULTS["reduce_bucket_size"]
+                        ),
+                        "zero_allgather_bucket_size": self.zero_optimization.get(
+                            "allgather_bucket_size",
+                            ZERO_DEFAULTS["allgather_bucket_size"],
+                        ),
+                    }
+                )
             else:
                 assert (
                     self.autotuning is not None
@@ -1040,19 +1050,18 @@ class NeoXArgs(*BASE_CLASSES):
             "type": OPT_DEFAULT,
             "params": OPT_PARAMS_DEFAULTS,
         }
-        self.update_values({
-            "optimizer_type":
-            opt_params.get("type", OPT_DEFAULT),
-            "lr":
-            opt_params["params"].get("lr", OPT_PARAMS_DEFAULTS["lr"]),
-        })
+        self.update_values(
+            {
+                "optimizer_type": opt_params.get("type", OPT_DEFAULT),
+                "lr": opt_params["params"].get("lr", OPT_PARAMS_DEFAULTS["lr"]),
+            }
+        )
 
         if self.optimizer_type.lower() == "onebitadam":
             # onebitadam needs to instantiated by deepspeed, and so we need to pass deepspeed scheduler args
             # for all other optimizers, the scheduling is handled by megatron
             self.scheduler = {
-                "type":
-                "WarmupDecayLR",  # for now this is the only ds scheduler offering decay
+                "type": "WarmupDecayLR",  # for now this is the only ds scheduler offering decay
                 "params": {
                     "warmup_min_lr": 0,
                     "warmup_max_lr": self.lr,
@@ -1071,17 +1080,18 @@ class NeoXArgs(*BASE_CLASSES):
 
         # Attention config
         if self.attention_config is None:
-            self.update_value("attention_config",
-                              [[["global"], self.num_layers]])
+            self.update_value("attention_config", [[["global"], self.num_layers]])
         self.update_value(
             "attention_config",
             expand_attention_types(self.attention_config, self.num_layers),
         )
-        assert (len(self.attention_config) == self.num_layers
-                ), "Length of attention config list must equal num_layers"
+        assert (
+            len(self.attention_config) == self.num_layers
+        ), "Length of attention config list must equal num_layers"
         for item in self.attention_config:
-            assert (item in ATTENTION_TYPE_CHOICES
-                    ), f"Attention type {item} not recognized"
+            assert (
+                item in ATTENTION_TYPE_CHOICES
+            ), f"Attention type {item} not recognized"
         if "gmlp" in self.attention_config or "amlp" in self.attention_config:
             assert (
                 not self.partition_activations
@@ -1151,8 +1161,12 @@ class NeoXArgs(*BASE_CLASSES):
         ]
         for req_arg in required_args:
             if getattr(self, req_arg) is None:
-                error_message = (self.__class__.__name__ +
-                                 ".validate_values() " + req_arg + " is None.")
+                error_message = (
+                    self.__class__.__name__
+                    + ".validate_values() "
+                    + req_arg
+                    + " is None."
+                )
                 logging.error(error_message)
                 raise ValueError(error_message)
                 return False
@@ -1160,8 +1174,8 @@ class NeoXArgs(*BASE_CLASSES):
         # Checks.
         if self.hidden_size % self.num_attention_heads != 0:
             error_message = (
-                self.__class__.__name__ +
-                ".validate_values() hidden_size must be divisible by num_attention_heads"
+                self.__class__.__name__
+                + ".validate_values() hidden_size must be divisible by num_attention_heads"
             )
             logging.error(error_message)
             raise ValueError(error_message)
@@ -1170,8 +1184,8 @@ class NeoXArgs(*BASE_CLASSES):
         if self.seq_length is not None:
             if not (self.max_position_embeddings >= self.seq_length):
                 error_message = (
-                    self.__class__.__name__ +
-                    ".validate_values() max_position_embeddings must be bigger or equal seq_length"
+                    self.__class__.__name__
+                    + ".validate_values() max_position_embeddings must be bigger or equal seq_length"
                 )
                 logging.error(error_message)
                 raise ValueError(error_message)
@@ -1179,30 +1193,33 @@ class NeoXArgs(*BASE_CLASSES):
 
         if not (self.min_lr <= self.lr):
             error_message = (
-                self.__class__.__name__ +
-                ".validate_values() min_lr must be smaller or equal lr")
+                self.__class__.__name__
+                + ".validate_values() min_lr must be smaller or equal lr"
+            )
             logging.error(error_message)
             raise ValueError(error_message)
             return False
 
-        if (self.save is not None and self.checkpoint_factor is None
-                and self.extra_save_iters is None):
+        if (
+            self.save is not None
+            and self.checkpoint_factor is None
+            and self.extra_save_iters is None
+        ):
             error_message = (
-                self.__class__.__name__ +
-                ".validate_values() checkpoint_factor or extra_save_iters must be defined if save is defined"
+                self.__class__.__name__
+                + ".validate_values() checkpoint_factor or extra_save_iters must be defined if save is defined"
             )
             logging.error(error_message)
             raise ValueError(error_message)
             return False
 
         # Parameters sharing does not work with torch DDP.
-        if (self.num_unique_layers is not None) and (self.num_layers
-                                                     is not None):
+        if (self.num_unique_layers is not None) and (self.num_layers is not None):
 
             if not (self.num_unique_layers <= self.num_layers):
                 error_message = (
-                    self.__class__.__name__ +
-                    ".validate_values() num-unique-layers must be smaller or equal num_layers"
+                    self.__class__.__name__
+                    + ".validate_values() num-unique-layers must be smaller or equal num_layers"
                 )
                 logging.error(error_message)
                 raise ValueError(error_message)
@@ -1210,8 +1227,8 @@ class NeoXArgs(*BASE_CLASSES):
 
             if not (self.num_layers % self.num_unique_layers == 0):
                 error_message = (
-                    self.__class__.__name__ +
-                    ".validate_values() num-layers should be divisible by num-unique-layers"
+                    self.__class__.__name__
+                    + ".validate_values() num-layers should be divisible by num-unique-layers"
                 )
                 logging.error(error_message)
                 raise ValueError(error_message)
@@ -1219,8 +1236,8 @@ class NeoXArgs(*BASE_CLASSES):
 
         if self.fp16_lm_cross_entropy and self.precision != "fp16":
             error_message = (
-                self.__class__.__name__ +
-                ".validate_values() lm cross entropy in fp16 only support in fp16 mode."
+                self.__class__.__name__
+                + ".validate_values() lm cross entropy in fp16 only support in fp16 mode."
             )
             logging.error(error_message)
             raise ValueError(error_message)
@@ -1228,7 +1245,8 @@ class NeoXArgs(*BASE_CLASSES):
 
         # assert that if one of train/test/valid_data_path are provided, data_path should not be
         has_separate_path = [
-            data_path is not None for data_path in [
+            data_path is not None
+            for data_path in [
                 self.train_data_paths,
                 self.valid_data_paths,
                 self.test_data_paths,
@@ -1237,20 +1255,24 @@ class NeoXArgs(*BASE_CLASSES):
         if all(has_separate_path):
             assert self.data_path is None, (
                 "Please provide *either* `data_path` or `train/valid/test_data_path` "
-                "in args ")
+                "in args "
+            )
 
         # assert that if one of train/test/valid_data_path are provided, all should be
         assert_error_mess = (
-            "One or more of train/valid/test data_path are not provided:\n\t")
-        assert_error_mess += "\n\t".join([
-            f"{name} data paths: {data_path}," for name, data_path in [
-                ["train", self.train_data_paths],
-                ["valid", self.valid_data_paths],
-                ["test", self.test_data_paths],
+            "One or more of train/valid/test data_path are not provided:\n\t"
+        )
+        assert_error_mess += "\n\t".join(
+            [
+                f"{name} data paths: {data_path},"
+                for name, data_path in [
+                    ["train", self.train_data_paths],
+                    ["valid", self.valid_data_paths],
+                    ["test", self.test_data_paths],
+                ]
             ]
-        ])
-        assert any(has_separate_path) == all(
-            has_separate_path), assert_error_mess
+        )
+        assert any(has_separate_path) == all(has_separate_path), assert_error_mess
 
         # assert that if train / valid / test data path(s) and weights are provided, that the paths and the weights should be equal length
         if self.train_data_paths is not None:
@@ -1276,8 +1298,9 @@ class NeoXArgs(*BASE_CLASSES):
 
             actual_type = type(actual_value)
             if actual_type != field_def.type:
-                if (actual_type == int and field_def.type == float
-                    ):  # floats should be able to be configured as ints
+                if (
+                    actual_type == int and field_def.type == float
+                ):  # floats should be able to be configured as ints
                     continue
 
                 # for typing.Literal (i.e a list of choices) - checks that actual value is in accepted values
@@ -1288,14 +1311,14 @@ class NeoXArgs(*BASE_CLASSES):
                     elif type(actual_value) == str:
                         # case insensitive checking
                         lowercase_accepted_values = [
-                            i.lower() for i in accepted_values
-                            if isinstance(i, str)
+                            i.lower() for i in accepted_values if isinstance(i, str)
                         ]
                         if actual_value.lower() in lowercase_accepted_values:
                             continue
                     logging.error(
-                        self.__class__.__name__ + ".validate_types() " +
-                        f"{field_name}: '{actual_value}' Not in accepted values: '{accepted_values}'"
+                        self.__class__.__name__
+                        + ".validate_types() "
+                        + f"{field_name}: '{actual_value}' Not in accepted values: '{accepted_values}'"
                     )
                     return False
                 elif field_def.type.__origin__ == Union:
@@ -1304,14 +1327,16 @@ class NeoXArgs(*BASE_CLASSES):
                         continue
                     else:
                         logging.error(
-                            self.__class__.__name__ + ".validate_types() " +
-                            f"{field_name}: '{actual_type}' not in {accepted_types}"
+                            self.__class__.__name__
+                            + ".validate_types() "
+                            + f"{field_name}: '{actual_type}' not in {accepted_types}"
                         )
                         return False
 
                 logging.error(
-                    self.__class__.__name__ + ".validate_types() " +
-                    f"{field_name}: '{actual_type}' instead of '{field_def.type}'"
+                    self.__class__.__name__
+                    + ".validate_types() "
+                    + f"{field_name}: '{actual_type}' instead of '{field_def.type}'"
                 )
                 return False
 
@@ -1319,29 +1344,37 @@ class NeoXArgs(*BASE_CLASSES):
         for field_name in ["optimizer", "scheduler"]:
             value = getattr(self, field_name)
             if isinstance(
-                    value, dict
+                value, dict
             ):  # dict is checked above, only fields are checked here
                 if "type" in value:
                     if not isinstance(value["type"], str):
                         logging.error(
-                            self.__class__.__name__ + ".validate_types() " +
-                            f"{field_name}: key 'type' must be a string")
+                            self.__class__.__name__
+                            + ".validate_types() "
+                            + f"{field_name}: key 'type' must be a string"
+                        )
                         return False
                 else:
-                    logging.error(self.__class__.__name__ +
-                                  ".validate_types() " +
-                                  f"{field_name}: must contain key 'type'")
+                    logging.error(
+                        self.__class__.__name__
+                        + ".validate_types() "
+                        + f"{field_name}: must contain key 'type'"
+                    )
                     return False
                 if "params" in value:
                     if not isinstance(value["params"], dict):
                         logging.error(
-                            self.__class__.__name__ + ".validate_types() " +
-                            f"{field_name}: key 'params' must be a dict")
+                            self.__class__.__name__
+                            + ".validate_types() "
+                            + f"{field_name}: key 'params' must be a dict"
+                        )
                         return False
                 else:
-                    logging.error(self.__class__.__name__ +
-                                  ".validate_types() " +
-                                  f"{field_name}: must contain key 'params'")
+                    logging.error(
+                        self.__class__.__name__
+                        + ".validate_types() "
+                        + f"{field_name}: must contain key 'params'"
+                    )
                     return False
 
         for field_name in ["fp16", "amp", "flops_profiler"]:
@@ -1349,8 +1382,10 @@ class NeoXArgs(*BASE_CLASSES):
             if isinstance(value, dict):
                 if not "enabled" in value:
                     error_message = (
-                        self.__class__.__name__ + ".validate_types() " +
-                        f"{field_name}: must contain key 'enabled'")
+                        self.__class__.__name__
+                        + ".validate_types() "
+                        + f"{field_name}: must contain key 'enabled'"
+                    )
                     logging.error(error_message)
                     return False
 

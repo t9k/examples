@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: DeepSpeedJob
 metadata:
-  name: neox-multi-nodes
+  name: neox-multi
 spec:
   config:
     slotsPerWorker: 4
@@ -17,11 +17,11 @@ spec:
         - "--data_path"
         - "/t9k/mnt/data/enwik8/enwik8_text_document"
   worker:
-    replicas: 2
+    replicas: 1
     template:
       spec:
         containers:
-          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230807
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230814
             imagePullPolicy: IfNotPresent
             name: worker
             resources:
