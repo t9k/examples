@@ -9,7 +9,7 @@
 - multi-gpu.yaml：单节点多 GPU 环境下训练。
 - multi-nodes.yaml：多节点多 GPU 环境下训练。
 - multi-nodes-rdma.yaml：多节点多 GPU 环境下训练，使用 IB 网络进行通信。
-- multi-gpu-checkpoint.yaml：单节点多 GPU 环境，添加 GPT Neox 训练的 checkpoint 参数。
+- multi-gpu-checkpoint.yaml：单节点多 GPU 环境，添加 checkpoint 参数。
 - multi-elastic.yaml：弹性训练，在训练过程中动态调节节点数量。注意：训练脚本需支持自动保存和读取 checkpoint，以免在节点重启时从头开始训练。
 - multi-nodes-autotune.yaml：多节点多 GPU 环境下，测试 autotuning 功能。
 
