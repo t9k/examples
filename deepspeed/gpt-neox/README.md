@@ -1,28 +1,30 @@
-# GPT NeoX
+# GPT-NeoX
 
-GPT-NeoX 是 EleutherAI 开发的一个 GPT 模型的项目。它目前的框架基于 NVIDIA 的 Megatron 语言模型，并结合了 DeepSpeed 技术。
+[GPT-NeoX](https://github.com/EleutherAI/gpt-neox) 是 EleutherAI 开发的一个在 GPU 上训练大型语言模型的项目。它目前的框架基于 NVIDIA 的 Megatron 语言模型，并结合了 DeepSpeed 技术以及一些新的优化技巧。
+
+本示例使用 DeepSpeedJob 在 TensorStack AI 计算平台上完成 GPT-NeoX 的训练。
 
 ## 镜像
 
 使用以下命令制作镜像：
 
 ```
-docker build -f Dockerfile . -t t9kpublic/deepspeed:23.02-gpt-neox
+docker build -f Dockerfile . -t t9kpublic/deepspeed-neox:23.02-0.10.0-230814
 ```
 
 该镜像以 `nvcr.io/nvidia/pytorch:23.02-py3` 为基础镜像，安装了：
 
 - deepspeed 包以及启动 deepspeed 命令所必须的包
-- GPT NeoX 训练脚本的依赖包
-- GPT NeoX 训练脚本（[GitHub](https://github.com/EleutherAI/gpt-neox)）
+- GPT-NeoX 训练脚本的依赖包
+- GPT-NeoX 训练脚本（[GitHub](https://github.com/EleutherAI/gpt-neox)）
 
-修改 GPT NeoX 训练脚本中的部分文件：
+并且修改了 GPT-NeoX 训练脚本中的部分文件：
 
 - 修改 `NeoXArgs` 类：
-  - 添加方法 `cosume_t9kdj_args`，用于在使用 DeepSpeedJob 启动训练时解析配置文件。（文件 [arguments.py](arguments.py) 397 行）
-  - 修改方法 `calculate_derived`，将其中 GPU 总数量的计算方法替换为从环境中读取 `WORLD_SIZE`。原因是 NeoXArgs 计算 GPU 的方法仅适用于 worker 0（deepspeed 的启动副本），其他 worker 在使用该方法计算的时候会只计算当前副本的 GPU，导致校验不通过。（文件 [arguments.py](arguments.py) 910 行）
+  - 添加方法 `cosume_t9kdj_args`，用于在使用 DeepSpeedJob 启动训练时解析配置文件。（文件 [arguments.py 397 行](arguments.py#L397)）
+  - 修改方法 `calculate_derived`，将其中 GPU 总数量的计算方法替换为从环境中读取 `WORLD_SIZE`。原因是 NeoXArgs 计算 GPU 的方法仅适用于 worker 0（deepspeed 的启动副本），其他 worker 在使用该方法计算的时候会只计算当前副本的 GPU，导致校验不通过。（文件 [arguments.py 910 行](arguments.py#L910)）
 - 修改启动脚本 `train.py`:
-  - 用 `NeoXArgs.consume_t9kdj_args()` 替换 `NeoXArgs.consume_neox_args()`。（文件 [train.py](train.py) 23 行）
+  - 用 `NeoXArgs.consume_t9kdj_args()` 替换 `NeoXArgs.consume_neox_args()`。（文件 [train.py 23 行](train.py#L23)）
 - 添加了更多配置文件到 `configs` 文件夹中，原项目的配置文件可以继续使用。
 
 ## 训练
@@ -44,7 +46,7 @@ docker build -f Dockerfile . -t t9kpublic/deepspeed:23.02-gpt-neox
 
 用户可以通过 DeepSpeedJob 的 `spec.config.run.pyhon` 字段设置训练启动命令。
 
-GPT NeoX 的启动命令格式为：`train.py <training-config> [flags]`，支持的 flag 包括：
+GPT-NeoX 的启动命令格式为：`train.py <training-config> [flags]`，支持的 flag 包括：
 
 - `--vocab_file`：指定 vocab 文件路径。
 - `--merge_file`：指定 merge 文件路径。
