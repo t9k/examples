@@ -2,7 +2,7 @@
 
 [Megatron-LM](https://github.com/NVIDIA/Megatron-LM) 用于高效训练基于 transformer 的大型语言模型（如 GPT、BERT 和 T5），支持模型并行（张量并行、序列并行和流水线并行）和多节点训练。[Megatron-DeepSpeed](https://github.com/microsoft/Megatron-DeepSpeed/tree/main) 是 Megatron-LM 的 DeepSpeed 版本，它为几个功能添加了额外的支持，包括 MoE 模型训练、课程学习、3D 并行等。
 
-本项目使用 DeepSpeedJob 在 TensorStack AI 计算平台上完成 Megatron-DeepSpeed 的 GPT 示例的训练。
+本示例使用 DeepSpeedJob 在 TensorStack AI 计算平台上完成 Megatron-DeepSpeed 的 GPT 示例的训练。
 
 ## 使用方法
 

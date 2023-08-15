@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir  accelerate \
+    pip install --no-cache-dir \
+    accelerate \
     datasets \
     sentencepiece \
     transformers \
