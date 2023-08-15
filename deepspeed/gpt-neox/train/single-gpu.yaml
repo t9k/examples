@@ -1,0 +1,41 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: neox-single
+spec:
+  config:
+    slotsPerWorker: 1
+    localRank: true
+    run:
+      python:
+        - "train.py"
+        - "configs/1-3B.yml"
+        - "--vocab_file"
+        - "/t9k/mnt/data/gpt2-vocab.json"
+        - "--merge_file"
+        - "/t9k/mnt/data/gpt2-merges.txt"
+        - "--data_path"
+        - "/t9k/mnt/data/enwik8/enwik8_text_document"
+  worker:
+    replicas: 1
+    template:
+      spec:
+        containers:
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230814
+            imagePullPolicy: IfNotPresent
+            name: worker
+            resources:
+              limits:
+                cpu: "2"
+                memory: 8Gi
+                nvidia.com/gpu: 1
+              requests:
+                cpu: "1"
+                memory: 4Gi
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: neox
