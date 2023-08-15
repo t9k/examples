@@ -12,5 +12,10 @@
 
 ## 示例列表
 
+* DeepSpeed 示例：
+    * [DeepSpeed-Chat](./deepspeed/chat/)
+    * [Megatron-DeepSpeed GPT](./deepspeed/megatron-gpt/)
+    * [GPT-NeoX](./deepspeed/gpt-neox/)
 * [ColossalAI 示例](./colossalai/)
+* [nanoGPT](./nanoGPT/)
 * [MLPerf Training benchmark](./mlperf/)
