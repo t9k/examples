@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir  \
 RUN git clone https://github.com/EleutherAI/gpt-neox /t9k/workspace/gpt-neox
 COPY arguments.py /t9k/workspace/gpt-neox/megatron/neox_arguments/arguments.py
 COPY train.py /t9k/workspace/gpt-neox/train.py
-COPY configs/* /t9k/workspace/gpt-neox/configs/
+COPY configs/t9k /t9k/workspace/gpt-neox/configs/t9k
 
 WORKDIR /t9k/workspace/gpt-neox
 

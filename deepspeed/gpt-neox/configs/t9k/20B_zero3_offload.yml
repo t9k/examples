@@ -23,26 +23,28 @@
   "output_layer_init_method": "wang_init",
 
   # optimizer settings
-  "optimizer":
-    {
-      "type": "CPU_Adam",
-      "params": { "lr": 0.97e-4, "betas": [0.9, 0.95], "eps": 1.0e-8 },
-    },
+  "optimizer": {
+    "type": "Adam",
+    "params": {
+      "lr": 0.97e-4,
+      "betas": [0.9, 0.95],
+      "eps": 1.0e-8,
+      }
+      },
 
   "min_lr": 0.97e-5,
 
   # for all zero_optimization options, see https://www.deepspeed.ai/docs/config-json/#zero-optimizations-for-fp16-training
-  "zero_optimization":
-    {
-      "stage": 3,
-      "offload_optimizer": { "device": "cpu" },
-      "allgather_partitions": True,
-      "allgather_bucket_size": 1260000000,
-      "overlap_comm": True,
-      "reduce_scatter": True,
-      "reduce_bucket_size": 1260000000,
-      "contiguous_gradients": True,
-    },
+  "zero_optimization": {
+  "stage": 3,
+  "offload_optimizer": { "device": "cpu" },
+  "allgather_partitions": True,
+  "allgather_bucket_size": 1260000000,
+  "overlap_comm": True,
+  "reduce_scatter": True,
+  "reduce_bucket_size": 1260000000,
+  "contiguous_gradients": True,
+  },
 
   # batch / data settings (assuming 96 GPUs)
   "train_micro_batch_size_per_gpu": 4,
@@ -63,15 +65,14 @@
   "attention_dropout": 0,
 
   # precision settings
-  "fp16":
-    {
-      "fp16": true,
-      "enabled": true,
-      "loss_scale": 0,
-      "loss_scale_window": 1000,
-      "initial_scale_power": 12,
-      "hysteresis": 2,
-      "min_loss_scale": 1,
+  "fp16": {
+    "fp16": true,
+    "enabled": true,
+    "loss_scale": 0,
+    "loss_scale_window": 1000,
+    "initial_scale_power": 12,
+    "hysteresis": 2,
+    "min_loss_scale": 1
     },
 
   # misc. training settings
@@ -94,4 +95,5 @@
   "tokenizer_type": "HFTokenizer",
   "tensorboard-dir": "./tensorboard",
   "log_dir": "./logs",
+
 }
