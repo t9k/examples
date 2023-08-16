@@ -9,7 +9,7 @@ spec:
     run:
       python:
         - "train.py"
-        - "configs/1-3B.yml"
+        - "configs/t9k/1-3B.yml"
         - "--vocab_file"
         - "/t9k/mnt/data/gpt2-vocab.json"
         - "--merge_file"

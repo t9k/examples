@@ -16,7 +16,7 @@ spec:
     run:
       python:
         - "train.py"
-        - "configs/1-3B_checkpoint.yml"
+        - "configs/t9k/1-3B_checkpoint.yml"
         - "--vocab_file"
         - "/t9k/mnt/data/gpt2-vocab.json"
         - "--merge_file"
@@ -34,6 +34,9 @@ spec:
           - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230814
             imagePullPolicy: IfNotPresent
             name: worker
+            securityContext:
+              capabilities:
+                add: ["IPC_LOCK"]
             resources:
               limits:
                 cpu: "4"

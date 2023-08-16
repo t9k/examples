@@ -10,7 +10,7 @@ spec:
     run:
       python:
         - "train.py"
-        - "configs/125M_autotune.yml"
+        - "configs/t9k/125M_autotune.yml"
         - "--vocab_file"
         - "/t9k/mnt/data/gpt2-vocab.json"
         - "--merge_file"
