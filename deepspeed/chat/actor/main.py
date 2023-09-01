@@ -14,7 +14,6 @@ from torch.utils.data.distributed import DistributedSampler
 
 from transformers import (
     AutoModelForCausalLM,
-    AutoTokenizer,
     SchedulerType,
     default_data_collator,
     get_scheduler,
@@ -26,10 +25,11 @@ from deepspeed.ops.adam import DeepSpeedCPUAdam, FusedAdam
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir)))
 from utils.data.data_utils import create_prompt_dataset
-from utils.utils import print_rank_0, to_device, save_hf_format, set_random_seed, get_all_reduce_mean, get_optimizer_grouped_parameters, save_zero_three_model
+from utils.utils import print_rank_0, to_device, save_hf_format, set_random_seed, get_all_reduce_mean, get_optimizer_grouped_parameters, save_zero_three_model, load_hf_tokenizer
 from utils.ds_utils import get_train_ds_config
-from utils.module.lora import convert_linear_layer_to_lora, convert_lora_to_linear_layer, only_optimize_lora_parameters
+from utils.module.lora import convert_linear_layer_to_lora, convert_lora_to_linear_layer, only_optimize_lora_parameters, make_model_gradient_checkpointing_compatible
 from utils.model.model_utils import create_hf_model
+from utils.perf import print_throughput
 
 
 def parse_args():
@@ -162,6 +162,13 @@ def parse_args():
     parser.add_argument('--only_optimize_lora',
                         action='store_true',
                         help='Only optimize the LoRA parameters.')
+    parser.add_argument(
+        "--lora_learning_rate",
+        type=float,
+        default=5e-4,
+        help=
+        "Initial LoRA learning rate (after the potential warmup period) to use."
+    )
     ## Tensorboard logging
     parser.add_argument('--enable_tensorboard',
                         action='store_true',
@@ -175,12 +182,6 @@ def parse_args():
                         help='Prints loss at each step.')
     parser = deepspeed.add_config_arguments(parser)
     args = parser.parse_args()
-
-    # Validate settings
-    if args.gradient_checkpointing and args.lora_dim > 0:
-        assert (
-            not args.only_optimize_lora
-        ), "--gradient_checkpointing and --only_optimize_lora cannot be enabled at the same time."
 
     return args
 
@@ -215,11 +216,8 @@ def main():
 
     torch.distributed.barrier()
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name_or_path,
-                                              fast_tokenizer=True)
-    tokenizer.pad_token = tokenizer.eos_token
-    # make sure tokenizer is right pad in our logic
-    tokenizer.padding_side = 'right'
+    # load_hf_tokenizer will get the correct tokenizer and set padding tokens based on the model family
+    tokenizer = load_hf_tokenizer(args.model_name_or_path, fast_tokenizer=True)
     model = create_hf_model(AutoModelForCausalLM,
                             args.model_name_or_path,
                             tokenizer,
@@ -231,6 +229,7 @@ def main():
                                              args.lora_dim)
         if args.only_optimize_lora:
             model = only_optimize_lora_parameters(model)
+            model = make_model_gradient_checkpointing_compatible(model)
 
     # Prepare the data
     train_phase = 1
@@ -283,7 +282,7 @@ def main():
 
     # Split weights in two groups, one with weight decay and the other not.
     optimizer_grouped_parameters = get_optimizer_grouped_parameters(
-        model, args.weight_decay)
+        model, args.weight_decay, args.lora_learning_rate)
 
     AdamOptimizer = DeepSpeedCPUAdam if args.offload else FusedAdam
     optimizer = AdamOptimizer(optimizer_grouped_parameters,
@@ -323,7 +322,9 @@ def main():
             f"Beginning of Epoch {epoch+1}/{args.num_train_epochs}, Total Micro Batches {len(train_dataloader)}",
             args.global_rank)
         model.train()
+        import time
         for step, batch in enumerate(train_dataloader):
+            start = time.time()
             batch = to_device(batch, device)
             outputs = model(**batch, use_cache=False)
             loss = outputs.loss
@@ -333,6 +334,10 @@ def main():
                 )
             model.backward(loss)
             model.step()
+            end = time.time()
+            if torch.distributed.get_rank() == 0:
+                print_throughput(model.model, args, end - start,
+                                 args.global_rank)
 
         # Evaluate perplexity on the validation set.
         print_rank_0(

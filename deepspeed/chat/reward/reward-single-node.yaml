@@ -5,30 +5,36 @@ metadata:
 spec:
   scheduler:
     t9kScheduler:
-      queue: default
+      queue: mlperf
       priority: 50
   config:
     slotsPerWorker: 4
     run:
       python: [
         "./examples/deepspeed/chat/reward/main.py",
-        "--data_path", "./datasets/Dahoas/rm-static", "./datasets/Dahoas/full-hh-rlhf", "./datasets/Dahoas/synthetic-instruct-gptj-pairwise",
+        "--data_path", "./datasets/Dahoas/rm-static", "./datasets/Dahoas/full-hh-rlhf", "./datasets/Dahoas/synthetic-instruct-gptj-pairwise", "./datasets/yitingxie/rlhf-reward-datasets",
         "--data_split", "2,4,4",
-        "--model_name_or_path", "./models/opt-350m",
-        "--num_padding_at_beginning", "1",
+        "--model_name_or_path", "./models/Llama-2-7b-hf",
         "--per_device_train_batch_size", "8",
         "--per_device_eval_batch_size", "8",
         "--max_seq_len", "512",
-        "--learning_rate", "5e-5",
+        "--learning_rate", "9.65e-6",
         "--weight_decay", "0.1",
+        "--num_padding_at_beginning", "0",
         "--num_train_epochs", "1",
         "--gradient_accumulation_steps", "1",
         "--lr_scheduler_type", "cosine",
         "--num_warmup_steps", "0",
         "--seed", "1234",
-        "--zero_stage", "0",
+        "--gradient_checkpointing",
+        "--zero_stage", "2",
         "--deepspeed",
-        "--output_dir", "./output/single-node/reward-models/350m"
+        "--offload",
+        "--lora_dim", "128",
+        "--lora_module_name", "layers.",
+        "--output_dir", "./output/single-node/reward-models/llama2-7b",
+        "--enable_tensorboard",
+        "--tensorboard_path", "./output/single-node/reward-logs/llama2-7b"
       ]
   worker:
     replicas: 1
@@ -37,7 +43,7 @@ spec:
         containers:
           - name: worker
             workingDir: /t9k/mnt/
-            image: t9kpublic/deepspeed:chat-0.9.0
+            image: tsz.io/xyx/deepspeed:chat-0.10.2-2
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]
@@ -58,7 +64,7 @@ spec:
         volumes:
           - name: data
             persistentVolumeClaim:
-              claimName: dschat
+              claimName: gpt
           - name: dshm
             emptyDir:
               medium: Memory
