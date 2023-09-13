@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     transformers>=4.31.0 \
     datasets>=2.12.0 \
     accelerate>=0.21.0 \
-    peft==0.4.0 \
+    peft>=0.4.0 \
     git+https://hub.nuaa.cf/huggingface/trl.git \
     scipy \
     sentencepiece \

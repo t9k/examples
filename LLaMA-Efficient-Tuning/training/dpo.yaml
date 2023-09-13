@@ -1,25 +1,18 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: DeepSpeedJob
 metadata:
-  name: baichuan2-dpo-single-node
+  name: baichuan2-dpo
 spec:
-  # runMode:
-  #   debug:
-  #     enable: true
-  #     replicaSpecs:
-  #       - type: worker
-  #         skipInitContainer: true
-  #         command: ["sleep", "inf"]
   scheduler:
     t9kScheduler:
-      queue: mlperf
+      queue: default
       priority: 50
   config:
     slotsPerWorker: 4
     run:
       python:
         - ./src/train_bash.py
-        - "--deepspeed=/t9k/mnt/ds-config.json"
+        - "--deepspeed=/t9k/mnt/examples/LLaMA-Efficient-Tuning/ds-config.json"
         - "--stage=dpo"
         - "--model_name_or_path=/t9k/mnt/models/Baichuan2-7B-Base"
         - "--do_train"
@@ -34,7 +27,7 @@ spec:
         - "--gradient_accumulation_steps=4"
         - "--lr_scheduler_type=cosine"
         - "--logging_steps=10"
-        - "--save_steps=1000"
+        - "--save_steps=400"
         - "--learning_rate=1e-5"
         - "--num_train_epochs=1.0"
         - "--plot_loss"
@@ -67,7 +60,7 @@ spec:
         volumes:
           - name: data
             persistentVolumeClaim:
-              claimName: llama
+              claimName: llama-efficient-tuning
           - name: dshm
             emptyDir:
               medium: Memory
