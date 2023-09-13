@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: DeepSpeedJob
 metadata:
-  name: baichuan2-dpo-single-node
+  name: baichuan2-rm-single-node
 spec:
   # runMode:
   #   debug:
@@ -20,7 +20,7 @@ spec:
       python:
         - ./src/train_bash.py
         - "--deepspeed=/t9k/mnt/ds-config.json"
-        - "--stage=dpo"
+        - "--stage=rm"
         - "--model_name_or_path=/t9k/mnt/models/Baichuan2-7B-Base"
         - "--do_train"
         - "--dataset=comparison_gpt4_zh"
@@ -29,13 +29,13 @@ spec:
         - "--lora_target=W_pack"
         - "--resume_lora_training=False"
         - "--checkpoint_dir=/t9k/mnt/output/sft-ckpts/baichuan2/7b/"
-        - "--output_dir=/t9k/mnt/output/dpo-ckpts/baichuan2/7b"
+        - "--output_dir=/t9k/mnt/output/rm-ckpts/baichuan2/7b/"
         - "--per_device_train_batch_size=2"
         - "--gradient_accumulation_steps=4"
         - "--lr_scheduler_type=cosine"
         - "--logging_steps=10"
-        - "--save_steps=1000"
-        - "--learning_rate=1e-5"
+        - "--save_steps=3000"
+        - "--learning_rate=1e-6"
         - "--num_train_epochs=1.0"
         - "--plot_loss"
         - "--fp16"
