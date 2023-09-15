@@ -22,7 +22,7 @@ TensorStack AI 计算平台所在的集群需要：
 ```shell
 cd ~
 git clone https://github.com/t9k/examples.git
-cd examples/nanoGPT
+cd examples/nanogpt
 ```
 
 #### 数据集
@@ -64,7 +64,7 @@ kubectl create -f job_torch1.yaml
 ```shell
 cd ~
 git clone https://github.com/t9k/examples.git
-cd examples/nanoGPT
+cd examples/nanogpt
 ```
 
 #### 数据集

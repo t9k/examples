@@ -22,9 +22,9 @@ spec:
             - name: pytorch
               args:
                 - train.py
-                - config/train_gpt2_torch1.py
-              workingDir: /t9k/mnt/examples/nanoGPT/
-              image: t9kpublic/nanogpt:torch1-test-v1
+                - config/train_gpt2_test_small.py
+              workingDir: /t9k/mnt/examples/nanogpt/
+              image: t9kpublic/nanogpt:test-v1
               securityContext:
                 capabilities:
                   add: [ "IPC_LOCK" ]

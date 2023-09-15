@@ -14,7 +14,7 @@ spec:
     rdzvBackend: c10d
   replicaSpecs:
     - type: node
-      replicas: 2
+      replicas: 1
       restartPolicy: ExitCode
       template:
         spec:
@@ -22,18 +22,9 @@ spec:
             - name: pytorch
               args:
                 - train.py
-                - config/train_gpt2.py
-              workingDir: /t9k/mnt/examples/nanoGPT/
-              image: t9kpublic/nanogpt:test-v1
-              env:
-                - name: NCCL_IB_HCA  # configure IB network
-                  value: 'mlx5'
-                - name: NCCL_IB_DISABLE
-                  value: '0'
-                - name: NCCL_DEBUG
-                  value: 'INFO'
-                - name: NCCL_DEBUG_SUBSYS
-                  value: 'INIT,ENV,NET,TUNING'
+                - config/train_gpt2_torch1.py
+              workingDir: /t9k/mnt/examples/nanogpt/
+              image: t9kpublic/nanogpt:torch1-test-v1
               securityContext:
                 capabilities:
                   add: [ "IPC_LOCK" ]
@@ -42,12 +33,10 @@ spec:
                   cpu: 16
                   memory: 256Gi
                   nvidia.com/gpu: 8
-                  rdma/rdma_shared_device_a: 1  # request RDMA networking card
                 limits:
                   cpu: 32
                   memory: 512Gi
                   nvidia.com/gpu: 8
-                  rdma/rdma_shared_device_a: 1
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data
