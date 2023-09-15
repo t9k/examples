@@ -25,6 +25,12 @@
    "init_method": "small_init",
    "output_layer_init_method": "wang_init",
 
+   "tensorboard": {
+     "enabled": true,
+     "output_path": "/t9k/mnt/tensorboard",
+     "job_name": "1-3B.ds"
+   },
+
    # optimizer settings
    "optimizer": {
      "type": "Adam",

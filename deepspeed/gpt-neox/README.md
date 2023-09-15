@@ -25,6 +25,7 @@ docker build -f Dockerfile . -t t9kpublic/deepspeed-neox:23.02-0.10.0-230814
   - 修改方法 `calculate_derived`，将其中 GPU 总数量的计算方法替换为从环境中读取 `WORLD_SIZE`。原因是 NeoXArgs 计算 GPU 的方法仅适用于 worker 0（deepspeed 的启动副本），其他 worker 在使用该方法计算的时候会只计算当前副本的 GPU，导致校验不通过。（文件 [arguments.py 910 行](arguments.py#L910)）
 - 修改启动脚本 `train.py`:
   - 用 `NeoXArgs.consume_t9kdj_args()` 替换 `NeoXArgs.consume_neox_args()`。（文件 [train.py 23 行](train.py#L23)）
+- 修改启动脚本 `corpora.py` 中 enwik8 的下载地址，GPT-NeoX 原代码中的地址已失效。除了 enwik8 以外的数据集地址也失效了，请勿使用。（文件 [corpora.py 293 行](corpora.py#L293)）
 - 添加了更多配置文件到 `configs` 文件夹中，原项目的配置文件可以继续使用。
 
 ## 训练

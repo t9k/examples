@@ -24,7 +24,7 @@ spec:
     template:
       spec:
         containers:
-          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230814
+          - image: t9kpublic/deepspeed-neox:23.02-0.10.0-230914
             imagePullPolicy: IfNotPresent
             name: worker
             securityContext:
