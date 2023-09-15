@@ -23,7 +23,7 @@ spec:
               args:
                 - train.py
                 - config/train_gpt2.py
-              workingDir: /t9k/mnt/examples/nanoGPT/
+              workingDir: /t9k/mnt/examples/nanogpt/
               image: t9kpublic/nanogpt:test-v1
               securityContext:
                 capabilities:
