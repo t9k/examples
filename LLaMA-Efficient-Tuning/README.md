@@ -32,7 +32,7 @@ git clone https://github.com/t9k/examples.git
 使用 `sft.yaml` 创建 DeepSpeedJob 以执行训练：
 
 ```shell
-cd ~/examples/LLaMA-Efficient-Tuning/training
+cd ~/examples/llama-efficient-tuning/training
 kubectl create -f sft.yaml
 ```
 
@@ -71,17 +71,18 @@ kubectl create -f dpo.yaml
 
 ## 命令行聊天
 
-安装必要的依赖，然后执行 `LLaMA-Efficient-Tuning/src/cli_demo.py` 脚本以开始聊天：
+安装必要的依赖，然后执行 `src/cli_demo.py` 脚本以开始聊天：
 
 ```shell
-pip install ...
+cd ~/LLaMA-Efficient-Tuning
+pip install trl xformers
 
 # 加载 SFT 模型
-python src/cli_demo.py --model_name_or_path models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/
+python src/cli_demo.py --model_name_or_path /t9k/mnt/models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/
 
 # 加载 PPO 模型
-python src/cli_demo.py --model_name_or_path models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/,/t9k/mnt/output/ppo-ckpts/baichuan2/7b/
+python src/cli_demo.py --model_name_or_path /t9k/mnt/models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/,/t9k/mnt/output/ppo-ckpts/baichuan2/7b/
 
 # 加载 DPO 模型
-python src/cli_demo.py --model_name_or_path models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/,/t9k/mnt/output/dpo-ckpts/baichuan2/7b/
+python src/cli_demo.py --model_name_or_path /t9k/mnt/models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/,/t9k/mnt/output/dpo-ckpts/baichuan2/7b/
 ```
