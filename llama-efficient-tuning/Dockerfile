@@ -1,7 +1,7 @@
 FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 
 RUN apt-get update && \
-  apt-get install -yq --no-install-recommends openssh-server pdsh && \
+  apt-get install -yq --no-install-recommends openssh-server pdsh git && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     datasets>=2.12.0 \
     accelerate>=0.21.0 \
     peft>=0.4.0 \
-    git+https://hub.nuaa.cf/huggingface/trl.git \
+    git+https://ghproxy.com/https://github.com/huggingface/trl.git \
     scipy \
     sentencepiece \
     tiktoken \
@@ -26,5 +26,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     fastapi==0.95.1 \
     sse-starlette \
     matplotlib
+
+RUN mkdir /run/sshd
+RUN chown root:root /usr/lib
 
 WORKDIR /t9k/mnt

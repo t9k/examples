@@ -1,0 +1,40 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: SimpleMLService
+metadata:
+  name: fastchat-openai-baichuan2-sft
+spec:
+  replicas: 1
+  scheduler:
+    t9kScheduler:
+      queue: default
+  storage:
+    pvc:
+      name: llama-efficient-tuning
+      subPath: output/sft-models/baichuan2/7b
+      containerPath: /workspace/baichuan2-sft
+  service:
+    type: ClusterIP
+    ports:
+    - targetPort: 8000
+      port: 8000
+  custom:
+    spec:
+      containers:
+      - name: server
+        image: t9kpublic/fastchat-openai:20230918
+        args:
+          - "./baichuan2-sft"
+        ports:
+        - containerPort: 8000
+        resources:
+          limits:
+            cpu: 4
+            memory: 64Gi
+            nvidia.com/gpu: 1
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory

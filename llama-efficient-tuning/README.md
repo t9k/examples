@@ -43,7 +43,7 @@ kubectl create -f sft.yaml
 * 队列名称为 default（第 8 行）。
 * 输出路径为 `/t9k/mnt/output/sft-ckpts/baichuan2/7b`（第 23 行）。
 * 训练占用显存 ~35GB，减小 `--per_device_train_batch_size`（第 25 行）可以减小显存占用，以防止 OOM。
-* 镜像 `t9kpublic/llama-efficient-tuning:20230912`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
+* 镜像 `t9kpublic/llama-efficient-tuning:20230918`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
 
 ### RM（训练奖励模型）
 
@@ -86,3 +86,7 @@ python src/cli_demo.py --model_name_or_path /t9k/mnt/models/Baichuan2-7B-Base --
 # 加载 DPO 模型
 python src/cli_demo.py --model_name_or_path /t9k/mnt/models/Baichuan2-7B-Base --template default --finetuning_type lora --checkpoint_dir /t9k/mnt/output/sft-ckpts/baichuan2/7b/,/t9k/mnt/output/dpo-ckpts/baichuan2/7b/
 ```
+
+## 评估
+
+## 部署为服务
