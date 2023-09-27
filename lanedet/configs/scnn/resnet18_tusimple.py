@@ -67,23 +67,23 @@ val_process = [
     dict(type='ToTensor', keys=['img']),
 ] 
 
-dataset_path = './data/tusimple'
+dataset_path = './data/TUSimple'
 dataset = dict(
     train=dict(
         type='TuSimple',
-        data_root=dataset_path,
+        data_root=dataset_path + '/train_set',
         split='trainval',
         processes=train_process,
     ),
     val=dict(
         type='TuSimple',
-        data_root=dataset_path,
+        data_root=dataset_path + '/test_set',
         split='test',
         processes=val_process,
     ),
     test=dict(
         type='TuSimple',
-        data_root=dataset_path,
+        data_root=dataset_path + '/test_set',
         split='test',
         processes=val_process,
     )
@@ -94,7 +94,7 @@ workers = 12
 num_classes = 6 + 1
 ignore_label = 255
 log_interval = 100
-eval_ep = 1
-save_ep = epochs
-test_json_file='data/tusimple/test_label.json'
+eval_ep = 5
+save_ep = 10
+test_json_file='data/TUSimple/test_label.json'
 lr_update_by_epoch = False

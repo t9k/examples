@@ -22,7 +22,12 @@ SPLIT_FILES = {
 class TuSimple(BaseDataset):
     def __init__(self, data_root, split, processes=None, cfg=None):
         super().__init__(data_root, split, processes, cfg)
-        self.anno_files = SPLIT_FILES[split] 
+        self.anno_files = []
+        if split == 'test':
+            self.anno_files = [cfg.test_json_file]
+        else:
+            for anno_file in SPLIT_FILES[split]:
+                self.anno_files.append(osp.join(self.data_root, anno_file))
         self.load_annotations()
         self.h_samples = list(range(160, 720, 10))
 
@@ -31,7 +36,6 @@ class TuSimple(BaseDataset):
         self.data_infos = []
         max_lanes = 0
         for anno_file in self.anno_files:
-            anno_file = osp.join(self.data_root, anno_file)
             with open(anno_file, 'r') as anno_obj:
                 lines = anno_obj.readlines()
             for line in lines:

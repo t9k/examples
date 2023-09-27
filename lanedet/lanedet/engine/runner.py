@@ -14,7 +14,7 @@ from lanedet.datasets import build_dataloader
 from lanedet.utils.recorder import build_recorder
 from lanedet.utils.net_utils import save_model, load_network
 from mmcv.parallel import MMDataParallel 
-
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 class Runner(object):
     def __init__(self, cfg):
@@ -23,12 +23,10 @@ class Runner(object):
         random.seed(cfg.seed)
         self.cfg = cfg
         self.recorder = build_recorder(self.cfg)
+        
         self.net = build_net(self.cfg)
-        # self.net.to(torch.device('cuda'))
-        # self.net = torch.nn.parallel.DataParallel(
-        #         self.net, device_ids = range(self.cfg.gpus)).cuda()
-        self.net = MMDataParallel(
-                self.net, device_ids = range(self.cfg.gpus)).cuda()
+        self.net = DDP(self.net.to(cfg.device_id), device_ids=[cfg.device_id])
+    
         self.recorder.logger.info('Network: \n' + str(self.net))
         self.resume()
         self.optimizer = build_optimizer(self.cfg, self.net)
@@ -47,11 +45,11 @@ class Runner(object):
         load_network(self.net, self.cfg.load_from,
                 finetune_from=self.cfg.finetune_from, logger=self.recorder.logger)
 
-    def to_cuda(self, batch):
+    def to_device(self, batch):
         for k in batch:
             if not isinstance(k, torch.Tensor):
                 continue
-            batch[k] = batch[k].cuda()
+            batch[k] = batch[k].to(self.cfg.device_id)
         return batch
     
     def train_epoch(self, epoch, train_loader):
@@ -63,7 +61,7 @@ class Runner(object):
                 break
             date_time = time.time() - end
             self.recorder.step += 1
-            data = self.to_cuda(data)
+            data = self.to_device(data)
             output = self.net(data)
             self.optimizer.zero_grad()
             loss = output['loss']
@@ -92,9 +90,9 @@ class Runner(object):
         for epoch in range(self.cfg.epochs):
             self.recorder.epoch = epoch
             self.train_epoch(epoch, train_loader)
-            if (epoch + 1) % self.cfg.save_ep == 0 or epoch == self.cfg.epochs - 1:
+            if self.cfg.rank == 0 and ((epoch + 1) % self.cfg.save_ep == 0 or epoch == self.cfg.epochs - 1):
                 self.save_ckpt()
-            if (epoch + 1) % self.cfg.eval_ep == 0 or epoch == self.cfg.epochs - 1:
+            if self.cfg.rank == 0 and ((epoch + 1) % self.cfg.eval_ep == 0 or epoch == self.cfg.epochs - 1):
                 self.validate()
             if self.recorder.step >= self.cfg.total_iter:
                 break
@@ -107,7 +105,7 @@ class Runner(object):
         self.net.eval()
         predictions = []
         for i, data in enumerate(tqdm(self.val_loader, desc=f'Validate')):
-            data = self.to_cuda(data)
+            data = self.to_device(data)
             with torch.no_grad():
                 output = self.net(data)
                 output = self.net.module.get_lanes(output)

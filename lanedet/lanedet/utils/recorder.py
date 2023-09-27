@@ -49,7 +49,6 @@ class Recorder(object):
         self.logger.info('Config: \n' + cfg.text)
 
         self.save_cfg(cfg)
-        self.cp_projects(self.work_dir)
 
         # scalars
         self.epoch = 0
@@ -64,21 +63,6 @@ class Recorder(object):
         cfg_path = os.path.join(self.work_dir, 'config.py')
         with open(cfg_path, 'w') as cfg_file:
             cfg_file.write(cfg.text)
-
-    def cp_projects(self, to_path):
-       with open('./.gitignore','r') as fp:
-           ign = fp.read()
-       ign += '\n.git'
-       spec = pathspec.PathSpec.from_lines(pathspec.patterns.GitWildMatchPattern, ign.splitlines())
-       all_files = {os.path.join(root,name) for root,dirs,files in os.walk('./') for name in files}
-       matches = spec.match_files(all_files)
-       matches = set(matches)
-       to_cp_files = all_files - matches
-       for f in to_cp_files:
-           dirs = os.path.join(to_path,'code',os.path.split(f[2:])[0])
-           if not os.path.exists(dirs):
-               os.makedirs(dirs)
-           os.system('cp %s %s'%(f,os.path.join(to_path,'code',f[2:])))
 
     def get_work_dir(self):
         now = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')

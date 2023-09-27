@@ -52,7 +52,7 @@ class Alaug(object):
             for t in transforms:
                 parmas = {
                     key: value
-                    for key, value in t.items() if key is not 'type'
+                    for key, value in t.items() if key != 'type'
                 }
                 choice = getattr(al, t['type'])(**parmas)
                 choices.append(choice)
@@ -60,7 +60,7 @@ class Alaug(object):
 
         parmas = {
             key: value
-            for key, value in transform.items() if key is not 'type'
+            for key, value in transform.items() if key != 'type'
         }
         return getattr(al, transform['type'])(**parmas)
 

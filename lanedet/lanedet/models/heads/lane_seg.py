@@ -71,10 +71,10 @@ class LaneSeg(nn.Module):
     def loss(self, output, batch):
         weights = torch.ones(self.cfg.num_classes)
         weights[0] = self.cfg.bg_weight
-        weights = weights.cuda()
+        weights = weights.to(self.cfg.device_id)
         criterion = torch.nn.NLLLoss(ignore_index=self.cfg.ignore_label,
-                                          weight=weights).cuda()
-        criterion_exist = torch.nn.BCEWithLogitsLoss().cuda()
+                                          weight=weights).to(self.cfg.device_id)
+        criterion_exist = torch.nn.BCEWithLogitsLoss().to(self.cfg.device_id)
         loss = 0.
         loss_stats = {}
         seg_loss = criterion(F.log_softmax(

@@ -8,22 +8,26 @@ import random
 from lanedet.utils.config import Config
 from lanedet.engine.runner import Runner 
 from lanedet.datasets import build_dataloader
+import torch.distributed as dist
 
 
 def main():
     args = parse_args()
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(str(gpu) for gpu in args.gpus)
-
     cfg = Config.fromfile(args.config)
-    cfg.gpus = len(args.gpus)
 
     cfg.load_from = args.load_from
     cfg.finetune_from = args.finetune_from
     cfg.view = args.view
     cfg.seed = args.seed
 
-    cfg.work_dirs = args.work_dirs + '/' + cfg.dataset.train.type
+    dist.init_process_group("nccl")
+    rank = dist.get_rank()
+    cfg.device_id = rank % torch.cuda.device_count()
+    cfg.rank = rank
+    cfg.total_iter = cfg.total_iter // dist.get_world_size() + cfg.epochs
 
+    cfg.work_dirs = args.work_dirs + '/' + cfg.dataset.train.type + '/' + str(rank)
+    
     cudnn.benchmark = True
     # cudnn.fastest = True
 
