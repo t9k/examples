@@ -37,7 +37,7 @@ spec:
       spec:
         containers:
           - name: worker
-            workingDir: /t9k/mnt/llama-efficient-tuning
+            workingDir: /t9k/mnt/LLaMA-Efficient-Tuning
             image: t9kpublic/llama-efficient-tuning:20230918
             securityContext:
               capabilities:
