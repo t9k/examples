@@ -1,38 +1,28 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: DeepSpeedJob
 metadata:
-  name: baichuan2-ppo
+  name: baichuan2-evaluation-sft
 spec:
   scheduler:
     t9kScheduler:
       queue: default
       priority: 50
   config:
-    slotsPerWorker: 4
+    slotsPerWorker: 1
     run:
       python:
         - ./src/train_bash.py
-        # - "--deepspeed=/t9k/mnt/examples/llama-efficient-tuning/ds-config.json"
-        - "--stage=ppo"
+        - "--stage=sft"
         - "--model_name_or_path=/t9k/mnt/models/Baichuan2-7B-Base"
-        - "--do_train"
-        - "--dataset=alpaca_gpt4_zh"
+        - "--do_eval"
+        - "--dataset=alpaca_zh"
         - "--template=default"
         - "--finetuning_type=lora"
-        - "--lora_target=W_pack"
-        - "--resume_lora_training=False"
-        - "--checkpoint_dir=/t9k/mnt/output/sft-ckpts/baichuan2/7b/"
-        - "--reward_model=/t9k/mnt/output/rm-ckpts/baichuan2/7b/"
-        - "--output_dir=/t9k/mnt/output/ppo-ckpts/baichuan2/7b"
-        - "--per_device_train_batch_size=2"
-        - "--gradient_accumulation_steps=4"
-        - "--lr_scheduler_type=cosine"
-        - "--logging_steps=10"
-        - "--save_steps=600"
-        - "--learning_rate=1e-5"
-        - "--num_train_epochs=1.0"
-        - "--plot_loss"
-        - "--bf16"
+        - "--checkpoint_dir=/t9k/mnt/output/sft-ckpts/baichuan2/7b"
+        - "--output_dir=/t9k/mnt/output/sft-eval/baichuan2/7b"
+        - "--per_device_eval_batch_size=8"
+        - "--max_samples=100"
+        - "--predict_with_generate"
   worker:
     replicas: 1
     template:
@@ -46,13 +36,13 @@ spec:
                 add: [ "IPC_LOCK" ]
             resources:
               requests:
-                cpu: 8
-                memory: 128Gi
-                nvidia.com/gpu: 4
+                cpu: 2
+                memory: 32Gi
+                nvidia.com/gpu: 1
               limits:
-                cpu: 16
-                memory: 256Gi
-                nvidia.com/gpu: 4
+                cpu: 4
+                memory: 64Gi
+                nvidia.com/gpu: 1
             volumeMounts:
               - mountPath: /t9k/mnt
                 name: data

@@ -12,7 +12,7 @@ spec:
     run:
       python:
         - ./src/train_bash.py
-        - "--deepspeed=/t9k/mnt/examples/LLaMA-Efficient-Tuning/ds-config.json"
+        - "--deepspeed=/t9k/mnt/examples/llama-efficient-tuning/ds-config.json"
         - "--stage=dpo"
         - "--model_name_or_path=/t9k/mnt/models/Baichuan2-7B-Base"
         - "--do_train"
@@ -31,15 +31,15 @@ spec:
         - "--learning_rate=1e-5"
         - "--num_train_epochs=1.0"
         - "--plot_loss"
-        - "--fp16"
+        - "--bf16"
   worker:
     replicas: 1
     template:
       spec:
         containers:
           - name: worker
-            workingDir: /t9k/mnt/LLaMA-Efficient-Tuning
-            image: tsz.io/t9k/llama-efficient-tuning:20230912
+            workingDir: /t9k/mnt/llama-efficient-tuning
+            image: t9kpublic/llama-efficient-tuning:20230918
             securityContext:
               capabilities:
                 add: [ "IPC_LOCK" ]
