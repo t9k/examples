@@ -25,6 +25,15 @@ git clone https://github.com/hiyouga/LLaMA-Efficient-Tuning.git
 git clone https://github.com/t9k/examples.git
 ```
 
+安装 git-lfs，从 Hugging Face Hub 拉取预训练模型：
+
+```bash
+sudo apt update && sudo apt install git-lfs  # password: tensorstack
+git lfs install
+mkdir models && cd models
+git clone https://huggingface.co/baichuan-inc/Baichuan2-7B-Base
+```
+
 ## 训练
 
 ### SFT（有监督微调）
