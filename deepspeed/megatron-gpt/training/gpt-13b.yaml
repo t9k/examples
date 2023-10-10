@@ -3,17 +3,10 @@ kind: DeepSpeedJob
 metadata:
   name: gpt-13b
 spec:
-  # runMode:
-  #   debug:
-  #     enable: true
-  #     replicaSpecs:
-  #       - type: worker
-  #         skipInitContainer: true
-  #         command: ["sleep", "inf"]
-  scheduler:
-    t9kScheduler:
-      queue: default
-      priority: 50
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
   config:
     localRank: true
     slotsPerWorker: 8

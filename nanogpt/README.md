@@ -38,7 +38,7 @@ python data/openwebtext/prepare.py
 
 使用 `job.yaml` 创建 PyTorchTrainingJob 以启动训练，您可以如下修改训练配置：
 
-* 队列名称在第 8 行定义（默认为 `default`）。
+* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 每个节点的进程数量在第 13 行定义（默认为 `"8"`）。
 * 节点数量在第 17 行定义（默认为 `1`）。
 
@@ -82,7 +82,7 @@ python data/openwebtext-10k/prepare.py
 
 使用 `job_test_small.yaml` 或 `job_test_random.yaml` 创建 PyTorchTrainingJob 以启动训练，区别在于前者使用小型数据集而后者直接使用随机数作为数据集。您可以如下修改训练配置：
 
-* 队列名称在第 8 行定义（默认为 `default`）。
+* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 每个节点的进程数量在第 13 行定义（默认为 `"8"`）。
 * 节点数量在第 17 行定义（默认为 `1`）。
 

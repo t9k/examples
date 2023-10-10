@@ -3,10 +3,10 @@ kind: DeepSpeedJob
 metadata:
   name: baichuan2-sft
 spec:
-  scheduler:
-    t9kScheduler:
-      queue: default
-      priority: 50
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
   config:
     slotsPerWorker: 4
     run:

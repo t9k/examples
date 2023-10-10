@@ -73,7 +73,7 @@ kubectl create -f gpt-125m.yaml
 
 * 训练副本（replica）数量为 1（第 89 行）。
 * 每个副本的进程数量（第 19 行）和 GPU 数量（第 106 和 110 行）同为 1。
-* 队列名称为 default（第 8 行）。
+* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 检查点的保存/加载路径同为 `output/gpt-125m/model`（第 68 和 69 行）；TensorBoard 日志的保存路径为 `output/gpt-125m/tensorboard`（第 75 行）。
 * 训练占用显存 ~31GB，修改以下参数可以减小显存占用，以防止 OOM：
     * 减小 `--micro-batch-size`（第 49 行）。

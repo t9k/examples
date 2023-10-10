@@ -49,7 +49,7 @@ kubectl create -f sft.yaml
 
 * 训练副本（replica）数量为 1（第 35 行）。
 * 每个副本的进程数量（第 11 行）和 GPU 数量（第 49 和 53 行）同为 4。
-* 队列名称为 default（第 8 行）。
+* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 输出路径为 `/t9k/mnt/output/sft-ckpts/baichuan2/7b`（第 23 行）。
 * 训练占用显存 ~35GB，减小 `--per_device_train_batch_size`（第 25 行）可以减小显存占用，以防止 OOM。
 * 镜像 `t9kpublic/llama-efficient-tuning:20230918`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
