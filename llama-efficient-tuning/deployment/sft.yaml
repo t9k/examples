@@ -4,9 +4,9 @@ metadata:
   name: fastchat-openai-baichuan2-sft
 spec:
   replicas: 1
-  scheduler:
-    t9kScheduler:
-      queue: default
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
   storage:
     pvc:
       name: llama-efficient-tuning

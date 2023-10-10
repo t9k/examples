@@ -70,6 +70,7 @@ kubectl create -f actor/actor-multi-node.yaml
 
 * 训练副本（replica）数量为 1（第 32 行）。
 * 每个副本的进程数量（第 7 行）和 GPU 数量（第 46 和 50 行）同为 4。
+* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 使用数据集 [Dahoas/rm-static](https://huggingface.co/datasets/Dahoas/rm-static)、[Dahoas/full-hh-rlhf](https://huggingface.co/datasets/Dahoas/full-hh-rlhf) 和 [Dahoas/synthetic-instruct-gptj-pairwise](https://huggingface.co/datasets/Dahoas/synthetic-instruct-gptj-pairwise)（第 11 行）；可以使用一个或多个数据集；所有可用的数据集请参考[这里](./utils/data/data_utils.py#L20)。
 * 模型文件会在训练完成后输出到 `output/single-node/actor-models/13b` 路径下（第 29 行）。
 * 修改以下参数可以减小显存占用，以防止 OOM：

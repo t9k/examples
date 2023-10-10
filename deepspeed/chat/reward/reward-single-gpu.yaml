@@ -3,10 +3,10 @@ kind: DeepSpeedJob
 metadata:
   name: reward-single-gpu
 spec:
-  scheduler:
-    t9kScheduler:
-      queue: default
-      priority: 50
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
   config:
     slotsPerWorker: 1
     run:
