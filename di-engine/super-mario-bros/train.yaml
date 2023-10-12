@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ding
+spec:
+  nodeName: sm02
+  containers:
+  - name: worker
+    image: tsz.io/xyx/ding:main
+    command: [ "/bin/bash", "-c", "--" ]
+    args: [ "sleep infinity" ]
+    resources:
+      limits:
+        cpu: 16
+        memory: 64Gi
+        # nvidia.com/gpu: 1
+    volumeMounts:
+      - mountPath: /workspace
+        name: data
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: ding
