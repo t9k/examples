@@ -15,10 +15,10 @@ from dizoo.box2d.lunarlander.config.lunarlander_dqn_config import main_config, c
 
 
 def main():
-    filename = '{}/log.txt'.format(main_config.exp_name)
-    logging.getLogger(with_files=[filename]).setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
     cfg = compile_config(main_config, create_cfg=create_config, auto=True)
     ding_init(cfg)
+
     with task.start(async_mode=False, ctx=OnlineRLContext()):
         collector_env = SubprocessEnvManagerV2(env_fn=[
             lambda: DingEnvWrapper(gym.make(cfg.env.env_id))

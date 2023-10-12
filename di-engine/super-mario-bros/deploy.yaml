@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: super-mario-bros
+  name: super-mario-bros-deploy
 spec:
   scheduler:
     t9kScheduler:
@@ -17,16 +17,16 @@ spec:
             - name: pytorch
               args:
                 - python
-                - train.py
+                - deploy.py
               workingDir: /t9k/mnt/examples/di-engine/super-mario-bros
               image: t9kpublic/ding:20231011
               resources:
                 requests:
-                  cpu: 8
-                  memory: 8Gi
+                  cpu: 2
+                  memory: 2Gi
                 limits:
-                  cpu: 32
-                  memory: 32Gi
+                  cpu: 4
+                  memory: 4Gi
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data
