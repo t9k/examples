@@ -1,0 +1,38 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: slime-volley
+spec:
+  scheduler:
+    t9kScheduler:
+      queue: sm02
+      priority: 50
+  replicaSpecs:
+    - type: node
+      replicas: 1
+      restartPolicy: ExitCode
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              args:
+                - python
+                - train.py
+              workingDir: /t9k/mnt/examples/di-engine/slime-volley
+              image: t9kpublic/ding:main
+              resources:
+                requests:
+                  cpu: 4
+                  memory: 16Gi
+                  nvidia.com/gpu: 1
+                limits:
+                  cpu: 8
+                  memory: 32Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /t9k/mnt
+                  name: data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: ding
