@@ -10,7 +10,6 @@ from ding.envs import BaseEnvManager, DingEnvWrapper
 from ding.policy import DQNPolicy
 from ding.model import DQN
 from ding.utils import set_pkg_seed
-from ding.rl_utils import get_epsilon_greedy_fn
 from dizoo.box2d.lunarlander.config.lunarlander_dqn_config import main_config, create_config
 
 
@@ -32,7 +31,7 @@ def main(cfg, seed=0):
                          InteractionSerialEvaluator,
                          AdvancedReplayBuffer,
                          save_cfg=True)
-    cfg.policy.load_path = './final.pth.tar'
+    cfg.policy.load_path = './lunarlander_dqn_seed0/ckpt/final.pth.tar'
 
     # build multiple environments and use env_manager to manage them
     evaluator_env_num = cfg.env.evaluator_env_num

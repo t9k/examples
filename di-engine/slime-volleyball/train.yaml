@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: super-mario-bros-evaluate
+  name: slime-volleyball
 spec:
   scheduler:
     t9kScheduler:
@@ -17,16 +17,18 @@ spec:
             - name: pytorch
               args:
                 - python
-                - evaluate.py
-              workingDir: /t9k/mnt/examples/di-engine/super-mario-bros
-              image: t9kpublic/ding:20231011
+                - train.py
+              workingDir: /t9k/mnt/examples/di-engine/slime-volleyball
+              image: t9kpublic/ding:main
               resources:
                 requests:
-                  cpu: 2
-                  memory: 2Gi
+                  cpu: 8
+                  memory: 16Gi
+                  nvidia.com/gpu: 1
                 limits:
-                  cpu: 4
-                  memory: 4Gi
+                  cpu: 16
+                  memory: 32Gi
+                  nvidia.com/gpu: 1
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data

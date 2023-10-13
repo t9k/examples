@@ -49,7 +49,6 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
     obs = env.reset()
     returns = 0.
     while True:
-
         action = forward_fn(obs)
         obs, rew, done, info = env.step(action)
         returns += rew

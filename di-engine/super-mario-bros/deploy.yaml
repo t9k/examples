@@ -19,7 +19,7 @@ spec:
                 - python
                 - deploy.py
               workingDir: /t9k/mnt/examples/di-engine/super-mario-bros
-              image: t9kpublic/ding:20231011
+              image: t9kpublic/ding:main
               resources:
                 requests:
                   cpu: 2

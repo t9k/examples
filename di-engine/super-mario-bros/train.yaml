@@ -19,14 +19,16 @@ spec:
                 - python
                 - train.py
               workingDir: /t9k/mnt/examples/di-engine/super-mario-bros
-              image: t9kpublic/ding:20231011
+              image: t9kpublic/ding:main
               resources:
                 requests:
-                  cpu: 8
-                  memory: 8Gi
+                  cpu: 4
+                  memory: 16Gi
+                  nvidia.com/gpu: 1
                 limits:
-                  cpu: 32
+                  cpu: 8
                   memory: 32Gi
+                  nvidia.com/gpu: 1
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data

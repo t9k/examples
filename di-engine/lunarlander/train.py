@@ -44,8 +44,8 @@ def main():
         task.use(nstep_reward_enhancer(cfg))
         task.use(data_pusher(cfg, buffer_))
         task.use(OffPolicyLearner(cfg, policy.learn_mode, buffer_))
+        task.use(CkptSaver(policy, cfg.exp_name, train_freq=1000))
         task.use(online_logger(train_show_freq=10))
-        task.use(CkptSaver(policy, cfg.exp_name, train_freq=100))
         task.run()
 
 

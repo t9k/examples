@@ -19,13 +19,13 @@ spec:
                 - python
                 - train.py
               workingDir: /t9k/mnt/examples/di-engine/lunarlander
-              image: t9kpublic/ding:20231011
+              image: t9kpublic/ding:main
               resources:
                 requests:
-                  cpu: 2
+                  cpu: 8
                   memory: 2Gi
                 limits:
-                  cpu: 4
+                  cpu: 16
                   memory: 4Gi
               volumeMounts:
                 - mountPath: /t9k/mnt
