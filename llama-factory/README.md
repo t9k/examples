@@ -1,8 +1,8 @@
-# LLaMA-Efficient-Tuning
+# LLaMA-Factory
 
-[LLaMA-Efficient-Tuning](https://github.com/hiyouga/LLaMA-Efficient-Tuning) 是一个预训练、指令微调、评估和部署开源大型语言模型的项目。
+[LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 是一个预训练、指令微调、评估和部署开源大型语言模型的项目。
 
-本示例使用 DeepSpeedJob 在 TensorStack AI 计算平台上完成由 LLaMA-Efficient-Tuning 实现的指令微调训练。
+本示例使用 DeepSpeedJob 在 TensorStack AI 计算平台上完成由 LLaMA-Factory 实现的指令微调训练。
 
 ## 使用方法
 
@@ -15,13 +15,13 @@
 | PPO  | SFT + RM | alpaca_gpt4_zh                                                                   | ~12h     |
 | DPO  | SFT      | comparison_gpt4_zh                                                               | ~90min   |
 
-创建一个名为 llama-efficient-tuning、大小为 250GiB 的 PVC，然后创建一个同样名为 llama-efficient-tuning 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large（如要尝试命令行聊天，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)；如要使用远程操作，请开启 SSH）。
+创建一个名为 llama-factory、大小为 250GiB 的 PVC，然后创建一个同样名为 llama-factory 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large（如要尝试命令行聊天，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)；如要使用远程操作，请开启 SSH）。
 
-进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆 LLaMA-Efficient-Tuning 以及此仓库：
+进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆 LLaMA-Factory 以及此仓库：
 
 ```shell
 cd ~
-git clone https://github.com/hiyouga/LLaMA-Efficient-Tuning.git
+git clone https://github.com/hiyouga/LLaMA-Factory.git
 git clone https://github.com/t9k/examples.git
 ```
 
@@ -41,7 +41,7 @@ git clone https://huggingface.co/baichuan-inc/Baichuan2-7B-Base
 使用 `sft.yaml` 创建 DeepSpeedJob 以执行训练：
 
 ```shell
-cd ~/examples/llama-efficient-tuning/training
+cd ~/examples/llama-factory/training
 kubectl create -f sft.yaml
 ```
 
@@ -52,7 +52,7 @@ kubectl create -f sft.yaml
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 输出路径为 `/t9k/mnt/output/sft-ckpts/baichuan2/7b`（第 23 行）。
 * 训练占用显存 ~35GB，减小 `--per_device_train_batch_size`（第 25 行）可以减小显存占用，以防止 OOM。
-* 镜像 `t9kpublic/llama-efficient-tuning:20230918`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
+* 镜像 `t9kpublic/llama-factory:20230918`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
 
 ### RM（训练奖励模型）
 
@@ -83,7 +83,7 @@ kubectl create -f dpo.yaml
 安装必要的依赖，然后执行 `src/cli_demo.py` 脚本以开始聊天：
 
 ```shell
-cd ~/LLaMA-Efficient-Tuning
+cd ~/LLaMA-Factory
 pip install trl xformers
 
 # 加载 SFT 模型

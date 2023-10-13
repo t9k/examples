@@ -9,7 +9,7 @@ spec:
   #     queue: default
   storage:
     pvc:
-      name: llama-efficient-tuning
+      name: llama-factory
       subPath: output/sft-models/baichuan2/7b
       containerPath: /workspace/baichuan2-sft
   service:
