@@ -20,7 +20,7 @@ from dizoo.mario.mario_dqn_config import main_config, create_config
 
 def wrapped_mario_env():
     return DingEnvWrapper(
-        JoypadSpace(gym_super_mario_bros.make('SuperMarioBros-1-1-v3'),
+        JoypadSpace(gym_super_mario_bros.make('SuperMarioBros-1-1-v0'),
                     [['right'], ['right', 'A']]),
         cfg={
             'env_wrapper': [
@@ -61,7 +61,7 @@ def main():
         task.use(nstep_reward_enhancer(cfg))
         task.use(data_pusher(cfg, buffer_))
         task.use(OffPolicyLearner(cfg, policy.learn_mode, buffer_))
-        task.use(CkptSaver(policy, cfg.exp_name, train_freq=10000))
+        task.use(CkptSaver(policy, cfg.exp_name, train_freq=20000))
         task.use(online_logger(train_show_freq=10))
         task.run()
 
