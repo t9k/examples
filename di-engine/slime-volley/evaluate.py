@@ -32,7 +32,7 @@ def main(cfg, seed=0):
                          InteractionSerialEvaluator,
                          NaiveReplayBuffer,
                          save_cfg=True)
-    cfg.policy.load_path = './slime_volley_ppo_seed0/ckpt_learner1/final.pth.tar'
+    cfg.policy.load_path = './slime_volley_ppo_seed0/ckpt_learner1/ckpt_best.pth.tar'
 
     # build multiple environments and use env_manager to manage them
     evaluator_env_num = cfg.env.evaluator_env_num

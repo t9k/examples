@@ -40,4 +40,4 @@ if __name__ == '__main__':
     main(main_config=main_config,
          create_config=create_config,
          ckpt_path=
-         'slime_volley_ppo_seed0/ckpt_learner1/final.pth.tar')
+         'slime_volley_ppo_seed0/ckpt_learner1/ckpt_best.pth.tar')

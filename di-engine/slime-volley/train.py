@@ -1,6 +1,5 @@
 import os
 import copy
-import torch
 from tensorboardX import SummaryWriter
 from functools import partial
 
@@ -14,28 +13,35 @@ from dizoo.slime_volley.envs import SlimeVolleyEnv
 from dizoo.slime_volley.config.slime_volley_ppo_config import main_config
 
 
-def main(cfg, seed=0, max_iterations=int(1e10)):
-    cfg = compile_config(
-        cfg,
-        SyncSubprocessEnvManager,
-        PPOPolicy,
-        BaseLearner,
-        BattleSampleSerialCollector,
-        InteractionSerialEvaluator,
-        NaiveReplayBuffer,
-        save_cfg=True
-    )
+def main(cfg, seed=0, max_iterations=int(1e9)):
+    cfg = compile_config(cfg,
+                         SyncSubprocessEnvManager,
+                         PPOPolicy,
+                         BaseLearner,
+                         BattleSampleSerialCollector,
+                         InteractionSerialEvaluator,
+                         NaiveReplayBuffer,
+                         save_cfg=True)
+    cfg.policy.learn.learner.hook.log_show_after_iter = 1000
+    cfg.policy.learn.learner.hook.save_ckpt_after_iter = 100000
+    cfg.policy.collect.collector.collect_print_freq = 1000
+    cfg.policy.eval.evaluator.eval_freq = 10000
+
     collector_env_num, evaluator_env_num = cfg.env.collector_env_num, cfg.env.evaluator_env_num
     collector_env_cfg = copy.deepcopy(cfg.env)
     collector_env_cfg.agent_vs_agent = True
     evaluator_env_cfg = copy.deepcopy(cfg.env)
     evaluator_env_cfg.agent_vs_agent = False
-    collector_env = SyncSubprocessEnvManager(
-        env_fn=[partial(SlimeVolleyEnv, collector_env_cfg) for _ in range(collector_env_num)], cfg=cfg.env.manager
-    )
-    evaluator_env = SyncSubprocessEnvManager(
-        env_fn=[partial(SlimeVolleyEnv, evaluator_env_cfg) for _ in range(evaluator_env_num)], cfg=cfg.env.manager
-    )
+    collector_env = SyncSubprocessEnvManager(env_fn=[
+        partial(SlimeVolleyEnv, collector_env_cfg)
+        for _ in range(collector_env_num)
+    ],
+                                             cfg=cfg.env.manager)
+    evaluator_env = SyncSubprocessEnvManager(env_fn=[
+        partial(SlimeVolleyEnv, evaluator_env_cfg)
+        for _ in range(evaluator_env_num)
+    ],
+                                             cfg=cfg.env.manager)
 
     collector_env.seed(seed)
     evaluator_env.seed(seed, dynamic_seed=False)
@@ -44,16 +50,18 @@ def main(cfg, seed=0, max_iterations=int(1e10)):
     model = VAC(**cfg.policy.model)
     policy = PPOPolicy(cfg.policy, model=model)
 
-    tb_logger = SummaryWriter(os.path.join('./{}/log/'.format(cfg.exp_name), 'serial'))
-    learner = BaseLearner(
-        cfg.policy.learn.learner, policy.learn_mode, tb_logger, exp_name=cfg.exp_name, instance_name='learner1'
-    )
+    tb_logger = SummaryWriter(
+        os.path.join('./{}/log/'.format(cfg.exp_name), 'serial'))
+    learner = BaseLearner(cfg.policy.learn.learner,
+                          policy.learn_mode,
+                          tb_logger,
+                          exp_name=cfg.exp_name,
+                          instance_name='learner1')
     collector = BattleSampleSerialCollector(
         cfg.policy.collect.collector,
         collector_env, [policy.collect_mode, policy.collect_mode],
         tb_logger,
-        exp_name=cfg.exp_name
-    )
+        exp_name=cfg.exp_name)
     evaluator_cfg = copy.deepcopy(cfg.policy.eval.evaluator)
     evaluator_cfg.stop_value = cfg.env.stop_value
     evaluator = InteractionSerialEvaluator(
@@ -62,13 +70,14 @@ def main(cfg, seed=0, max_iterations=int(1e10)):
         policy.eval_mode,
         tb_logger,
         exp_name=cfg.exp_name,
-        instance_name='builtin_ai_evaluator'
-    )
+        instance_name='builtin_ai_evaluator')
 
     learner.call_hook('before_run')
     for _ in range(max_iterations):
         if evaluator.should_eval(learner.train_iter):
-            stop_flag, reward = evaluator.eval(learner.save_checkpoint, learner.train_iter, collector.envstep)
+            stop_flag, reward = evaluator.eval(learner.save_checkpoint,
+                                               learner.train_iter,
+                                               collector.envstep)
             if stop_flag:
                 break
         new_data, _ = collector.collect(train_iter=learner.train_iter)

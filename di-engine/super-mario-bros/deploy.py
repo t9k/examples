@@ -60,4 +60,4 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
 if __name__ == '__main__':
     main(main_config=main_config,
          create_config=create_config,
-         ckpt_path='mario_dqn_seed0/ckpt/iteration_1000.pth.tar')
+         ckpt_path='mario_dqn_seed0/ckpt/final.pth.tar')
