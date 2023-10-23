@@ -38,7 +38,7 @@ kubectl create -f deploy.yaml    # 部署（演示）
 
 部署（演示）结果示例：
 
-![](./assets/lunar-lander-video.mp4)
+https://github.com/t9k/examples/assets/64956476/b60d70b7-ad77-4221-9a1c-043abbc0600f
 
 ### 超级马里奥兄弟
 
@@ -56,7 +56,7 @@ kubectl create -f deploy.yaml
 
 部署（演示）结果示例：
 
-![](./assets/mario-video.mp4)
+https://github.com/t9k/examples/assets/64956476/fb8c1210-4411-46c4-9b6c-e053bdc523ca
 
 ### 史莱姆排球
 
