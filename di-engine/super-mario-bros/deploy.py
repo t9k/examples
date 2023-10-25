@@ -35,7 +35,7 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
                 lambda env: WarpFrameWrapper(env, size=84),
                 lambda env: ScaledFloatFrameWrapper(env),
                 lambda env: FrameStackWrapper(env, n_frames=4),
-                lambda env: TimeLimitWrapper(env, max_limit=400),
+                lambda env: TimeLimitWrapper(env, max_limit=800),
                 lambda env: EvalEpisodeReturnWrapper(env),
             ]
         })
