@@ -56,7 +56,7 @@ kubectl create -f deploy.yaml
 
 部署（演示）结果示例：
 
-https://github.com/t9k/examples/assets/64956476/fb8c1210-4411-46c4-9b6c-e053bdc523ca
+https://github.com/t9k/examples/assets/64956476/b817aa37-f70f-46ca-b412-71003d9d80b7
 
 ### 史莱姆排球
 
