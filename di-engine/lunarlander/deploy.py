@@ -35,4 +35,4 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
 if __name__ == "__main__":
     main(main_config=main_config,
          create_config=create_config,
-         ckpt_path='./final.pth.tar')
+         ckpt_path='./lunarlander_dqn_seed0/ckpt/final.pth.tar')

@@ -35,7 +35,7 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
                 lambda env: WarpFrameWrapper(env, size=84),
                 lambda env: ScaledFloatFrameWrapper(env),
                 lambda env: FrameStackWrapper(env, n_frames=4),
-                lambda env: TimeLimitWrapper(env, max_limit=400),
+                lambda env: TimeLimitWrapper(env, max_limit=800),
                 lambda env: EvalEpisodeReturnWrapper(env),
             ]
         })
@@ -49,7 +49,6 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
     obs = env.reset()
     returns = 0.
     while True:
-
         action = forward_fn(obs)
         obs, rew, done, info = env.step(action)
         returns += rew
@@ -61,4 +60,4 @@ def main(main_config: EasyDict, create_config: EasyDict, ckpt_path: str):
 if __name__ == '__main__':
     main(main_config=main_config,
          create_config=create_config,
-         ckpt_path='mario_dqn_seed0/ckpt/iteration_1000.pth.tar')
+         ckpt_path='mario_dqn_seed0/ckpt/final.pth.tar')

@@ -1,37 +1,38 @@
 import os
-import gym
 import torch
 from tensorboardX import SummaryWriter
 from easydict import EasyDict
 
 from ding.config import compile_config
-from ding.worker import BaseLearner, SampleSerialCollector, InteractionSerialEvaluator, AdvancedReplayBuffer
-from ding.envs import BaseEnvManager, DingEnvWrapper
-from ding.policy import DQNPolicy
-from ding.model import DQN
+from ding.worker import BaseLearner, BattleSampleSerialCollector, NaiveReplayBuffer, InteractionSerialEvaluator
+from ding.envs import BaseEnvManager
+from ding.policy import PPOPolicy
+from ding.model import VAC
 from ding.utils import set_pkg_seed
-from dizoo.box2d.lunarlander.config.lunarlander_dqn_config import main_config, create_config
+from dizoo.slime_volley.envs import SlimeVolleyEnv
+from dizoo.slime_volley.config.slime_volley_ppo_config import main_config
 
 
 # Get DI-engine form env class
 def wrapped_lunarlander_env():
-    return DingEnvWrapper(
-        gym.make(main_config['env']['env_id']),
-        EasyDict(env_wrapper='default'),
-    )
+    return SlimeVolleyEnv(
+        EasyDict({
+            'env_id': main_config['env']['env_id'],
+            'agent_vs_agent': False
+        }))
 
 
 def main(cfg, seed=0):
-    cfg['exp_name'] = 'lunarlander_dqn_eval'
+    cfg['exp_name'] = 'slime_volley_ppo_eval'
     cfg = compile_config(cfg,
                          BaseEnvManager,
-                         DQNPolicy,
+                         PPOPolicy,
                          BaseLearner,
-                         SampleSerialCollector,
+                         BattleSampleSerialCollector,
                          InteractionSerialEvaluator,
-                         AdvancedReplayBuffer,
+                         NaiveReplayBuffer,
                          save_cfg=True)
-    cfg.policy.load_path = './lunarlander_dqn_seed0/ckpt/final.pth.tar'
+    cfg.policy.load_path = './slime_volley_ppo_seed0/ckpt_learner1/ckpt_best.pth.tar'
 
     # build multiple environments and use env_manager to manage them
     evaluator_env_num = cfg.env.evaluator_env_num
@@ -40,16 +41,17 @@ def main(cfg, seed=0):
         cfg=cfg.env.manager)
 
     # switch save replay interface
-    evaluator_env.enable_save_replay(
-        replay_path='./lunarlander_dqn_eval/video')
+    # == cannot render currently ==
+    # evaluator_env.enable_save_replay(
+    #     replay_path='./slime_volley_ppo_eval/video')
 
     # Set random seed for all package and instance
     evaluator_env.seed(seed, dynamic_seed=False)
     set_pkg_seed(seed, use_cuda=cfg.policy.cuda)
 
     # Set up RL Policy
-    model = DQN(**cfg.policy.model)
-    policy = DQNPolicy(cfg.policy, model=model)
+    model = VAC(**cfg.policy.model)
+    policy = PPOPolicy(cfg.policy, model=model)
     policy.eval_mode.load_state_dict(
         torch.load(cfg.policy.load_path, map_location='cpu'))
 

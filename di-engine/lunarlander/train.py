@@ -15,10 +15,10 @@ from dizoo.box2d.lunarlander.config.lunarlander_dqn_config import main_config, c
 
 
 def main():
-    filename = '{}/log.txt'.format(main_config.exp_name)
-    logging.getLogger(with_files=[filename]).setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
     cfg = compile_config(main_config, create_cfg=create_config, auto=True)
     ding_init(cfg)
+
     with task.start(async_mode=False, ctx=OnlineRLContext()):
         collector_env = SubprocessEnvManagerV2(env_fn=[
             lambda: DingEnvWrapper(gym.make(cfg.env.env_id))
@@ -44,8 +44,8 @@ def main():
         task.use(nstep_reward_enhancer(cfg))
         task.use(data_pusher(cfg, buffer_))
         task.use(OffPolicyLearner(cfg, policy.learn_mode, buffer_))
+        task.use(CkptSaver(policy, cfg.exp_name, train_freq=1000))
         task.use(online_logger(train_show_freq=10))
-        task.use(CkptSaver(policy, cfg.exp_name, train_freq=100))
         task.run()
 
 

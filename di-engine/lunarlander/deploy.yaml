@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: super-mario-bros
+  name: lunarlander-deploy
 spec:
   scheduler:
     t9kScheduler:
@@ -17,18 +17,16 @@ spec:
             - name: pytorch
               args:
                 - python
-                - train.py
-              workingDir: /t9k/mnt/examples/di-engine/super-mario-bros
+                - deploy.py
+              workingDir: /t9k/mnt/examples/di-engine/lunarlander
               image: t9kpublic/ding:main
               resources:
                 requests:
-                  cpu: 4
-                  memory: 16Gi
-                  nvidia.com/gpu: 1
+                  cpu: 2
+                  memory: 1Gi
                 limits:
-                  cpu: 8
-                  memory: 32Gi
-                  nvidia.com/gpu: 1
+                  cpu: 4
+                  memory: 2Gi
               volumeMounts:
                 - mountPath: /t9k/mnt
                   name: data
