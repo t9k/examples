@@ -1,0 +1,16 @@
+[
+    {
+        "model": "gpt-4",
+        "api_key": "<your_api_key>"
+    },
+    {
+        "model": "gpt-3.5-turbo",
+        "api_key": "<your_api_key>"
+    },
+    {
+        "model": "<your_model_name>",
+        "api_key": "NULL",
+        "api_base": "http://127.0.0.1:8000/v1",
+        "api_type": "open_ai"
+    }
+]
