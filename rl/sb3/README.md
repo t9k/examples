@@ -43,6 +43,8 @@ kubectl create -f train-play.yaml  # 训练和预测（演示）
 
 本示例支持强化学习算法 DQN、A2C 和 PPO。使用 PPO 训练的模型的一次预测（演示）如下：
 
+https://github.com/t9k/examples/assets/64956476/06af7b0f-6793-4eb2-aa1d-0be992bdeeac
+
 ### Space Invaders
 
 Space Invaders 环境封装了最早的射击游戏之一《Space Invaders》，游戏中玩家控制一台太空飞船，通过射击外星入侵者来防止它们接近地球。详情请参阅[此文档](https://gymnasium.farama.org/environments/atari/space_invaders/)。
@@ -67,6 +69,8 @@ kubectl create -f train-play.yaml  # 训练和预测（演示）
 
 本示例支持强化学习算法 DQN、A2C 和 PPO。使用 PPO 训练的模型的一次预测（演示）如下：
 
+https://github.com/t9k/examples/assets/64956476/05dd21e2-858a-4126-bb2e-c72f1d09ecef
+
 ### Lunar Lander Continuous
 
 Lunar Lander 环境模拟了一个经典的火箭轨迹优化问题，这里采用它的连续版本。详情请参阅[此文档](https://gymnasium.farama.org/environments/box2d/lunar_lander/)。
@@ -89,6 +93,8 @@ kubectl create -f train-play.yaml  # 训练和预测（演示）
 
 本示例支持强化学习算法 PPO、DDPG 和 SAC。使用 SAC 训练的模型的一次预测（演示）如下：
 
+https://github.com/t9k/examples/assets/64956476/e1516f5d-511a-4465-8012-304f2af6464b
+
 ### Hopper
 
 Hopper 环境中的“hopper”是一个二维的单腿形状，它由四个主要部分组成：顶部的躯干，中间的大腿，底部的小腿，以及支撑整个身体的单脚，目标是通过在连接这四个部分的三个铰链上施加扭矩，实现向前（右）方向的跃动。详情请参阅[此文档](https://gymnasium.farama.org/environments/mujoco/hopper/)。
@@ -109,6 +115,8 @@ python play.py -a ppo         # 预测（演示）
 kubectl create -f train-play.yaml  # 训练和预测（演示）
 ```
 
-本示例支持强化学习算法 PPO、SAC 和 TD3。使用 TD3 训练的模型的一次预测（演示）如下：
+本示例支持强化学习算法 PPO、SAC 和 TD3。使用 SAC 训练的模型的一次预测（演示）如下：
+
+https://github.com/t9k/examples/assets/64956476/194dd8ae-c893-4ee9-8093-31675651760d
 
 ### 怀旧游戏
