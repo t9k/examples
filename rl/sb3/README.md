@@ -13,8 +13,8 @@
 1. 在 Notebook 或本地的终端中，安装以下依赖：
 
     ```bash
-    apt update && apt install python-opengl xvfb
-    pip install stable_baselines3 gymnasium gymnasium[atari] gymnasium[accept-rom-license] gymnasium[mujoco] gymnasium[mujoco_py] moviepy pygame stable-retro opencv-python
+    apt update && apt install python-opengl xvfb swig
+    pip install -r requirements.txt
     ```
 
 1. 继续使用终端，参照下面的各个环境示例进行操作。
@@ -99,7 +99,7 @@ https://github.com/t9k/examples/assets/64956476/e1516f5d-511a-4465-8012-304f2af6
 
 Hopper 环境中的“hopper”是一个二维的单腿形状，它由四个主要部分组成：顶部的躯干，中间的大腿，底部的小腿，以及支撑整个身体的单脚，目标是通过在连接这四个部分的三个铰链上施加扭矩，实现向前（右）方向的跃动。详情请参阅[此文档](https://gymnasium.farama.org/environments/mujoco/hopper/)。
 
-![](https://gymnasium.farama.org/environments/mujoco/hopper/)
+![](https://gymnasium.farama.org/_images/hopper.gif)
 
 先后运行 `train.py` 和 `play.py` 脚本以进行训练和预测（演示）：
 

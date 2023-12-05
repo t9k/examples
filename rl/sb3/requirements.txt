@@ -1,0 +1,11 @@
+stable_baselines3
+gymnasium
+gymnasium[atari]
+gymnasium[accept-rom-license]
+gymnasium[box2d]
+gymnasium[mujoco]
+moviepy
+pygame
+stable-retro
+opencv-python
+tensorboard

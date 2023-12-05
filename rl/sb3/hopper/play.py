@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(description="Play RL agents on Hopper-v4.")
 parser.add_argument(
     "-a",
     "--algorithm",
-    choices=["dqn", "a2c", "ppo"],
+    choices=["ppo", "sac", "td3"],
     required=True,
     help="Choose the model corresponding to the RL algorithm to play.")
 args = parser.parse_args()
