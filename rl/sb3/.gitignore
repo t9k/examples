@@ -1,0 +1,6 @@
+# log files
+logs/
+*_tensorboard/
+
+# saved model files
+*.zip
