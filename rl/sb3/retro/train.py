@@ -48,20 +48,20 @@ class StochasticFrameSkip(gym.Wrapper):
                     want_render=False,
                 )
             else:
-                ob, rew, terminated, truncated, info = self.env.step(self.curac)
+                ob, rew, terminated, truncated, info = self.env.step(
+                    self.curac)
             totrew += rew
             if terminated or truncated:
                 break
         return ob, totrew, terminated, truncated, info
 
 
-def make_retro(*, game, state=None, max_episode_steps=4500, **kwargs):
+def make_retro(*, game, state=None, **kwargs):
     if state is None:
         state = retro.State.DEFAULT
     env = retro.make(game, state, **kwargs)
     env = StochasticFrameSkip(env, n=4, stickprob=0.25)
-    if max_episode_steps is not None:
-        env = TimeLimit(env, max_episode_steps=max_episode_steps)
+    env = TimeLimit(env, max_episode_steps=4500)
     return env
 
 
@@ -82,11 +82,14 @@ def main():
     args = parser.parse_args()
 
     def make_env():
-        env = make_retro(game=args.game, state=args.state, scenario=args.scenario)
+        env = make_retro(game=args.game,
+                         state=args.state,
+                         scenario=args.scenario)
         env = wrap_deepmind_retro(env)
         return env
 
-    venv = VecTransposeImage(VecFrameStack(SubprocVecEnv([make_env] * 8), n_stack=4))
+    venv = VecTransposeImage(
+        VecFrameStack(SubprocVecEnv([make_env] * 8), n_stack=4))
     model = PPO(
         policy="CnnPolicy",
         env=venv,
@@ -99,11 +102,13 @@ def main():
         clip_range=0.1,
         ent_coef=0.01,
         verbose=1,
+        tensorboard_log="./ppo_retro_tensorboard/",
     )
     model.learn(
-        total_timesteps=100_000_000,
+        total_timesteps=1e8,
         log_interval=1,
     )
+    model.save("ppo_retro")
 
 
 if __name__ == "__main__":

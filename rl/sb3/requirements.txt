@@ -7,5 +7,5 @@ gymnasium[mujoco]
 moviepy
 pygame
 stable-retro
-opencv-python
+opencv-python-headless
 tensorboard
