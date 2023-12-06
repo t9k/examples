@@ -10,9 +10,9 @@ TensorStack AI 计算平台所在的集群需要：
 
 ## 使用方法
 
-1. 在您的项目中创建一个名为 ding、大小 20 GiB 的 PVC（需要存储一些模型检查点文件），然后创建一个同样名为 ding 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
+1. 在您的项目中创建一个名为 ding、大小 20 GiB 的 PVC（需要存储一些模型检查点文件），然后创建一个同样名为 ding 的 Notebook 挂载该 PVC，镜像和资源不限。
 
-1. 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆此仓库。
+1. 在 Notebook 的终端中，执行以下命令以克隆此仓库。
 
     ```shell
     cd ~
@@ -27,7 +27,7 @@ Lunar Lander 环境模拟了一个经典的火箭轨迹优化问题。详情请�
 
 ![](https://gymnasium.farama.org/_images/lunar_lander.gif)
 
-分别使用 `train.yaml`、`evaluate.yaml` 和 `deploy.yaml` 创建 PyTorchTrainingJob 以启动训练、评估和部署（演示）：
+先后使用 `train.yaml`、`evaluate.yaml` 和 `deploy.yaml` 创建 PyTorchTrainingJob 以启动训练、评估和部署（演示）：
 
 ```bash
 cd ~/examples/rl/di-engine/lunarlander
@@ -46,7 +46,7 @@ https://github.com/t9k/examples/assets/64956476/b60d70b7-ad77-4221-9a1c-043abbc0
 
 ![](https://user-images.githubusercontent.com/2184469/40948820-3d15e5c2-6830-11e8-81d4-ecfaffee0a14.png)
 
-分别使用 `train.yaml` 和 `deploy.yaml` 创建 PyTorchTrainingJob 以启动训练和部署（演示）：
+先后使用 `train.yaml` 和 `deploy.yaml` 创建 PyTorchTrainingJob 以启动训练和部署（演示）：
 
 ```bash
 cd ~/examples/rl/di-engine/super-mario-bros
@@ -64,7 +64,7 @@ https://github.com/t9k/examples/assets/64956476/b817aa37-f70f-46ca-b412-71003d9d
 
 ![](https://otoro.net/img/slimegym/pixel.gif)
 
-分别使用 `train.yaml`、`evaluate.yaml` 和 `deploy.yaml` 创建 PyTorchTrainingJob 以启动训练、评估和部署（演示）：
+先后使用 `train.yaml`、`evaluate.yaml` 和 `deploy.yaml` 创建 PyTorchTrainingJob 以启动训练、评估和部署（演示）：
 
 ```bash
 cd ~/examples/rl/di-engine/slime-volleyball

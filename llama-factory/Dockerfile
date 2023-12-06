@@ -11,8 +11,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
     transformers>=4.31.0 \
     datasets>=2.12.0 \
     accelerate>=0.21.0 \
-    peft>=0.4.0 \
-    git+https://ghproxy.com/https://github.com/huggingface/trl.git \
+    peft>=0.6.0 \
+    trl>=0.7.4 \
     scipy \
     sentencepiece \
     tiktoken \
