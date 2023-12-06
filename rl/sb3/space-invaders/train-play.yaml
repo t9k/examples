@@ -1,0 +1,38 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: space-invaders
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  replicaSpecs:
+    - type: node
+      replicas: 1
+      restartPolicy: ExitCode
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              command: ["/bin/sh", "-c"]
+              args:
+                - >-
+                    python train.py -a=dqn &&
+                    python play.py -a=dqn
+              workingDir: /t9k/mnt/examples/rl/sb3/space-invaders
+              image: t9kpublic/sb3:main
+              resources:
+                requests:
+                  cpu: 8
+                  memory: 2Gi
+                limits:
+                  cpu: 16
+                  memory: 4Gi
+              volumeMounts:
+                - mountPath: /t9k/mnt
+                  name: data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: sb3

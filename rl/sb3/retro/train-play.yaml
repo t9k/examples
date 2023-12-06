@@ -1,0 +1,38 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: retro
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  replicaSpecs:
+    - type: node
+      replicas: 1
+      restartPolicy: ExitCode
+      template:
+        spec:
+          containers:
+            - name: pytorch
+              command: ["/bin/sh", "-c"]
+              args:
+                - >-
+                    xvfb-run -a -s "-screen 0 1400x900x24" python train.py &&
+                    python play.py
+              workingDir: /t9k/mnt/examples/rl/sb3/retro
+              image: t9kpublic/sb3:main
+              resources:
+                requests:
+                  cpu: 16
+                  memory: 4Gi
+                limits:
+                  cpu: 32
+                  memory: 8Gi
+              volumeMounts:
+                - mountPath: /t9k/mnt
+                  name: data
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: sb3
