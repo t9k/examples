@@ -148,4 +148,6 @@ xvfb-run -a -s "-screen 0 1400x900x24" python train.py --game SnowBrothers-Nes  
 python play.py --game SnowBrothers-Nes                                     # 预测（演示）
 ```
 
-本示例仅支持 PPO 算法。
+本示例仅支持 PPO 算法。模型的一次预测（演示）如下：
+
+https://github.com/t9k/examples/assets/64956476/55a253c4-672b-40df-97c5-adf4843674e4
