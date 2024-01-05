@@ -1,8 +1,8 @@
 import argparse
-from gym.wrappers.time_limit import TimeLimit
+from gymnasium.wrappers.time_limit import TimeLimit
 from stable_baselines3 import PPO
 from stable_baselines3.common.atari_wrappers import ClipRewardEnv, WarpFrame
-from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv, VecFrameStack, VecTransposeImage, SubprocVecEnv
+from stable_baselines3.common.vec_env import VecVideoRecorder, DummyVecEnv, VecFrameStack, VecTransposeImage
 import retro
 
 
