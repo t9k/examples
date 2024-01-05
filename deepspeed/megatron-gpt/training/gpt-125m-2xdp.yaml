@@ -1,0 +1,122 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: DeepSpeedJob
+metadata:
+  name: gpt-125m
+spec:
+  # runMode:
+  #   debug:
+  #     enable: true
+  #     replicaSpecs:
+  #       - type: worker
+  #         skipInitContainer: true
+  #         command: ["sleep", "inf"]
+  scheduler:
+    t9kScheduler:
+      queue: default
+      priority: 50
+  config:
+    localRank: true
+    slotsPerWorker: 2
+    run:
+      python:
+        - Megatron-DeepSpeed/pretrain_gpt.py
+        ########################################
+        # Model configs
+        - "--seq-length=2048"
+        - "--max-position-embeddings=2048"
+        - "--num-layers=12"
+        - "--hidden-size=768"
+        - "--num-attention-heads=12"
+        - "--init-method-std=0.021"        # = sqrt(1/3/hidden_size) (MT-NLG)
+        ########################################
+        # Training duration configs
+        - "--train-samples=2500000"        # no use, > train-tokens / seq-length
+        - "--train-tokens=2500000000"      # = 20 * params (Chinchilla)
+        ########################################
+        # Optimizer configs
+        - "--lr=6.0e-4"
+        - "--min-lr=1.0e-6"
+        - "--lr-warmup-tokens=25000000"    # = 0.01 * train-tokens
+        - "--lr-decay-tokens=2500000000"   # = train-tokens
+        - "--lr-decay-style=cosine"
+        - "--adam-beta1=0.9"
+        - "--adam-beta2=0.95"
+        ########################################
+        # Parallelism and DeepSpeed configs
+        - "--deepspeed"
+        - "--deepspeed_config=examples/deepspeed/megatron-gpt/training/gpt-125m-ds-config.json"
+        - "--global-batch-size=256"
+        - "--micro-batch-size=16"
+        - "--zero-stage=2"
+        - "--tensor-model-parallel-size=1"
+        - "--no-pipeline-parallel"
+        - "--pipeline-model-parallel-size=1"
+        # - "--deepspeed-activation-checkpointing"
+        ########################################
+        # Regularization configs
+        - "--weight-decay=0.1"
+        - "--clip-grad=1.0"
+        ########################################
+        # Data and output configs
+        - "--seed=1234"
+        - "--vocab-file=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/vocab.json"
+        - "--merge-file=examples/deepspeed/megatron-gpt/tokenizer/wiki-en-tokenizer/merges.txt"
+        - "--data-path=examples/deepspeed/megatron-gpt/dataset/wiki-en/gpt_text_document"
+        - "--data-impl=mmap"
+        - "--split=949,50,1"
+        - "--num-workers=4"
+        - "--save=output/gpt-125m/model"
+        - "--load=output/gpt-125m/model"
+        - "--tensorboard-queue-size=1"
+        - "--log-timers-to-tensorboard"
+        - "--log-batch-size-to-tensorboard"
+        - "--log-validation-ppl-to-tensorboard"
+        # - "--log-optimizer-states-to-tensorboard"
+        - "--tensorboard-dir=output/gpt-125m/tensorboard"
+        ########################################
+        # Hook configs
+        - "--log-interval=10"
+        - "--eval-iters=10"
+        - "--eval-interval=100"
+        - "--save-interval=100"
+        ########################################
+        # Enhancement configs
+        - "--fp16"
+        # - "--checkpoint-activations"
+        - "--use-flash-attn"
+        ########################################
+  worker:
+    replicas: 1
+    template:
+      spec:
+        containers:
+          - name: worker
+            image: t9kpublic/megatron-deepspeed:23.05-py3
+            workingDir: /t9k/mnt/
+            securityContext:
+              capabilities:
+                add: [ "IPC_LOCK" ]
+            env:
+              - name: CUDA_DEVICE_MAX_CONNECTIONS
+                value: "1"
+            resources:
+              requests:
+                cpu: 4
+                memory: 16Gi
+                nvidia.com/gpu: 2
+              limits:
+                cpu: 8
+                memory: 32Gi
+                nvidia.com/gpu: 2
+            volumeMounts:
+              - mountPath: /t9k/mnt
+                name: data
+              - mountPath: /dev/shm
+                name: dshm  
+        volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: megatron
+          - name: dshm
+            emptyDir:
+              medium: Memory

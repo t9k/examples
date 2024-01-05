@@ -12,12 +12,18 @@ GPT-3 系列模型的参数量覆盖了从 125M 到 175B 的非常大的范围�
 
 这里选取其中 125M、1.3B、13B 和 175B（WIP）的模型进行训练，它们的参数量大约以 10 倍的关系递增，同时训练需要的 GPU 数量、需要的数据量、花费的时间逐渐增加，采用的并行策略逐渐复杂，具有比较好的代表性。更多细节如下表所示：
 
-| 参数量 | 训练 token 量 | 数据集 | 并行策略              | GPU 使用（参考） | 预计时间 |
-| ------ | ------------- | ------ | --------------------- | ---------------- | -------- |
-| 125M   | 2.5B          | enwiki | -                     | 1x A100 40GB     | ~8h      |
-| 1.3B   | 26B           | enwiki | 数据并行              | 4x A100 40GB     | ~8d      |
-| 13B    | 260B          | enwiki | 数据并行 + 流水线并行 | 2x 8x A100 40GB  |          |
-| 175B   | 3.5T          |        |                       |                  |          |
+| 参数量 | 训练 token 量 | 数据集 | 配置文件                      | 并行策略                     | GPU 使用（参考） | 预计时间 |
+| ------ | ------------- | ------ | ----------------------------- | ---------------------------- | ---------------- | -------- |
+| 125M   | 2.5B          | enwiki | `gpt-125m.yaml`               | -                            | 1x A100 40GB     | ~8h      |
+|        |               |        | `gpt-125m-2xdp.yaml`          | 数据并行                     | 2x A100 40GB     | ~4h      |
+|        |               |        | `gpt-125m-4xdp.yaml`          | 数据并行                     | 4x A100 40GB     | ~2h      |
+| 1.3B   | 26B           | enwiki | `gpt-1-3b-4xdp.yaml`          | 数据并行                     | 4x A100 40GB     | ~8d      |
+|        |               |        | `gpt-1-3b-8xdp.yaml`          | 数据并行                     | 8x A100 40GB     | ~4d      |
+|        |               |        | `gpt-1-3b-4xdp-4xpp.yaml`     | 数据并行+流水线并行          | 2x 8x A100 40GB  | ~2d      |
+| 13B    | 260B          | enwiki | `gpt-13b-4xdp-4xpp.yaml`      | 数据并行+流水线并行          | 2x 8x A100 80GB  |          |
+|        |               |        | `gpt-13b-4xdp-8xpp.yaml`      | 数据并行+流水线并行          | 4x 8x A100 80GB  |          |
+|        |               |        | `gpt-13b-4xdp-4xpp-4xtp.yaml` | 数据并行+流水线并行+张量并行 | 8x 8x A100 80GB  |          |
+| 175B   | 3.5T          |        |                               |                              |                  |          |
 
 > 要训练其他参数量的模型，可以在参数量接近的现有训练配置的基础上修改适当的参数以进行训练。
 
@@ -62,11 +68,11 @@ cd ../dataset
 
 ### 125M
 
-使用 `gpt-125m.yaml` 创建 DeepSpeedJob 以执行训练：
+以 `gpt-125m.yaml` 为例，创建 DeepSpeedJob 以执行训练：
 
 ```shell
 cd ~/examples/deepspeed/megatron-gpt/training
-kubectl create -f gpt-125m.yaml
+kubectl create -f gpt-125m.yaml  # or gpt-125m-2xdp.yaml, gpt-125m-4xdp.yaml
 ```
 
 对于 YAML 配置文件进行如下说明：
@@ -82,10 +88,10 @@ kubectl create -f gpt-125m.yaml
 
 ### 1.3B
 
-使用 `gpt-1-3b.yaml` 创建 DeepSpeedJob 以执行训练：
+以 `gpt-1-3b-4xdp.yaml` 为例，创建 DeepSpeedJob 以执行训练：
 
 ```shell
-kubectl create -f gpt-1-3b.yaml
+kubectl create -f gpt-1-3b-4xdp.yaml  # or gpt-1-3b-8xdp.yaml, gpt-1-3b-4xdp-4xpp.yaml
 ```
 
 除了与模型结构有关的超参数之外，与 `gpt-125m.yaml` 的不同之处在于：
@@ -101,10 +107,10 @@ kubectl create -f gpt-1-3b.yaml
 使用 `gpt-13b.yaml` 创建 DeepSpeedJob 以执行训练：
 
 ```shell
-kubectl create -f gpt-13b.yaml
+kubectl create -f gpt-13b-4xdp-4xpp.yaml  # or gpt-13b-4xdp-8xpp.yaml, gpt-13b-4xdp-4xpp-4xtp.yaml
 ```
 
-除了与模型结构有关的超参数之外，与 `gpt-1-3b.yaml` 的不同之处在于：
+除了与模型结构有关的超参数之外，与 `gpt-1-3b-4xdp.yaml` 的不同之处在于：
 
 * 训练副本（replica）数量改为 2（第 89 行），每个副本的进程数量（第 19 行）和 GPU 数量（第 106 和 110 行）改为 8 以进行数据并行+流水线并行训练，同时适当增大 CPU 和内存的量（第 104、105、108、109 行）。
 * 训练占用显存 ~70GB，修改以下参数可以减小显存占用，以防止 OOM：
