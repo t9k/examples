@@ -1,0 +1,16 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: ImageBuilder
+metadata:
+  name: tensorizer-download-image
+spec:
+  builder:
+    kaniko: {}
+  dockerConfig:
+    secret: <dockerconfig-name>
+    subPath: .dockerconfigjson
+  tag: <image-tag>
+  workspace:
+    pvc:
+      contextPath: ./examples/inference/tensorizer/deploy/download
+      dockerfilePath: ./examples/inference/tensorizer/deploy/Dockerfile
+      name: tensorizer

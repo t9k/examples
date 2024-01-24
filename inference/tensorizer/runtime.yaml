@@ -1,0 +1,27 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: MLServiceRuntime
+metadata:
+  name: tensorizer-kserve
+spec:
+  enabled: true
+  template:
+    spec:
+      containers:
+      - name: user-container
+        image: t9kpublic/tensorizer-kserve:0.0.1
+        env:
+          - name: MODEL_PATH 
+            value: /var/lib/t9k/model
+          - name: MODEL_LOAD_TYPE
+            value: tensorizer
+          - name: PYTHONUNBUFFERED
+            value: "1"
+        resources:
+          requests:
+            cpu: 2
+            memory: 64Gi
+            nvidia.com/gpu: 1
+          limits:
+            cpu: 2
+            memory: 64Gi
+            nvidia.com/gpu: 1
