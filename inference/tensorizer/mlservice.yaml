@@ -1,0 +1,13 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: MLService
+metadata:
+  name: tensorizer-gptj
+spec:
+  default: gptj
+  releases:
+    - name: gptj
+      predictor:
+        minReplicas: 1
+        model:
+          modelUri: pvc://tensorizer
+          runtime: tensorizer-kserve

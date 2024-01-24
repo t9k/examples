@@ -1,0 +1,16 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: ImageBuilder
+metadata:
+  name: tensorizer-deploy-image
+spec:
+  builder:
+    kaniko: {}
+  dockerConfig:
+    secret: <dockerconfig-name>
+    subPath: .dockerconfigjson
+  tag: <image-tag>
+  workspace:
+    pvc:
+      contextPath: ./tutorial-examples/deployment/mlservice-v2/mlservice-tensorizer/deploy
+      dockerfilePath: ./tutorial-examples/deployment/mlservice-v2/mlservice-tensorizer/deploy/Dockerfile
+      name: tutorial

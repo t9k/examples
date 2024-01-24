@@ -1,0 +1,35 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: GenericJob
+metadata:
+  name: model-download
+spec:
+  successRules:
+  - master:
+    - 0
+  failureRules:
+  - master:
+    - 0
+  replicaSpecs:
+  - type: master
+    replicas: 1
+    restartPolicy:
+      policy: OnFailure
+      limit: 1
+    template:
+      spec:
+        containers:
+        - name: model-downloader
+          image: t9kpublic/tensorizer-model-download:gptj
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: model-cache
+              mountPath: /mnt
+          resources:
+            limits:
+              cpu: 2
+              memory: 40Gi
+        volumes:
+          - name: model-cache
+            persistentVolumeClaim:
+              claimName: tensorizer
+        restartPolicy: Never
