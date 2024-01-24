@@ -11,6 +11,6 @@ spec:
   tag: <image-tag>
   workspace:
     pvc:
-      contextPath: ./tutorial-examples/deployment/mlservice-v2/mlservice-tensorizer/deploy
-      dockerfilePath: ./tutorial-examples/deployment/mlservice-v2/mlservice-tensorizer/deploy/Dockerfile
-      name: tutorial
+      contextPath: ./examples/inference/tensorizer/deploy
+      dockerfilePath: ./examples/inference/tensorizer/deploy/Dockerfile
+      name: tensorizer

@@ -25,6 +25,3 @@ model.config.save_pretrained("/mnt")
 serializer = TensorSerializer("/mnt/model.tensors")
 serializer.write_module(model, remove_tensors=True)
 serializer.close()
-
-
-
