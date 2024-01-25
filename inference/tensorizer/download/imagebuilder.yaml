@@ -11,6 +11,6 @@ spec:
   tag: <image-tag>
   workspace:
     pvc:
-      contextPath: ./examples/inference/tensorizer/deploy/download
-      dockerfilePath: ./examples/inference/tensorizer/deploy/Dockerfile
+      contextPath: ./examples/inference/tensorizer/download
+      dockerfilePath: ./examples/inference/tensorizer/download/Dockerfile
       name: tensorizer
