@@ -18,7 +18,7 @@ git clone https://github.com/t9k/examples.git
 
 ### 下载模型
 
-我们运行一个 `GenericJob` 下载并保存模型。在该 GenericJob 中，我们先使用国内模型平台 ModelScope 来下载 GPT-J-6B 模型，然后将模型转换为 CoreWeave Tensorizer 所需的格式，并保存到 PVC 中，代码细节见 [model_download.py](./download/model_download.py)
+我们运行一个 `GenericJob` 下载并保存模型。在该 GenericJob 中，我们先使用国内模型平台 ModelScope 来下载 GPT-J-6B 模型，然后将模型转换为 CoreWeave Tensorizer 所需的格式，并保存到 PVC 中，代码细节见 [model_download.py](./download/model_download.py)。
 
 运行 `GenericJob` 的命令如下：
 
@@ -90,7 +90,7 @@ cd ~/examples/inference/tensorizer/download
 打开其中的 `model_download.py` 文件，其内容分为两个部分：
 
 1. 前半部分先使用 ModelScope 下载模型文件，然后使用 Transformers 将模型加载到内存当中。
-1. 后半部分使用 Tensorizer 将模型及配置信息保存到 PVC 中。
+2. 后半部分使用 Tensorizer 将模型及配置信息保存到 PVC 中。
 
 用户可以用任意方式加载自定义模型来替换前半部分，然后沿用后半部分代码将用户自定义的模型以 Tensorizer 支持的形式保存到 PVC 中。
 
