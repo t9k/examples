@@ -1,0 +1,30 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: MLServiceRuntime
+metadata:
+  name: vllm-openai
+spec:
+  enabled: true
+  template:
+    spec:
+      containers:
+      - name: user-container
+        image: vllm/vllm-openai:v0.3.0
+        args:
+          - --model={{.MODEL_PATH}}
+          - --served-model-name={{.MODEL_NAME}}
+          - --tensor-parallel-size=2
+          - --trust-remote-code
+        resources:
+          limits:
+            cpu: 4
+            memory: 64Gi
+            nvidia.com/gpu: 2
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+      volumes:
+        - emptyDir:
+            medium: Memory
+          name: dshm
