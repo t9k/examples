@@ -25,13 +25,13 @@ git clone https://github.com/hiyouga/LLaMA-Factory.git
 git clone https://github.com/t9k/examples.git
 ```
 
-安装 git-lfs，从 Hugging Face Hub 拉取预训练模型：
+从 Hugging Face Hub（或魔搭社区）拉取预训练模型：
 
 ```bash
-sudo apt update && sudo apt install git-lfs  # password: tensorstack
-git lfs install
 mkdir models && cd models
-git clone https://huggingface.co/baichuan-inc/Baichuan2-7B-Base
+git clone --depth 1 https://huggingface.co/baichuan-inc/Baichuan2-7B-Base
+# 或
+# git clone --depth 1 https://www.modelscope.cn/baichuan-inc/Baichuan2-7B-Base.git
 ```
 
 ## 训练

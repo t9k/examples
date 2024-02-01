@@ -27,13 +27,11 @@ git clone https://github.com/t9k/examples.git
 
 ### 准备模型和数据集
 
-安装 git-lfs，从 Hugging Face Hub 拉取要训练的 Actor 模型和 Reward 模型，这里以 [facebook/opt-13b](https://huggingface.co/facebook/opt-13b) 为例：
+从 Hugging Face Hub 拉取要训练的 Actor 模型和 Reward 模型，这里以 [facebook/opt-13b](https://huggingface.co/facebook/opt-13b) 为例：
 
 ```bash
-sudo apt update && sudo apt install git-lfs  # password: tensorstack
-git lfs install
 mkdir models && cd models
-git clone https://huggingface.co/facebook/opt-13b
+git clone --depth 1 https://huggingface.co/facebook/opt-13b
 ```
 
 接着使用 `download_dataset.py` 脚本下载并保存数据集，这里以 [Dahoas/rm-static](https://huggingface.co/datasets/Dahoas/rm-static) 为例：
