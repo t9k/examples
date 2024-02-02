@@ -70,6 +70,6 @@ kubectl apply -f mpijob.yaml
 
 ## 资源需求和指标
 
-配置文件 `mpijob.yaml` 需要 32 个 CPU（核心），128Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `batch-size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/resnet/implementations/mxnet-22.04)中针对不同硬件的配置。
+配置文件 `mpijob.yaml` 需要 32 个 CPU（核心）、128Gi 内存以及 4 个 NVIDIA A100-SXM/PCIe-40GB。若您的 GPU 显存大于（或小于）40G，则可适当增大（或减小）参数 `batch-size`。请参照[原项目](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA/benchmarks/resnet/implementations/mxnet-22.04)中针对不同硬件的配置。
 
 该配置的运行时间参考值为 ~120min，长于 [v2.1 Results](https://mlcommons.org/en/training-normal-21/) 中的类似机器（NVIDIA A100-PCIe-80GB 300W x4，花费时间 ~60min）。

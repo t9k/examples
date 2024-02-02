@@ -18,9 +18,11 @@ git clone https://github.com/t9k/examples.git
 然后从 Hugging Face Hub（或魔搭社区）拉取要部署的模型，这里以 [CodeLlama-7b-Instruct-hf](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) 为例：
 
 ```bash
-git clone --depth 1 https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf
+huggingface-cli download codellama/CodeLlama-7b-Instruct-hf --local-dir .
 # 或
-# git clone --depth 1 https://www.modelscope.cn/AI-ModelScope/CodeLlama-7b-Instruct-hf.git
+# pip install modelscope
+# python -c "from modelscope import snapshot_download; snapshot_download('AI-ModelScope/CodeLlama-7b-Instruct-hf')"
+# mv .cache/modelscope/hub/AI-ModelScope/CodeLlama-7b-Instruct-hf .
 ```
 
 ## 部署
@@ -32,6 +34,16 @@ cd ~/examples/deployments/vllm
 kubectl apply -f mlservice-runtime.yaml
 kubectl create -f mlservice.yaml
 ```
+
+对于 `mlservice-runtime.yaml` 配置文件进行如下说明：
+
+* 每个 Predictor 最多请求 4 个 CPU（核心）、64 Gi 内存以及 1 个 GPU（需要 24GB 显存）。
+
+对于 `mlservice.yaml` 配置文件进行如下说明：
+
+* Predictor 数量为 1（第 13 行）。
+* 如要使用队列，取消第 6-8 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
+* 模型存储在 PVC `vllm` 的 `CodeLlama-7b-Instruct-hf/` 路径下（第 19 行）。
 
 在命令行监控服务是否就绪：
 

@@ -1,16 +1,19 @@
 apiVersion: tensorstack.dev/v1beta1
 kind: MLService
 metadata:
-  name: codellama-34b
+  name: codellama-7b
 spec:
-  default: codellama-34b
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  default: codellama-7b
   releases:
-    - name: codellama-34b
+    - name: codellama-7b
       predictor:
         minReplicas: 1
         model:
           runtime: vllm-openai
           parameters:
             MODEL_PATH: /var/lib/t9k/model
-            MODEL_NAME: codellama-34b
-          modelUri: pvc://vllm/CodeLlama-34b-Instruct-hf
+            MODEL_NAME: codellama-7b
+          modelUri: pvc://vllm/CodeLlama-7b-Instruct-hf
