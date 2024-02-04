@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: user-container
-        image: vllm/vllm-openai:v0.3.0
+        image: vllm/vllm-openai:v0.2.7
         args:
           - --model={{.MODEL_PATH}}
           - --served-model-name={{.MODEL_NAME}}
