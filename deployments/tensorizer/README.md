@@ -28,7 +28,7 @@ cd ~/examples/inference/tensorizer
 kubectl apply -f ./download-job.yaml
 ```
 
-## 部署服务
+### 部署服务
 
 查看下载模型任务的状态，等待 Phase 变为 `Succeeded`：
 
@@ -48,7 +48,7 @@ kubectl apply -f ./runtime.yaml
 kubectl apply -f ./mlservice.yaml
 ```
 
-## 测试服务
+### 测试服务
 
 查看 `MLService` 状态，并等待 Ready 一栏变为 `True`：
 
