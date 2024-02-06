@@ -17,10 +17,6 @@ spec:
           - name: PYTHONUNBUFFERED
             value: "1"
         resources:
-          requests:
-            cpu: 2
-            memory: 64Gi
-            nvidia.com/gpu: 1
           limits:
             cpu: 2
             memory: 64Gi
