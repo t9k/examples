@@ -1,8 +1,8 @@
-# vLLM
+# gpt4all
 
-[vLLM](https://github.com/vllm-project/vllm) 是一个快速、灵活且易于使用的 LLM 推理和服务库，其利用 PagedAttention 注意力算法显著提高了服务吞吐量。
+[gpt4all](https://github.com/nomic-ai/gpt4all) 是
 
-本示例使用 MLService 和 vLLM 框架在平台上部署一个 vLLM 推理服务。
+本示例使用 MLService 在平台上部署一个 vLLM 推理服务。
 
 ## 使用方法
 
@@ -15,18 +15,14 @@ cd ~
 git clone https://github.com/t9k/examples.git
 ```
 
-然后从 Hugging Face Hub 或魔搭社区下载要部署的模型，这里以 [CodeLlama-7b-Instruct-hf](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) 模型为例：
+然后从 Hugging Face Hub（或魔搭社区）拉取要部署的模型，这里以 [CodeLlama-7b-Instruct-hf](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) 为例：
 
 ```bash
-# 方法 1：如果可以直接访问 huggingface
-huggingface-cli download codellama/CodeLlama-7b-Instruct-hf \
-  --local-dir CodeLlama-7b-Instruct-hf --local-dir-use-symlinks False
-
-# 方法 2：对于国内用户，访问 modelscope 网络连通性更好
-pip install modelscope
-python -c \
-  "from modelscope import snapshot_download; snapshot_download('AI-ModelScope/CodeLlama-7b-Instruct-hf')"
-mv .cache/modelscope/hub/AI-ModelScope/CodeLlama-7b-Instruct-hf .
+huggingface-cli download codellama/CodeLlama-7b-Instruct-hf --local-dir .
+# 或
+# pip install modelscope
+# python -c "from modelscope import snapshot_download; snapshot_download('AI-ModelScope/CodeLlama-7b-Instruct-hf')"
+# mv .cache/modelscope/hub/AI-ModelScope/CodeLlama-7b-Instruct-hf .
 ```
 
 ## 部署
@@ -49,13 +45,13 @@ kubectl create -f mlservice.yaml
 * 如要使用队列，取消第 6-8 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 模型存储在 PVC `vllm` 的 `CodeLlama-7b-Instruct-hf/` 路径下（第 19 行）。
 
-监控服务是否准备就绪：
+在命令行监控服务是否就绪：
 
 ``` bash
-kubectl get -f mlservice.yaml -w
+kubectl get -f mlservice.yaml -o wide -w
 ```
 
-待其 `READY` 值变为 `true` 后，便可开始使用该服务。
+待 `Ready` 列变为 `True`，便可开始使用服务。
 
 ## 使用服务
 
@@ -130,4 +126,4 @@ curl ${address}/v1/completions \
 }
 ```
 
-我们也可以使用 [OpenAI Python 库](https://github.com/openai/openai-python)或第三方客户端（如 [ChatGPT-Next-Web](https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web)）来与 LLM 推理服务进行交互。有关如何使用这些客户端的详细信息，请参阅它们各自的用户文档。
+我们也可以使用 [OpenAI Python 库](https://github.com/openai/openai-python)或第三方客户端（如 [ChatGPT-Next-Web](https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web)）来与 vLLM 推理服务进行交互。有关如何使用这些客户端的详细信息，请参阅它们各自的用户文档。

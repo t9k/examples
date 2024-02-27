@@ -1,0 +1,33 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: SimpleMLService
+metadata:
+  name: fastchat
+spec:
+  replicas: 1
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  storage:
+    pvc:
+      name: fastchat
+      subPath: chatglm3-6b
+      containerPath: /workspace/chatglm3-6b
+  service:
+    type: ClusterIP
+    ports:
+    - targetPort: 80
+      port: 80
+  custom:
+    spec:
+      containers:
+      - name: server
+        image: t9kpublic/fastchat-openai:20240227
+        args:
+          - "chatglm3-6b"
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 4
+            memory: 64Gi
+            nvidia.com/gpu: 1

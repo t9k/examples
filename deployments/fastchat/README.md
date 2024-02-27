@@ -1,12 +1,12 @@
-# vLLM
+# FastChat
 
-[vLLM](https://github.com/vllm-project/vllm) 是一个快速、灵活且易于使用的 LLM 推理和服务库，其利用 PagedAttention 注意力算法显著提高了服务吞吐量。
+<a target="_blank" rel="noopener noreferrer" href="https://github.com/lm-sys/FastChat">FastChat</a> 是一个训练、伺服和评估基于 LLM 的聊天机器人的开放平台，其提供多种伺服方式，包括命令行、Web UI、兼容 OpenAI 的 RESTful API 等。
 
-本示例使用 MLService 和 vLLM 框架在平台上部署一个 vLLM 推理服务。
+本示例使用 SimpleMLService 和 FastChat 框架在平台上部署一个 LLM 推理服务。
 
 ## 使用方法
 
-创建一个名为 `vllm`、大小为 100GiB 的 PVC（需要存储模型文件），然后创建一个同样名为 `vllm` 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
+创建一个名为 `fastchat`、大小 50 GiB 以上的 PVC（需要存储模型文件），然后创建一个同样名为 `fastchat` 的 Notebook 挂载该 PVC，镜像和资源不限（如要使用远程操作，请开启 SSH）。
 
 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆此仓库：
 
@@ -15,44 +15,41 @@ cd ~
 git clone https://github.com/t9k/examples.git
 ```
 
-然后从 Hugging Face Hub 或魔搭社区下载要部署的模型，这里以 [CodeLlama-7b-Instruct-hf](https://huggingface.co/codellama/CodeLlama-7b-Instruct-hf) 模型为例：
+然后从 Hugging Face Hub 或魔搭社区下载要部署的模型，这里以 [chatglm3-6b](https://huggingface.co/THUDM/chatglm3-6b) 模型为例：
 
 ```bash
 # 方法 1：如果可以直接访问 huggingface
-huggingface-cli download codellama/CodeLlama-7b-Instruct-hf \
-  --local-dir CodeLlama-7b-Instruct-hf --local-dir-use-symlinks False
+huggingface-cli download THUDM/chatglm3-6b \
+  --local-dir chatglm3-6b --local-dir-use-symlinks False
 
 # 方法 2：对于国内用户，访问 modelscope 网络连通性更好
 pip install modelscope
 python -c \
-  "from modelscope import snapshot_download; snapshot_download('AI-ModelScope/CodeLlama-7b-Instruct-hf')"
-mv .cache/modelscope/hub/AI-ModelScope/CodeLlama-7b-Instruct-hf .
+  "from modelscope import snapshot_download; snapshot_download('ZhipuAI/chatglm3-6b')"
+mv .cache/modelscope/hub/ZhipuAI/chatglm3-6b .
 ```
 
 ## 部署
 
-使用 `mlservice-runtime.yaml` 创建 MLServiceRuntime，再使用 `mlservice.yaml` 创建 MLService 以部署服务：
+使用 `simplemlservice.yaml` 创建 SimpleMLService 以部署服务：
 
 ```bash
-cd ~/examples/deployments/vllm
-kubectl apply -f mlservice-runtime.yaml
-kubectl create -f mlservice.yaml
+cd ~/examples/deployments/fastchat
+kubectl create -f simplemlservice.yaml
 ```
 
-对于 `mlservice-runtime.yaml` 配置文件进行如下说明：
+对于 `simplemlservice.yaml` 配置文件进行如下说明：
 
-* 每个 Predictor 最多请求 4 个 CPU（核心）、64 Gi 内存以及 1 个 GPU（需要 24GB 显存）。
-
-对于 `mlservice.yaml` 配置文件进行如下说明：
-
-* Predictor 数量为 1（第 13 行）。
-* 如要使用队列，取消第 6-8 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
-* 模型存储在 PVC `vllm` 的 `CodeLlama-7b-Instruct-hf/` 路径下（第 19 行）。
+* 副本数量为 1（第 6 行）。
+* 如要使用队列，取消第 7-9 行的注释，并修改第 9 行的队列名称（默认为 `default`）。
+* 模型存储在 PVC `fastchat` 的 `chatglm3-6b/` 路径下（第 19 行）。
+* 使用的镜像 `t9kpublic/fastchat-openai`（第 24 行）由当前目录下的 Dockerfile 定义。
+* 计算资源最多使用 4 个 CPU（核心）、64 GiB 内存以及 1 个 GPU（第 31-33 行）。
 
 监控服务是否准备就绪：
 
 ``` bash
-kubectl get -f mlservice.yaml -w
+kubectl get -f simplemlservice.yaml -w
 ```
 
 待其 `READY` 值变为 `true` 后，便可开始使用该服务。
@@ -62,14 +59,14 @@ kubectl get -f mlservice.yaml -w
 使用 `curl` 命令发送聊天或生成文本的请求：
 
 ``` bash
-address=$(kubectl get -f mlservice.yaml -ojsonpath='{.status.address.url}')
+address=$(kubectl get -f simplemlservice.yaml -ojsonpath='{.status.address.url}')
 
 # 聊天
 curl ${address}/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "codellama-7b",
-    "messages": [{"role": "user", "content": "hello"}],
+    "model": "chatglm3-6b",
+    "messages": [{"role": "user", "content": "你好"}],
     "temperature": 0.5
   }'
 
@@ -77,8 +74,8 @@ curl ${address}/v1/chat/completions \
 curl ${address}/v1/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "codellama-7b",
-    "prompt": "Long long ago, there was",
+    "model": "chatglm3-6b",
+    "prompt": "很久很久以前，",
     "max_tokens": 100,
     "temperature": 0.5
   }'
@@ -91,7 +88,7 @@ curl ${address}/v1/completions \
     "id": "cmpl-5915c46dc6054ecfa4d57d07225c1264",
     "object": "chat.completion",
     "created": 5101130,
-    "model": "codellama-7b",
+    "model": "chatglm3-6b",
     "choices": [
         {
             "index": 0,
@@ -113,7 +110,7 @@ curl ${address}/v1/completions \
     "id": "cmpl-afbd703626c44a12ad192d0861fadd6e",
     "object": "text_completion",
     "created": 5101200,
-    "model": "codellama-7b",
+    "model": "chatglm3-6b",
     "choices": [
         {
             "index": 0,
