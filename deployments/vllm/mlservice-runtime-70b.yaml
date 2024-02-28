@@ -8,12 +8,12 @@ spec:
     spec:
       containers:
       - name: user-container
-        image: t9kpublic/vllm-openai:v0.2.7
+        image: t9kpublic/vllm-openai:v0.3.2
         args:
           - --model={{.MODEL_PATH}}
           - --served-model-name={{.MODEL_NAME}}
           - --trust-remote-code
-          - --tensor-parallel-size=2
+          - --tensor-parallel-size=2    # 2 度张量并行
         resources:
           limits:
             cpu: 4

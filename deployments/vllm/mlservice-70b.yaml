@@ -3,9 +3,9 @@ kind: MLService
 metadata:
   name: codellama-70b
 spec:
-  scheduler:
-    t9kScheduler:
-      queue: default
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
   default: codellama-70b
   releases:
     - name: codellama-70b

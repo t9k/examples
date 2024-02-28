@@ -1,7 +1,7 @@
 apiVersion: tensorstack.dev/v1beta1
 kind: SimpleMLService
 metadata:
-  name: fastchat
+  name: llama2-7b
 spec:
   replicas: 1
   # scheduler:
