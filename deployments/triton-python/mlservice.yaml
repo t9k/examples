@@ -1,0 +1,37 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: MLService
+metadata:
+  name: vit-base-patch16-224
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  default: v1
+  releases:
+    - name: v1
+      predictor:
+        minReplicas: 1
+        model:
+          runtime: triton-python
+        containersResources:
+        - name: user-container
+          resources:
+            limits:
+              cpu: 1
+              memory: 16Gi
+              nvidia.com/gpu: 1  # use 1 GPU
+        template:
+          spec:
+            containers:
+              - name: user-container        
+                volumeMounts:
+                  - mountPath: /data/vit-base-patch16-224-in21k
+                    name: data
+                    subPath: vit-base-patch16-224-in21k
+                  - mountPath: /models
+                    name: data
+                    subPath: python_model_repository
+            volumes:
+              - name: data
+                persistentVolumeClaim:
+                  claimName: triton-python

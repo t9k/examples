@@ -20,7 +20,7 @@ spec:
             memory: 64Gi
             nvidia.com/gpu: 2    # 对于 CodeLlama-70b 须为 A100 80GB
         ports:
-        - containerPort: 8000
+          - containerPort: 8000
         volumeMounts:
           - mountPath: /dev/shm  # 并行需要
             name: dshm

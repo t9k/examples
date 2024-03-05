@@ -1,22 +1,18 @@
 apiVersion: tensorstack.dev/v1beta1
 kind: MLServiceRuntime
 metadata:
-  name: vllm-openai
+  name: triton-python
 spec:
   enabled: true
   template:
     spec:
       containers:
       - name: user-container
-        image: t9kpublic/vllm-openai:v0.3.2
-        args:
-          - --model={{.MODEL_PATH}}
-          - --served-model-name={{.MODEL_NAME}}
-          - --trust-remote-code
+        image: t9kpublic/triton-python:20230605
         resources:
           limits:
-            cpu: 4
-            memory: 64Gi
+            cpu: 1
+            memory: 16Gi
             nvidia.com/gpu: 1
         ports:
           - containerPort: 8000

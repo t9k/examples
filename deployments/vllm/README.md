@@ -57,7 +57,7 @@ kubectl get -f mlservice.yaml -w
 
 待其 `READY` 值变为 `true` 后，便可开始使用该服务。
 
-## 使用服务
+## 使用推理服务
 
 使用 `curl` 命令发送聊天或生成文本的请求：
 

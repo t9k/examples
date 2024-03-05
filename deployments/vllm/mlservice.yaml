@@ -6,9 +6,9 @@ spec:
   # scheduler:
   #   t9kScheduler:
   #     queue: default
-  default: codellama-7b
+  default: v1
   releases:
-    - name: codellama-7b
+    - name: v1
       predictor:
         minReplicas: 1
         model:
