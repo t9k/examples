@@ -26,7 +26,6 @@
         * [DI-engine 示例](./rl/di-engine/)
         * [Stable Baseline3 示例](./rl/sb3/)
 * 推理：
-   * [Tensorizer](./deployments/tensorizer/)
-   * [vLLM](./deployments/vllm/)
+   * [Tensorizer](./inference/tensorizer/)
 * 应用：
     * [AutoGen 示例](./applications/autogen/)

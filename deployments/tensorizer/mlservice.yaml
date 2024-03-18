@@ -11,10 +11,3 @@ spec:
         model:
           modelUri: pvc://tensorizer
           runtime: tensorizer-kserve
-        containersResources:
-        - name: user-container
-          resources:
-            limits:
-              cpu: 2
-              memory: 64Gi
-              nvidia.com/gpu: 1
