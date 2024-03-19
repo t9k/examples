@@ -11,7 +11,7 @@ spec:
     pvc:
       name: fastchat
       subPath: chatglm3-6b
-      containerPath: /workspace/chatglm3-6b
+      mountPath: /workspace/chatglm3-6b
   service:
     type: ClusterIP
     ports:
