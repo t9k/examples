@@ -9,7 +9,6 @@ spec:
       predictor:
         minReplicas: 1
         model:
-          modelUri: pvc://tensorizer
           runtime: tensorizer-kserve
         containersResources:
         - name: user-container
@@ -18,3 +17,6 @@ spec:
               cpu: 2
               memory: 64Gi
               nvidia.com/gpu: 1
+        storage:
+          pvc:
+            name: tensorizer

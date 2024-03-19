@@ -16,7 +16,6 @@ spec:
           parameters:
             MODEL_PATH: /var/lib/t9k/model
             MODEL_NAME: codellama-70b
-          modelUri: pvc://vllm/CodeLlama-70b-Instruct-hf
         containersResources:
         - name: user-container
           resources:
@@ -24,3 +23,7 @@ spec:
               cpu: 4
               memory: 64Gi
               nvidia.com/gpu: 2
+        storage:
+          pvc:
+            name: vllm
+            subPath: CodeLlama-70b-Instruct-hf

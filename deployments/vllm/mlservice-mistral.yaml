@@ -16,7 +16,6 @@ spec:
           parameters:
             MODEL_PATH: /var/lib/t9k/model
             MODEL_NAME: mistral-7b
-          modelUri: pvc://vllm/Mistral-7B-Instruct-v0.1
         containersResources:
         - name: user-container
           resources:
@@ -24,3 +23,7 @@ spec:
               cpu: 4
               memory: 64Gi
               nvidia.com/gpu: 1
+        storage:
+          pvc:
+            name: vllm
+            subPath: Mistral-7B-Instruct-v0.1

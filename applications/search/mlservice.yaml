@@ -16,7 +16,6 @@ spec:
           parameters:
             MODEL_PATH: /var/lib/t9k/model
             MODEL_NAME: mixtral-8x7b
-          modelUri: pvc://search/Mixtral-8x7B-Instruct-v0.1
         containersResources:
           - name: user-container
             resources:
@@ -24,3 +23,7 @@ spec:
                 cpu: 4
                 memory: 64Gi
                 nvidia.com/gpu: 2
+        storage:
+          pvc:
+            name: search
+            subPath: Mixtral-8x7B-Instruct-v0.1

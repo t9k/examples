@@ -11,7 +11,7 @@ spec:
     pvc:
       name: fastchat
       subPath: Llama-2-7b-chat-hf
-      containerPath: /workspace/llama2-7b-chat
+      mountPath: /workspace/llama2-7b-chat
   service:
     type: ClusterIP
     ports:
