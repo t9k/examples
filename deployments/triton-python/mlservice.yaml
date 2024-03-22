@@ -19,7 +19,7 @@ spec:
             limits:
               cpu: 1
               memory: 16Gi
-              nvidia.com/gpu: 1  # use 1 GPU
+              nvidia.com/gpu: 1  # 至少 10 GiB 显存
         template:
           spec:
             containers:

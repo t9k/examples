@@ -41,6 +41,7 @@ kubectl create -f mlservice.yaml
 对于 `mlservice-runtime.yaml` 配置文件进行如下说明：
 
 * 每个 Predictor 最多请求 1 个 CPU（核心）、16 Gi 内存以及 1 个 GPU。
+* 镜像 `t9kpublic/triton-python:20230605`（第 11 行）由当前目录下的 Dockerfile 定义。
 
 对于 `mlservice.yaml` 配置文件进行如下说明：
 
