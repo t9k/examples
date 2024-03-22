@@ -1,0 +1,22 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: MLServiceRuntime
+metadata:
+  name: triton-tensorrtllm
+spec:
+  enabled: true
+  template:
+    spec:
+      containers:
+      - name: user-container
+        image: t9kpublic/triton-tensorrtllm:20240307
+        args:
+          - python3
+          - launch_triton_server.py
+          - --model_repo={{.MODEL_REPO_PATH}}
+        resources:
+          limits:
+            cpu: 4
+            memory: 64Gi
+            nvidia.com/gpu: 1
+        ports:
+          - containerPort: 8000

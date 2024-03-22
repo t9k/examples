@@ -1,0 +1,28 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: MLService
+metadata:
+  name: llama2-7b-chat-triton-tensorrtllm
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  default: v1
+  releases:
+    - name: v1
+      predictor:
+        minReplicas: 1
+        model:
+          runtime: triton-tensorrtllm
+          parameters:
+            MODEL_REPO_PATH: /workspace/inflight_batcher_llm
+        containersResources:
+        - name: user-container
+          resources:
+            limits:
+              cpu: 4
+              memory: 64Gi
+              nvidia.com/gpu: 1  # 至少 18 GiB 显存
+        storage:
+          pvc:
+            name: triton-tensorrtllm
+            mountPath: /workspace
