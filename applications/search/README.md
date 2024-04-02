@@ -15,7 +15,7 @@ cd ~
 git clone https://github.com/t9k/examples.git
 ```
 
-## 部署 LLM 推理服务
+### 部署 LLM 推理服务
 
 > [!TIP]
 > 以下部署 LLM 推理服务的步骤来自示例 [vLLM](../../deployments/vllm/)。本示例以 Mixtral 8x7B 模型为例。
@@ -47,7 +47,7 @@ kubectl apply -f mlservice-runtime.yaml
 kubectl create -f mlservice.yaml
 ```
 
-## 部署对话式搜索服务
+### 部署对话式搜索服务
 
 在 `secret.yaml` 中提供所调用搜索引擎的 API key，使用它创建 Secret：
 
@@ -72,7 +72,7 @@ kubectl create -f deployment.yaml
 kubectl create -f secret.yaml
 ```
 
-## 搜索
+### 搜索
 
 在本地的终端中，使用 t9k-pf 命令行工具，将服务的 8080 端口转发到本地的 8080 端口：
 

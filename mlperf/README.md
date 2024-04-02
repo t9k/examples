@@ -2,7 +2,7 @@
 
 MLPerf™ Training benchmark 是一个机器学习领域的基准测试套件，旨在针对现代机器学习工作负载公正、准确、全面地评估系统性能。更多详细信息请参阅官方网站 [MLCommons v2.1 Results](https://mlcommons.org/en/training-normal-21/)以及论文 [MLPerf Training Benchmark](https://mlcommons.org/en/training-normal-21/)。
 
-本项目提供 MLPerf Training 最新版本（当前为 v2.1）的各个 benchmark 在 TensorStack AI 计算平台上的运行方法。所有模型的实现均采用 [NVIDIA 的提交](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA)。
+本项目提供 MLPerf Training v2.1 版本的各个 benchmark 在 TensorStack AI 计算平台上的运行方法。所有模型的实现均采用 [NVIDIA 的提交](https://github.com/mlcommons/training_results_v2.1/tree/main/NVIDIA)。
 
 ## 使用前提
 
