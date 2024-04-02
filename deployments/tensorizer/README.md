@@ -164,5 +164,5 @@ kubectl get -f imagebuilder.yaml -w
 
 ## 参考
 
-- [Tensorizer 官方文档](https://docs.coreweave.com/coreweave-machine-learning-and-ai/inference/tensorizer)
-- [基于 Tensorizer 和 KServe 部署 gpt-j](https://github.com/coreweave/kubernetes-cloud/tree/master/online-inference/tensorizer-isvc)
+* [Tensorizer 官方文档](https://docs.coreweave.com/coreweave-machine-learning-and-ai/inference/tensorizer)
+* [基于 Tensorizer 和 KServe 部署 gpt-j](https://github.com/coreweave/kubernetes-cloud/tree/master/online-inference/tensorizer-isvc)

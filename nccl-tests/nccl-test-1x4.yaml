@@ -1,0 +1,42 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: MPIJob
+metadata:
+  name: nccl-test-1x4
+spec:
+  # runMode:
+  #   debug:
+  #     enabled: true
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  worker:
+    replicas: 1
+    extraMPIArgs: ["--allow-run-as-root", "-N", "1", "-bind-to", "none", "-x", "NCCL_DEBUG=INFO"]
+    cmd: ["/nccl_tests/build/all_reduce_perf", "-b", "8", "-e", "1G", "-f", "2", "-g", "4"]
+    template:
+      spec:
+        containers:
+          - name: mpi-worker
+            image: t9kpublic/nccl-tests:main
+            imagePullPolicy: IfNotPresent
+            resources:
+              requests:
+                cpu: 1
+                memory: 2Gi
+              limits:
+                cpu: 2
+                memory: 4Gi
+                nvidia.com/gpu: 4
+            volumeMounts:
+              - mountPath: /dev/shm
+                name: dshm
+        volumes:
+          - emptyDir:
+              medium: Memory
+            name: dshm
+  runPolicy:
+    cleanUpWorkers: true
+  ssh:
+    sshdPath: /usr/sbin/sshd
+  mpiHome: /usr/local
