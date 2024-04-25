@@ -21,9 +21,6 @@ spec:
             image: t9kpublic/nccl-tests:main
             imagePullPolicy: IfNotPresent
             resources:
-              requests:
-                cpu: 1
-                memory: 2Gi
               limits:
                 cpu: 2
                 memory: 4Gi
