@@ -1,0 +1,58 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: yolov5-debug
+spec:
+  runMode:
+    debug:
+      enabled: true
+  replicaSpecs:
+  - type: worker
+    replicas: 1
+    restartPolicy: OnFailure
+    template:
+      spec:
+        containers:
+        - name: yolov5
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_PTRACE"]
+          image: image.sourcefind.cn:5000/dcu/admin/base/pytorch:1.13.1-centos7.6-dtk-23.04.1-py38-latest
+          env:
+          - name: HIP_VISIBLE_DEVICES  # 若不设置该环境变量能看到和使用所有 DCU
+            value: "0"
+          - name: USE_MIOPEN_BATCHNORM
+            value: "1"
+          resources:
+            limits:
+              cpu: 16
+              memory: 32Gi
+              hygon.com/dcu: 1
+            requests:
+              cpu: 16
+              memory: 32Gi
+              hygon.com/dcu: 1
+          volumeMounts:
+          - name: dev-kfd
+            mountPath: /dev/kfd
+          - name: dev-dri
+            mountPath: /dev/dri
+          - name: data
+            mountPath: /workspace
+          - name: dshm
+            mountPath: /dev/shm
+        volumes:
+        - name: dev-kfd
+          hostPath:
+            path: /dev/kfd
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+        - name: data
+          persistentVolumeClaim:
+            claimName: yolov5
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: "32Gi"

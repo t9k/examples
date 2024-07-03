@@ -1,0 +1,77 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: yolov5-1x4xdp
+spec:
+  tensorboardSpec:
+    trainingLogFilesets:
+    - t9k://pvc/yolov5/yolov5_pytorch/run/train/
+    image: registry.cn-hangzhou.aliyuncs.com/t9k/tensorflow:2.11.0-cpu-sdk-0.5.2
+  torchrunConfig:
+    enabled: true
+    maxRestarts: 3
+    procPerNode: "4"
+    rdzvBackend: c10d
+  replicaSpecs:
+  - type: worker
+    replicas: 1
+    restartPolicy: OnFailure
+    template:
+      spec:
+        containers:
+        - name: yolov5
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["SYS_PTRACE"]
+          image: registry.cn-hangzhou.aliyuncs.com/xyxxxxx/yolov5:6.0
+          workingDir: /t9k/mnt/yolov5_pytorch
+          env:
+          - name: HIP_VISIBLE_DEVICES  # 若不设置该环境变量能看到和使用所有 DCU
+            value: "0,1,2,3"
+          - name: HSA_FORCE_FINE_GRAIN_PCIE
+            value: "1"
+          - name: USE_MIOPEN_BATCHNORM
+            value: "1"
+          args:
+          - train.py
+          - "--batch=128"
+          - "--data=coco.yaml"
+          - "--cfg=yolov5m.yaml"
+          - "--weights="
+          - "--project=run/train"
+          - "--hyp=data/hyps/hyp.scratch-high.yaml"
+          - "--device=0,1,2,3"
+          - "--epochs=1000"
+          resources:
+            limits:
+              cpu: 16
+              memory: 32Gi
+              hygon.com/dcu: 4
+            requests:
+              cpu: 16
+              memory: 32Gi
+              hygon.com/dcu: 4
+          volumeMounts:
+          - name: dev-kfd
+            mountPath: /dev/kfd
+          - name: dev-dri
+            mountPath: /dev/dri
+          - name: workingdir
+            mountPath: /t9k/mnt
+          - name: dshm
+            mountPath: /dev/shm
+        volumes:
+        - name: dev-kfd
+          hostPath:
+            path: /dev/kfd
+        - name: dev-dri
+          hostPath:
+            path: /dev/dri
+        - name: workingdir
+          persistentVolumeClaim:
+            claimName: yolov5
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: "32Gi"

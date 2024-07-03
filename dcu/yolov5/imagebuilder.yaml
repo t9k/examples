@@ -1,0 +1,16 @@
+apiVersion: tensorstack.dev/v1beta1
+kind: ImageBuilder
+metadata:
+  name: yolov5
+spec:
+  builder:
+    kaniko:
+      image: registry.cn-hangzhou.aliyuncs.com/t9k/kaniko-executor:v1.7.0
+  dockerConfig:
+    secret: docker-config
+  tag: registry.cn-hangzhou.aliyuncs.com/xyxxxxx/yolov5:6.0
+  workspace:
+    pvc:
+      name: yolov5
+      dockerfilePath: ./Dockerfile
+      contextPath: .
