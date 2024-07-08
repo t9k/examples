@@ -1,16 +1,16 @@
 apiVersion: tensorstack.dev/v1beta1
 kind: ImageBuilder
 metadata:
-  name: yolov5
+  name: llama3
 spec:
   builder:
     kaniko:
       image: registry.cn-hangzhou.aliyuncs.com/t9k/kaniko-executor:v1.7.0
   dockerConfig:
     secret: docker-config
-  tag: registry.cn-hangzhou.aliyuncs.com/t9k/yolov5:dcu-6.0
+  tag: registry.cn-hangzhou.aliyuncs.com/xyxxxxx/pytorch:dcu-2.1.0-xtuner
   workspace:
     pvc:
-      name: yolov5
+      name: llama3
       dockerfilePath: ./Dockerfile
       contextPath: .

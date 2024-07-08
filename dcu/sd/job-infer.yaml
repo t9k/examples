@@ -1,11 +1,8 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: yolov5-debug
+  name: sd
 spec:
-  runMode:
-    debug:
-      enabled: true
   replicaSpecs:
   - type: worker
     replicas: 1
@@ -13,17 +10,19 @@ spec:
     template:
       spec:
         containers:
-        - name: yolov5
+        - name: sd
           securityContext:
             privileged: true
             capabilities:
               add: ["SYS_PTRACE"]
-          image: image.sourcefind.cn:5000/dcu/admin/base/pytorch:1.13.1-centos7.6-dtk-23.04.1-py38-latest
+          image: registry.cn-hangzhou.aliyuncs.com/xyxxxxx/stable-diffusion:dcu
+          workingDir: /workspace
+          command: ["python", "draw.py"]
           env:
           - name: HIP_VISIBLE_DEVICES  # 若不设置该环境变量能看到和使用所有 DCU
             value: "0"
-          - name: USE_MIOPEN_BATCHNORM
-            value: "1"
+          - name: HF_ENDPOINT
+            value: "https://hf-mirror.com"
           resources:
             limits:
               cpu: 4
@@ -40,6 +39,9 @@ spec:
             mountPath: /dev/dri
           - name: data
             mountPath: /workspace
+          - name: data
+            mountPath: /root/.cache/huggingface
+            subPath: .cache/huggingface
           - name: dshm
             mountPath: /dev/shm
         volumes:
@@ -51,8 +53,8 @@ spec:
             path: /dev/dri
         - name: data
           persistentVolumeClaim:
-            claimName: yolov5
+            claimName: sd
         - name: dshm
           emptyDir:
             medium: Memory
-            sizeLimit: "32Gi"
+            sizeLimit: "10Gi"

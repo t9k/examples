@@ -1,7 +1,7 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: yolov5-debug
+  name: llama3-debug
 spec:
   runMode:
     debug:
@@ -13,36 +13,42 @@ spec:
     template:
       spec:
         containers:
-        - name: yolov5
+        - name: llama3
           securityContext:
             privileged: true
             capabilities:
               add: ["SYS_PTRACE"]
-          image: image.sourcefind.cn:5000/dcu/admin/base/pytorch:1.13.1-centos7.6-dtk-23.04.1-py38-latest
+          image: image.sourcefind.cn:5000/dcu/admin/base/pytorch:2.1.0-centos7.6-dtk24.04-py310
           env:
           - name: HIP_VISIBLE_DEVICES  # 若不设置该环境变量能看到和使用所有 DCU
             value: "0"
-          - name: USE_MIOPEN_BATCHNORM
-            value: "1"
           resources:
             limits:
-              cpu: 4
+              cpu: 16
               memory: 32Gi
               hygon.com/dcu: 1
             requests:
-              cpu: 4
+              cpu: 16
               memory: 32Gi
               hygon.com/dcu: 1
           volumeMounts:
+          - name: hyhal
+            mountPath: /opt/hyhal/
+            readOnly: true
           - name: dev-kfd
             mountPath: /dev/kfd
+            readOnly: true
           - name: dev-dri
             mountPath: /dev/dri
+            readOnly: true
           - name: data
             mountPath: /workspace
           - name: dshm
             mountPath: /dev/shm
         volumes:
+        - name: hyhal
+          hostPath:
+            path: /opt/hyhal/
         - name: dev-kfd
           hostPath:
             path: /dev/kfd
@@ -51,7 +57,7 @@ spec:
             path: /dev/dri
         - name: data
           persistentVolumeClaim:
-            claimName: yolov5
+            claimName: llama3
         - name: dshm
           emptyDir:
             medium: Memory

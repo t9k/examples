@@ -24,17 +24,8 @@ spec:
             privileged: true
             capabilities:
               add: ["SYS_PTRACE"]
-          image: registry.cn-hangzhou.aliyuncs.com/xyxxxxx/yolov5:6.0
+          image: registry.cn-hangzhou.aliyuncs.com/t9k/yolov5:dcu-6.0
           workingDir: /t9k/mnt/yolov5_pytorch
-          env:
-          - name: HIP_VISIBLE_DEVICES  # 若不设置该环境变量能看到和使用所有 DCU
-            value: "0,1,2,3"
-          - name: HSA_FORCE_FINE_GRAIN_PCIE
-            value: "1"
-          - name: USE_MIOPEN_BATCHNORM
-            value: "1"
-          - name: NCCL_SOCKET_IFNAME
-            value: "eno1"
           args:
           - train.py
           - "--batch=128"
@@ -45,13 +36,22 @@ spec:
           - "--hyp=data/hyps/hyp.scratch-high.yaml"
           - "--device=0,1,2,3"
           - "--epochs=1000"
+          env:
+          - name: HIP_VISIBLE_DEVICES  # 若不设置该环境变量能看到和使用所有 DCU
+            value: "0,1,2,3"
+          - name: HSA_FORCE_FINE_GRAIN_PCIE
+            value: "1"
+          - name: USE_MIOPEN_BATCHNORM
+            value: "1"
+          - name: NCCL_SOCKET_IFNAME
+            value: "eno1"
           resources:
             limits:
-              cpu: 16
+              cpu: 4
               memory: 32Gi
               hygon.com/dcu: 4
             requests:
-              cpu: 16
+              cpu: 4
               memory: 32Gi
               hygon.com/dcu: 4
           volumeMounts:
