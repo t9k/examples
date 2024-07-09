@@ -33,7 +33,7 @@ spec:
               hygon.com/dcu: 1
           volumeMounts:
           - name: hyhal
-            mountPath: /opt/hyhal/
+            mountPath: /opt/hyhal
             readOnly: true
           - name: dev-kfd
             mountPath: /dev/kfd
@@ -48,7 +48,7 @@ spec:
         volumes:
         - name: hyhal
           hostPath:
-            path: /opt/hyhal/
+            path: /opt/hyhal
         - name: dev-kfd
           hostPath:
             path: /dev/kfd
