@@ -10,7 +10,7 @@ spec:
       python: []
   runMode:
     debug:
-      enable: true
+      enabled: true
   worker:
     replicas: 1
     template:
