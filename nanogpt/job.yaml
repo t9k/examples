@@ -8,7 +8,7 @@ spec:
   #     queue: default
   #     priority: 50
   torchrunConfig:
-    enable: true
+    enabled: true
     maxRestarts: 3
     procPerNode: "8"
     rdzvBackend: c10d

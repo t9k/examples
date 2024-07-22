@@ -4,7 +4,7 @@ metadata:
   name: lanedet
 spec:
   torchrunConfig:
-    enable: true
+    enabled: true
     maxRestarts: 3
     procPerNode: "2"
     rdzvBackend: c10d
