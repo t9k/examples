@@ -5,7 +5,7 @@ metadata:
 spec:
   runMode:
     debug:
-      enable: true
+      enabled: true
       replicaSpecs:
         - type: worker
           skipInitContainer: true
