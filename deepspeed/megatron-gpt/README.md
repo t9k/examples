@@ -33,8 +33,8 @@ GPT-3 系列模型的参数量覆盖了从 125M 到 175B 的非常大的范围�
 
 ```shell
 cd ~
-git clone https://github.com/microsoft/Megatron-DeepSpeed.git
-git clone https://github.com/NVIDIA/Megatron-LM.git
+git clone https://github.com/microsoft/Megatron-DeepSpeed.git && cd Megatron-DeepSpeed && git reset --hard e7bff5ec80badd387abf0e52ae392d169cc738a6 && cd ..
+git clone https://github.com/NVIDIA/Megatron-LM.git && cd Megatron-LM && git reset --hard 040eac9414ccbd1301ae16369c3044c5632b7e14 && cd ..
 git clone https://github.com/t9k/examples.git
 ```
 
