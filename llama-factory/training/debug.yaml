@@ -1,0 +1,39 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: finetune-llama3
+spec:
+  runMode:
+    debug:
+      enabled: true
+  replicaSpecs:
+  - type: worker
+    replicas: 1
+    restartPolicy: OnFailure
+    template:
+      spec:
+        containers:
+        - name: pytorch
+          image: pytorch/pytorch:2.4.0-cuda12.1-cudnn9-runtime
+          resources:
+            limits:
+              cpu: 16
+              memory: 32Gi
+              nvidia.com/gpu: 1
+            requests:
+              cpu: 16
+              memory: 32Gi
+              nvidia.com/gpu: 1
+          volumeMounts:
+          - name: data
+            mountPath: /workspace
+          - name: dshm
+            mountPath: /dev/shm
+        volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: vllm
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: "32Gi"

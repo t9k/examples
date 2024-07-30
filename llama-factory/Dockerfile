@@ -1,33 +1,24 @@
-FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+FROM pytorch/pytorch:2.4.0-cuda12.1-cudnn9-runtime
 
 RUN apt-get update && \
-  apt-get install -yq --no-install-recommends openssh-server pdsh git && \
+  apt-get install -yq --no-install-recommends openssh-server pdsh git libaio-dev && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir \
-    deepspeed>=0.10.2 \
-    transformers>=4.31.0 \
-    datasets>=2.12.0 \
-    accelerate>=0.21.0 \
-    peft>=0.6.0 \
-    trl>=0.7.4 \
-    scipy \
-    sentencepiece \
-    tiktoken \
-    xformers \
-    jieba \
-    rouge-chinese \
-    nltk \
-    gradio>=3.36.0 \
-    uvicorn \
-    pydantic==1.10.11 \
-    fastapi==0.95.1 \
-    sse-starlette \
-    matplotlib
+RUN git clone --depth 1 https://github.com/hiyouga/LLaMA-Factory.git && \
+  cd LLaMA-Factory && \
+  pip install --no-cache-dir --upgrade pip && \
+  pip install -e ".[torch,metrics,deepspeed,bitsandbytes]" && \
+  cd .. && \
+  rm -rf LLaMA-Factory
 
 RUN mkdir /run/sshd
 RUN chown root:root /usr/lib
 
-WORKDIR /t9k/mnt
+ARG GID=1000
+ARG UID=1000
+RUN groupadd --gid=$GID t9kuser && mkdir /t9k && \
+    useradd -rm --create-home -d /t9k/mnt --shell /bin/bash \
+    --uid=$UID --gid=$GID t9kuser
+USER t9kuser
+WORKDIR /workspace
