@@ -14,7 +14,7 @@ spec:
     rdzvBackend: c10d
   replicaSpecs:
     - type: worker
-      replicas: 2
+      replicas: 1
       restartPolicy: OnFailure
       template:
         spec:
@@ -24,19 +24,18 @@ spec:
               workingDir: /workspace
               args: 
                 - LLaMA-Factory/src/llamafactory/launcher.py
-                - train
-                - examples/llama-factory/training/sft-8b-config.yaml
+                - examples/llama-factory/training/sft-8b-2xdp-config.yaml
               env:
                 - name: HF_ENDPOINT
                   value: "https://hf-mirror.com"
               resources:
                 requests:
                   cpu: 4
-                  memory: 32Gi
+                  memory: 8Gi
                   nvidia.com/gpu: 2
                 limits:
                   cpu: 8
-                  memory: 64Gi
+                  memory: 16Gi
                   nvidia.com/gpu: 2
               volumeMounts:
                 - mountPath: /workspace

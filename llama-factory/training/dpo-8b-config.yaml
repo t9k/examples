@@ -10,22 +10,22 @@ pref_beta: 0.1
 pref_loss: sigmoid  # choices: [sigmoid (dpo), orpo, simpo]
 
 ### dataset
+dataset_dir: examples/llama-factory/data
 dataset: dpo_mix_en,dpo_mix_zh
 template: llama3
-cutoff_len: 1024
-max_samples: 1000
+cutoff_len: 4096
 overwrite_cache: true
 preprocessing_num_workers: 16
 
 ### output
 output_dir: saves/llama3-1-8b/lora/dpo
 logging_steps: 100
-save_steps: 5000
+save_steps: 4000
 plot_loss: true
 overwrite_output_dir: true
 
 ### train
-per_device_train_batch_size: 8
+per_device_train_batch_size: 16
 gradient_accumulation_steps: 1
 learning_rate: 5.0e-6
 num_train_epochs: 3.0
@@ -38,4 +38,4 @@ ddp_timeout: 180000000
 val_size: 0.1
 per_device_eval_batch_size: 1
 eval_strategy: steps
-eval_steps: 5000
+eval_steps: 4000

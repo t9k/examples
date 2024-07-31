@@ -1,5 +1,5 @@
 ### model
-model_name_or_path: models/Meta-Llama-3.1-8B
+model_name_or_path: models/Meta-Llama-3.1-70B
 
 ### method
 stage: sft
@@ -7,10 +7,12 @@ do_train: true
 finetuning_type: lora
 lora_target: all
 deepspeed: examples/llama-factory/training/ds_z2_config.json
+# deepspeed: examples/llama-factory/training/ds_z3_config.json  # for node with NVLink
 
 ### dataset
 dataset_dir: examples/llama-factory/data
-dataset: identity,alpaca_gpt4_en,alpaca_gpt4_zh
+dataset: identity,alpaca_gpt4_en,alpaca_gpt4_zh,sharegpt4,lima,wikiqa,nectar_sft,webqa,stem_zh,mathinstruct
+
 template: llama3
 cutoff_len: 4096
 overwrite_cache: true
@@ -24,7 +26,7 @@ plot_loss: true
 overwrite_output_dir: true
 
 ### train
-per_device_train_batch_size: 16
+per_device_train_batch_size: 4
 gradient_accumulation_steps: 1
 learning_rate: 1.0e-5
 num_train_epochs: 3.0
