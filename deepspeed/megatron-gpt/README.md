@@ -27,7 +27,7 @@ GPT-3 系列模型的参数量覆盖了从 125M 到 175B 的非常大的范围�
 
 > 要训练其他参数量的模型，可以在参数量接近的现有训练配置的基础上修改适当的参数以进行训练。
 
-创建一个名为 megatron、大小为 250GiB 的 PVC，然后创建一个同样名为 megatron 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large（如要尝试文本生成，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)；如要使用远程操作，请开启 SSH）。
+创建一个名为 megatron、大小为 250GiB 的 PVC，然后创建一个同样名为 megatron 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large（如要使用远程操作，请开启 SSH）。
 
 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆 Megatron-DeepSpeed、Megatron-LM 以及此仓库：
 
@@ -84,7 +84,7 @@ kubectl create -f gpt-125m.yaml  # or gpt-125m-2xdp.yaml, gpt-125m-4xdp.yaml
 * 训练占用显存 ~31GB，修改以下参数可以减小显存占用，以防止 OOM：
     * 减小 `--micro-batch-size`（第 49 行）。
     * 启用 activation checkpointing（第 54 和 85 行），但会损害性能。
-* 镜像 `t9kpublic/megatron-deepspeed:23.05-py3`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
+* 镜像 `t9kpublic/megatron-deepspeed:23.06-py3`（第 94 行）由 [Dockerfile](./docker/Dockerfile) 定义。
 
 ### 1.3B
 
@@ -154,27 +154,21 @@ cp examples/deepspeed/megatron-gpt/profiling/training.py Megatron-DeepSpeed/mega
 
 ## 文本生成
 
-训练完成之后可以使用保存的检查点进行文本生成，还是以 125M 为例。首先 hack Megatron-LM 的文本生成相关的代码，并复制检查点文件到指定位置：
-
-```shell
-cd ~
-cp examples/deepspeed/megatron-gpt/inference/run_text_generation_server.py Megatron-LM/tools/run_text_generation_server.py
-mkdir -p output/gpt-125m/model/iter_0004769/mp_rank_00 && cp output/gpt-125m/model/global_step4769/mp_rank_00_model_states.pt output/gpt-125m/model/iter_0004769/mp_rank_00/model_optim_rng.pt
-```
-
-使用 `inference/inference-job.yaml` 创建一个启用 debug 模式的 Job，将其创建的处于空闲状态的 Pod 作为工作空间。进入该 Pod，执行 `inference/server-125m.sh` 脚本以启动服务：
+训练完成之后可以使用保存的检查点进行文本生成，还是以 125M 为例。使用 `inference/inference-job.yaml` 创建一个启用 debug 模式的 Job，将其创建的处于空闲状态的 Pod 作为工作空间。进入该 Pod，hack Megatron-LM 的文本生成相关的代码，复制检查点文件到指定位置，然后执行 `inference/server-125m.sh` 脚本以启动服务：
 
 ```shell
 kubectl create -f examples/deepspeed/megatron-gpt/inference/inference-job.yaml
-kubectl exec -it gpt-inference-worker-0 -- bash
+kubectl exec -it $(kubectl get pod -l tensorstack.dev/owner-name=gpt-inference -o jsonpath='{.items[0].metadata.name}') -- bash
 
+cp examples/deepspeed/megatron-gpt/inference/run_text_generation_server.py Megatron-LM/tools/run_text_generation_server.py
+mkdir -p output/gpt-125m/model/iter_0004769/mp_rank_00 && cp output/gpt-125m/model/global_step4769/mp_rank_00_model_states.pt output/gpt-125m/model/iter_0004769/mp_rank_00/model_optim_rng.pt
 ./examples/deepspeed/megatron-gpt/inference/server-125m.sh
 ```
 
 打开一个新的终端，同样进入该 Pod，执行 `Megatron-LM/tools/text_generation_cli.py` 脚本以发送推理请求：
 
 ```shell
-kubectl exec -it gpt-inference-worker-0 -- bash
+kubectl exec -it $(kubectl get pod -l tensorstack.dev/owner-name=gpt-inference -o jsonpath='{.items[0].metadata.name}') -- bash
 
 python Megatron-LM/tools/text_generation_cli.py localhost:5000
 # 根据提示输入
