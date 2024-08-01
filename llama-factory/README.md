@@ -10,8 +10,8 @@
 
 | 参数量 | 步骤 | 数据集                                   | 配置文件            | 并行策略 | GPU 使用（参考） | 预计时间 |
 | ------ | ---- | ---------------------------------------- | ------------------- | -------- | ---------------- | -------- |
-| 8B     | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-8b.yaml`       | -        | 1x A100 40GB     | ~6h      |
-|        |      |                                          | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~3h      |
+| 8B     | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-8b.yaml`       | -        | 1x A100 40GB     | ~12h     |
+|        |      |                                          | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~6.5h    |
 |        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-8b.yaml`       | -        | 1x A100 40GB     | ~0min    |
 |        |      |                                          | `dpo-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~0min    |
 | 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 40GB     | ~0min    |
@@ -30,7 +30,7 @@ git clone https://github.com/t9k/examples.git
 安装 LLaMA-Factory 库：
 
 ```bash
-pip install -e LLaMA-Factory
+pip install ./LLaMA-Factory
 ```
 
 从 Hugging Face Hub（或魔搭社区）拉取预训练模型：
@@ -63,7 +63,7 @@ kubectl create -f sft-8b.yaml  # 或 sft-8b-2xdp.yaml
 * 每个副本的进程数量和 GPU 数量（第 31 和 35 行）同为 1。
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 读取配置文件 `examples/llama-factory/training/sft-8b-config.yaml`（第 23 行）。
-* 训练占用显存 ~34GB，减小配置文件的 `per_device_train_batch_size`（第 27 行）可以减小显存占用，以防止 OOM。
+* 训练占用显存 ~33GB，减小配置文件的 `per_device_train_batch_size`（第 27 行）可以减小显存占用，以防止 OOM。
 * 镜像 `t9kpublic/llama-factory:20240730`（第 18 行）由 [Dockerfile](./Dockerfile) 定义。
 
 分别与 Meta-Llama-3.1-8B 原模型以及 SFT 训练得到的模型聊天：
@@ -119,12 +119,12 @@ kubectl create -f sft-70b-4xdp.yaml
 
 对于 YAML 配置文件进行如下说明：
 
-* 训练副本（replica）数量为 1（第 12 行）。
-* 每个副本的进程数量（第 13 行）和 GPU 数量（第 35 和 39 行）同为 1。
+* 训练副本（replica）数量为 1（第 17 行）。
+* 每个副本的进程数量（第 13 行）和 GPU 数量（第 35 和 39 行）同为 4。
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 读取配置文件 `examples/llama-factory/training/sft-70b-4xdp-config.yaml`（第 23 行）。
-* 训练占用显存 ~35GB，减小配置文件的 `per_device_train_batch_size`（第 27 行）可以减小显存占用，以防止 OOM。
-* 镜像 `t9kpublic/llama-factory:20240730`（第 18 行）由 [Dockerfile](./Dockerfile) 定义。
+* 训练占用显存 ~GB，减小配置文件的 `per_device_train_batch_size`（第 29 行）可以减小显存占用，以防止 OOM。
+* 镜像 `t9kpublic/llama-factory:20240730`（第 23 行）由 [Dockerfile](./Dockerfile) 定义。
 
 然后合并 LoRA adapter 到原模型得到新模型 Meta-Llama-3.1-70B-sft：
 
