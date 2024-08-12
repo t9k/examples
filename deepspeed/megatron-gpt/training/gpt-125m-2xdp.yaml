@@ -3,17 +3,10 @@ kind: DeepSpeedJob
 metadata:
   name: gpt-125m
 spec:
-  # runMode:
-  #   debug:
-  #     enabled: true
-  #     replicaSpecs:
-  #       - type: worker
-  #         skipInitContainer: true
-  #         command: ["sleep", "inf"]
-  scheduler:
-    t9kScheduler:
-      queue: default
-      priority: 50
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
   config:
     localRank: true
     slotsPerWorker: 2
@@ -91,7 +84,7 @@ spec:
       spec:
         containers:
           - name: worker
-            image: t9kpublic/megatron-deepspeed:23.05-py3
+            image: t9kpublic/megatron-deepspeed:23.06-py3
             workingDir: /t9k/mnt/
             securityContext:
               capabilities:
