@@ -3,11 +3,11 @@
 ### model
 model_name_or_path: models/Meta-Llama-3.1-70B
 adapter_name_or_path: saves/llama3-1-70b/lora/sft
-template: llama3
+template: default
 finetuning_type: lora
 
 ### export
 export_dir: models/Meta-Llama-3.1-70B-sft
 export_size: 2
-export_device: cpu
+export_device: gpu
 export_legacy_format: false

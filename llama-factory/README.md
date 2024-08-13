@@ -11,11 +11,10 @@
 | 参数量 | 步骤 | 数据集                                   | 配置文件            | 并行策略 | GPU 使用（参考） | 预计时间 |
 | ------ | ---- | ---------------------------------------- | ------------------- | -------- | ---------------- | -------- |
 | 8B     | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-8b.yaml`       | -        | 1x A100 40GB     | ~12h     |
-|        |      |                                          | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~6.5h    |
-|        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-8b.yaml`       | -        | 1x A100 40GB     | ~0min    |
-|        |      |                                          | `dpo-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~0min    |
-| 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 40GB     | ~0min    |
-|        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-70b-4xdp.yaml` | 数据并行 | 4x A100 40GB     | ~0min    |
+|        |      |                                          | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~6h      |
+|        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-8b-4xdp.yaml`  | 数据并行 | 4x A100 40GB     | ~5h      |
+| 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     | ~0min    |
+|        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     | ~0min    |
 
 创建一个名为 llama-factory、大小为 100 GiB（对于 8B 模型，对于 70B 模型为 300GiB）的 PVC，然后创建一个同样名为 llama-factory 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)（如要使用远程操作，请开启 SSH）。
 
@@ -84,18 +83,27 @@ llamafactory-cli export examples/llama-factory/merging/8b-sft.yaml
 
 #### DPO
 
-以 `dpo-8b.yaml` 为例，创建 PyTorchTrainingJob 以执行 DPO（直接偏好优化）训练：
+以 `dpo-8b-4xdp.yaml` 为例，创建 PyTorchTrainingJob 以执行 DPO（直接偏好优化）训练：
 
 ```bash
 cd ~/examples/llama-factory/training
-kubectl create -f dpo-8b.yaml  # 或 dpo-8b-2xdp.yaml
+kubectl create -f dpo-8b-4xdp.yaml
 ```
+
+对于 YAML 配置文件进行如下说明：
+
+* 训练副本（replica）数量为 1（第 17 行）。
+* 每个副本的进程数量（第 13 行）和 GPU 数量（第 35 和 39 行）同为 4。
+* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
+* 读取配置文件 `examples/llama-factory/training/dpo-8b-4xdp-config.yaml`（第 27 行）。
+* 训练占用显存 ~38GB。
+* 镜像 `t9kpublic/llama-factory:20240730`（第 18 行）由 [Dockerfile](./Dockerfile) 定义。
 
 与 DPO 训练得到的模型聊天：
 
 ```bash
 # 回答更加符合人类偏好
-llamafactory_cli chat examples/llama-factory/inference/8b-dpo.yaml
+llamafactory-cli chat examples/llama-factory/inference/8b-dpo.yaml
 ```
 
 然后合并 LoRA adapter 到 Meta-Llama-3.1-8B-sft 模型得到新模型 Meta-Llama-3.1-8B-dpo：
@@ -108,7 +116,7 @@ llamafactory-cli export examples/llama-factory/merging/8b-dpo.yaml
 
 （WIP）
 
-#### SFT
+<!-- #### SFT
 
 以 `sft-70b-4xdp.yaml` 为例，创建 PyTorchTrainingJob 以执行 SFT（有监督微调）训练：
 
@@ -130,11 +138,11 @@ kubectl create -f sft-70b-4xdp.yaml
 
 ```bash
 llamafactory-cli export examples/llama-factory/merging/70b-sft.yaml
-```
+``` -->
 
 ## 评估
 
-
+（WIP）
 
 ## 部署为推理服务
 
