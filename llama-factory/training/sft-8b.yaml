@@ -1,0 +1,47 @@
+apiVersion: batch.tensorstack.dev/v1beta1
+kind: PyTorchTrainingJob
+metadata:
+  name: llama3-1-8b-sft
+spec:
+  # scheduler:
+  #   t9kScheduler:
+  #     queue: default
+  #     priority: 50
+  replicaSpecs:
+    - type: worker
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: worker
+              image: t9kpublic/llama-factory:20240730
+              workingDir: /workspace
+              command: 
+                - llamafactory-cli
+                - train
+                - examples/llama-factory/training/sft-8b-config.yaml
+              env:
+                - name: HF_ENDPOINT
+                  value: "https://hf-mirror.com"
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 4Gi
+                  nvidia.com/gpu: 1
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /workspace
+                  name: data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: llama-factory
+            - name: dshm
+              emptyDir:
+                medium: Memory

@@ -1,0 +1,4 @@
+model_name_or_path: models/Meta-Llama-3.1-8B
+adapter_name_or_path: saves/llama3-1-8b/lora/sft
+template: default
+finetuning_type: lora
