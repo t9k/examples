@@ -16,7 +16,7 @@
 | 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     | ~0min    |
 |        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     | ~0min    |
 
-创建一个名为 llama-factory、大小为 100 GiB（对于 8B 模型，对于 70B 模型为 300GiB）的 PVC，然后创建一个同样名为 llama-factory 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)（如要使用远程操作，请开启 SSH）。
+创建一个名为 llama-factory、大小为 60 GiB（对于 8B 模型，对于 70B 模型为 500GiB）的 PVC，然后创建一个同样名为 llama-factory 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)（如要使用远程操作，请开启 SSH）。
 
 进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆 LLaMA-Factory 以及此仓库：
 
@@ -38,8 +38,9 @@ pip install ./LLaMA-Factory
 mkdir models && cd models
 MODEL_NAME=Meta-Llama-3.1-8B  # 或 Meta-Llama-3.1-70B
 
-huggingface-cli download "meta-llama/$MODEL_NAME" --exclude "original/*" --local-dir "./$MODEL_NAME" --local-dir-use-symlinks False --token <HF_TOKEN>
+HF_ENDPOINT=https://hf-mirror.com huggingface-cli download "meta-llama/$MODEL_NAME" --exclude "original/*" --local-dir "./$MODEL_NAME" --local-dir-use-symlinks False --token <HF_TOKEN>
 # 或
+# pip install modelscope
 # modelscope download --model "LLM-Research/$MODEL_NAME" --exclude "original/*" --local_dir "./$MODEL_NAME"
 ```
 
@@ -62,13 +63,15 @@ kubectl create -f sft-8b.yaml  # 或 sft-8b-2xdp.yaml
 * 每个副本的进程数量和 GPU 数量（第 31 和 35 行）同为 1。
 * 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
 * 读取配置文件 `examples/llama-factory/training/sft-8b-config.yaml`（第 23 行）。
-* 训练占用显存 ~33GB，减小配置文件的 `per_device_train_batch_size`（第 27 行）可以减小显存占用，以防止 OOM。
+* 训练占用显存 ~40GB，减小配置文件的 `per_device_train_batch_size`（第 27 行）可以减小显存占用，以防止 OOM。
 * 镜像 `t9kpublic/llama-factory:20240730`（第 18 行）由 [Dockerfile](./Dockerfile) 定义。
 
-分别与 Meta-Llama-3.1-8B 原模型以及 SFT 训练得到的模型聊天：
+分别与基座模型以及 SFT 训练得到的模型聊天：
 
 ```bash
-# 没有聊天能力，会自言自语或无限重复
+cd ~
+
+# 没有聊天能力，会自言自语和无限重复
 llamafactory-cli chat examples/llama-factory/inference/8b.yaml
 
 # 有聊天能力
@@ -102,6 +105,8 @@ kubectl create -f dpo-8b-4xdp.yaml
 与 DPO 训练得到的模型聊天：
 
 ```bash
+cd ~
+
 # 回答更加符合人类偏好
 llamafactory-cli chat examples/llama-factory/inference/8b-dpo.yaml
 ```
@@ -142,7 +147,12 @@ llamafactory-cli export examples/llama-factory/merging/70b-sft.yaml
 
 ## 评估
 
-（WIP）
+在 MMLU（或 CMMLU、C-Eval）数据集上评估模型：
+
+```bash
+cd ~
+HF_ENDPOINT=https://hf-mirror.com llamafactory-cli eval examples/llama-factory/evaluation/8b.yaml  # 或 8b-sft.yaml, 8b-dpo.yaml
+```
 
 ## 部署为推理服务
 

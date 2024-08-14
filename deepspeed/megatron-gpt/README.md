@@ -54,7 +54,7 @@ python download_wiki.py en
 
 ```shell
 cd ../tokenizer
-python train_tokenizer.py ../dataset/wiki-en/all wiki-en-tokenizer
+HF_ENDPOINT=https://hf-mirror.com python train_tokenizer.py ../dataset/wiki-en/all wiki-en-tokenizer
 ```
 
 接着执行 `preprocess_wiki.sh` 脚本预处理数据集：

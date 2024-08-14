@@ -1,0 +1,15 @@
+### model
+model_name_or_path: models/Meta-Llama-3.1-8B
+
+### dataset
+task: mmlu_test  # choices: [mmlu_test, ceval_validation, cmmlu_test]
+task_dir: LLaMA-Factory/evaluation
+template: fewshot
+lang: en
+n_shot: 5
+
+### output
+save_dir: saves/llama3-1-8b/lora/eval/base
+
+### eval
+batch_size: 4
