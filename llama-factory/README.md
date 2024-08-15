@@ -8,13 +8,13 @@
 
 这里选取 [Meta-Llama-3.1-8B](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B) 或 [Meta-Llama-3.1-70B](https://huggingface.co/meta-llama/Meta-Llama-3.1-70B) 模型进行 SFT（有监督微调）和 DPO 训练，更多细节如下表所示：
 
-| 参数量 | 步骤 | 数据集                                   | 配置文件            | 并行策略 | GPU 使用（参考） | 预计时间 |
-| ------ | ---- | ---------------------------------------- | ------------------- | -------- | ---------------- | -------- |
-| 8B     | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-8b.yaml`       | -        | 1x A100 40GB     | ~12h     |
-|        |      |                                          | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~6h      |
-|        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-8b-4xdp.yaml`  | 数据并行 | 4x A100 40GB     | ~5h      |
-| 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     | ~0min    |
-|        | DPO  | dpo_mix_en, dpo_mix_zh                   | `dpo-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     | ~0min    |
+| 参数量 | 步骤 | 数据集                                                                                                                                                                                                                                                                            | 配置文件            | 并行策略 | GPU 使用（参考） | 预计时间 |
+| ------ | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------- | ---------------- | -------- |
+| 8B     | SFT  | [identity](https://github.com/hiyouga/LLaMA-Factory/blob/625a0e32c47aeb72a6fe9c3536914996912e89d4/data/identity.json), [alpaca_gpt4_en](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM), [alpaca_gpt4_zh](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM) | `sft-8b.yaml`       | -        | 1x A100 40GB     | ~12h     |
+|        |      |                                                                                                                                                                                                                                                                                   | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~6h      |
+|        | DPO  | [dpo_mix_en](https://huggingface.co/datasets/hiyouga/DPO-En-Zh-20k), [dpo_mix_zh](https://huggingface.co/datasets/hiyouga/DPO-En-Zh-20k)                                                                                                                                          | `dpo-8b-4xdp.yaml`  | 数据并行 | 4x A100 40GB     | ~5h      |
+| 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh                                                                                                                                                                                                                                          | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     |          |
+|        | DPO  | dpo_mix_en, dpo_mix_zh                                                                                                                                                                                                                                                            | `dpo-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     |          |
 
 创建一个名为 llama-factory、大小为 60 GiB（对于 8B 模型，对于 70B 模型为 500GiB）的 PVC，然后创建一个同样名为 llama-factory 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)（如要使用远程操作，请开启 SSH）。
 
