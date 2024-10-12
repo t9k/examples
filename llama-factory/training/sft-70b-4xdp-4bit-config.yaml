@@ -1,5 +1,5 @@
 ### model
-model_name_or_path: models/Meta-Llama-3.1-70B
+model_name_or_path: models/Llama-3.1-70B
 quantization_bit: 4
 quantization_method: bitsandbytes  # choices: [bitsandbytes (4/8), hqq (2/3/4/5/6/8), eetq (8)]
 

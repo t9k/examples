@@ -7,11 +7,6 @@ spec:
   #   t9kScheduler:
   #     queue: default
   #     priority: 50
-  torchrunConfig:
-    enabled: true
-    maxRestarts: 3
-    procPerNode: "2"
-    rdzvBackend: c10d
   replicaSpecs:
     - type: worker
       replicas: 1
@@ -22,8 +17,9 @@ spec:
             - name: worker
               image: t9kpublic/llama-factory:20240730
               workingDir: /workspace
-              args: 
-                - LLaMA-Factory/src/llamafactory/launcher.py
+              command: 
+                - llamafactory-cli
+                - train
                 - examples/llama-factory/training/sft-8b-2xdp-config.yaml
               env:
                 - name: HF_ENDPOINT
