@@ -1,0 +1,34 @@
+server:
+  image:
+    registry: "$(T9K_APP_IMAGE_REGISTRY)"
+    repository: "topsrider/vllm-openai"
+    tag: "20250314"
+    pullPolicy: IfNotPresent
+
+  resources:
+    limits:
+      cpu: 4
+      memory: 64Gi
+      enflame.com/gcu: 1
+
+  model:
+    deployName: "DeepSeek-R1-Distill-Qwen-7B"
+
+    volume:
+      storageClass: ""
+      size: 32Gi
+      accessModes:
+        - ReadWriteOnce
+      existingClaim: "llm"
+      subPath: "DeepSeek-R1-Distill-Qwen-7B/"
+
+  autoScaling:
+    minReplicas: 1
+    maxReplicas: 1
+
+initializer:
+  image:
+    registry: "$(T9K_APP_IMAGE_REGISTRY)"
+    repository: "$(T9K_APP_IMAGE_NAMESPACE)/kubectl"
+    tag: "1.27"
+    pullPolicy: IfNotPresent
