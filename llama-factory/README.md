@@ -1,159 +1,165 @@
 # LLaMA-Factory
 
-[LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 是一个（增量）预训练、指令微调、评估和部署开源大型语言模型的项目。LLaMA-Factory 支持大部分主流模型，提供丰富的训练方法，支持多种精度，并且整合了多种先进算法和实用技术。
+[LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) 是一个简单易用且高效的大型语言模型（Large Language Model）训练与微调平台。LLaMA-Factory 支持大部分主流模型，提供丰富的训练方法，支持多种精度，并且整合了多种先进算法和实用技术。
 
-本示例使用 PyTorchTrainingJob 在 TensorStack AI 计算平台上完成由 LLaMA-Factory 实现的指令微调和评估。
+本示例使用 PyTorchTrainingJob 在 TensorStack AI 计算平台上完成由 LLaMA-Factory 实现的微调和评估。
 
 ## 使用方法
 
-这里选取 [Meta-Llama-3.1-8B](https://huggingface.co/meta-llama/Meta-Llama-3.1-8B) 或 [Meta-Llama-3.1-70B](https://huggingface.co/meta-llama/Meta-Llama-3.1-70B) 模型进行 SFT（有监督微调）和 DPO 训练，更多细节如下表所示：
+这里选取 [Qwen2.5-7B-Instruct](https://huggingface.co/Qwen/Qwen2.5-7B-Instruct) 模型进行 LoRA SFT 和 DPO 训练，以及全量 SFT 和 DPO 训练，更多细节如下表所示：
 
-| 参数量 | 步骤 | 数据集                                                                                                                                                                                                                                                                            | 配置文件            | 并行策略 | GPU 使用（参考） | 预计时间 |
-| ------ | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | -------- | ---------------- | -------- |
-| 8B     | SFT  | [identity](https://github.com/hiyouga/LLaMA-Factory/blob/625a0e32c47aeb72a6fe9c3536914996912e89d4/data/identity.json), [alpaca_gpt4_en](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM), [alpaca_gpt4_zh](https://github.com/Instruction-Tuning-with-GPT-4/GPT-4-LLM) | `sft-8b.yaml`       | -        | 1x A100 40GB     | ~12h     |
-|        |      |                                                                                                                                                                                                                                                                                   | `sft-8b-2xdp.yaml`  | 数据并行 | 2x A100 40GB     | ~6h      |
-|        | DPO  | [dpo_mix_en](https://huggingface.co/datasets/hiyouga/DPO-En-Zh-20k), [dpo_mix_zh](https://huggingface.co/datasets/hiyouga/DPO-En-Zh-20k)                                                                                                                                          | `dpo-8b-4xdp.yaml`  | 数据并行 | 4x A100 40GB     | ~5h      |
-| 70B    | SFT  | identity, alpaca_gpt4_en, alpaca_gpt4_zh                                                                                                                                                                                                                                          | `sft-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     |          |
-|        | DPO  | dpo_mix_en, dpo_mix_zh                                                                                                                                                                                                                                                            | `dpo-70b-4xdp.yaml` | 数据并行 | 4x A100 80GB     |          |
+| 微调方法 | 步骤 | 数据集                                                                                                                                                                                                                                                                          | 配置文件        | 并行策略 | GPU 使用（参考） |
+| -------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------- | ---------------- |
+| LoRA     | SFT  | [identity](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/identity.json), [alpaca_en_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_en_demo.json), [alpaca_zh_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_zh_demo.json) | `lora-sft.yaml` | -        | 1x A100 40GB     |
+| LoRA     | DPO  | [dpo_en_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/dpo_en_demo.json), [dpo_zh_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/dpo_zh_demo.json)                                                                                                | `lora-dpo.yaml` | 数据并行 | 2x A100 40GB     |
+| Full     | SFT  | [identity](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/identity.json), [alpaca_en_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_en_demo.json), [alpaca_zh_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_zh_demo.json) | `full-sft.yaml` | 数据并行 | 4x A100 40GB     |
 
-创建一个名为 llama-factory、大小为 60 GiB（对于 8B 模型，对于 70B 模型为 500GiB）的 PVC，然后创建一个同样名为 llama-factory 的 Notebook 挂载该 PVC，镜像选择 PyTorch 2.0 的类型，模板选择 large (NVIDIA GPU) 或 large (shared NVIDIA GPU)（如要使用远程操作，请开启 SSH）。
 
-进入 Notebook 或远程连接到 Notebook，启动一个终端，执行以下命令以克隆 LLaMA-Factory 以及此仓库：
+创建一个名为 finetune、大小为 100 GiB 的 PVC，然后创建一个同样名为 finetune 的 JupyterLab/CodeServer App 挂载该 PVC。
+
+进入 JupyterLab/CodeServer 的 UI，启动一个终端，执行以下命令以克隆此仓库：
 
 ```bash
 cd ~
-git clone https://github.com/hiyouga/LLaMA-Factory.git
 git clone https://github.com/t9k/examples.git
 ```
 
-安装 LLaMA-Factory 库：
-
-```bash
-pip install ./LLaMA-Factory
-```
-
-从 Hugging Face Hub（或魔搭社区）拉取预训练模型：
+从魔搭社区拉取预训练模型：
 
 ```bash
 mkdir models && cd models
-MODEL_NAME=Meta-Llama-3.1-8B  # 或 Meta-Llama-3.1-70B
+MODEL_NAME=Qwen2.5-7B-Instruct
 
-HF_ENDPOINT=https://hf-mirror.com huggingface-cli download "meta-llama/$MODEL_NAME" --exclude "original/*" --local-dir "./$MODEL_NAME" --local-dir-use-symlinks False --token <HF_TOKEN>
-# 或
-# pip install modelscope
-# modelscope download --model "LLM-Research/$MODEL_NAME" --exclude "original/*" --local_dir "./$MODEL_NAME"
+modelscope download --model "Qwen/$MODEL_NAME" --local_dir "./$MODEL_NAME"
 ```
 
-## 训练
+### 训练
 
-### 8B
+#### LoRA SFT
 
-#### SFT
-
-以 `sft-8b.yaml` 为例，创建 PyTorchTrainingJob 以执行 SFT（有监督微调）训练：
+以 `lora-sft.yaml` 为例，创建 PyTorchTrainingJob 以执行 LoRA SFT 训练：
 
 ```bash
 cd ~/examples/llama-factory/training
-kubectl create -f sft-8b.yaml  # 或 sft-8b-2xdp.yaml
+kubectl create -f lora-sft.yaml
 ```
 
 对于 YAML 配置文件进行如下说明：
 
-* 训练副本（replica）数量为 1（第 12 行）。
-* 每个副本的进程数量和 GPU 数量（第 31 和 35 行）同为 1。
-* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
-* 读取配置文件 `examples/llama-factory/training/sft-8b-config.yaml`（第 23 行）。
-* 训练占用显存 ~40GB，减小配置文件的 `per_device_train_batch_size`（第 27 行）可以减小显存占用，以防止 OOM。
-* 镜像 `t9kpublic/llama-factory:20240730`（第 18 行）由 [Dockerfile](./Dockerfile) 定义。
+* 训练副本（replica）数量为 1（第 11 行）。
+* 每个副本的进程数量和 GPU 数量（第 30 和 34 行）同为 1。
+* 读取配置文件 `examples/llama-factory/training/lora-sft-config.yaml`（第 22 行）。
+* 检查点文件保存在 `saves/qwen2-5-7b/lora/sft` 目录下。
+* 训练占用显存 ~37GB，减小配置文件的 `per_device_train_batch_size`（第 30 行）可以减小显存占用，以防止 OOM。
+* 镜像 `registry.cn-hangzhou.aliyuncs.com/t9k/llamafactory:20250318`（第 18 行）由 [Dockerfile](https://github.com/hiyouga/LLaMA-Factory/blob/a02a140840da08d2b0fe16adcd6de09afe732ab5/docker/docker-cuda/Dockerfile) 定义。
 
-分别与基座模型以及 SFT 训练得到的模型聊天：
+#### LoRA DPO
 
-```bash
-cd ~
-
-# 没有聊天能力，会自言自语和无限重复
-llamafactory-cli chat examples/llama-factory/inference/8b.yaml
-
-# 有聊天能力
-llamafactory-cli chat examples/llama-factory/inference/8b-sft.yaml
-```
-
-然后合并 LoRA adapter 到原模型得到新模型 Meta-Llama-3.1-8B-sft：
-
-```bash
-llamafactory-cli export examples/llama-factory/merging/8b-sft.yaml
-```
-
-#### DPO
-
-以 `dpo-8b-4xdp.yaml` 为例，创建 PyTorchTrainingJob 以执行 DPO（直接偏好优化）训练：
+以 `lora-dpo.yaml` 为例，创建 PyTorchTrainingJob 以执行 LoRA DPO 训练：
 
 ```bash
 cd ~/examples/llama-factory/training
-kubectl create -f dpo-8b-4xdp.yaml
+kubectl create -f lora-dpo.yaml
 ```
 
 对于 YAML 配置文件进行如下说明：
 
-* 训练副本（replica）数量为 1（第 17 行）。
-* 每个副本的进程数量（第 13 行）和 GPU 数量（第 35 和 39 行）同为 4。
-* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
-* 读取配置文件 `examples/llama-factory/training/dpo-8b-4xdp-config.yaml`（第 27 行）。
-* 训练占用显存 ~38GB。
-* 镜像 `t9kpublic/llama-factory:20240730`（第 18 行）由 [Dockerfile](./Dockerfile) 定义。
+* 训练副本（replica）数量为 1（第 11 行）。
+* 每个副本的进程数量和 GPU 数量（第 30 和 34 行）同为 2。
+* 读取配置文件 `examples/llama-factory/training/lora-dpo-config.yaml`（第 22 行）。
+* 检查点文件保存在 `saves/qwen2-5-7b/lora/dpo` 目录下。
+* 训练最高占用显存 ~40GB。
 
-与 DPO 训练得到的模型聊天：
+#### Full SFT
 
-```bash
-cd ~
-
-# 回答更加符合人类偏好
-llamafactory-cli chat examples/llama-factory/inference/8b-dpo.yaml
-```
-
-然后合并 LoRA adapter 到 Meta-Llama-3.1-8B-sft 模型得到新模型 Meta-Llama-3.1-8B-dpo：
-
-```bash
-llamafactory-cli export examples/llama-factory/merging/8b-dpo.yaml
-```
-
-### 70B
-
-（WIP）
-
-<!-- #### SFT
-
-以 `sft-70b-4xdp.yaml` 为例，创建 PyTorchTrainingJob 以执行 SFT（有监督微调）训练：
+以 `full-sft.yaml` 为例，创建 PyTorchTrainingJob 以执行 Full SFT 训练：
 
 ```bash
 cd ~/examples/llama-factory/training
-kubectl create -f sft-70b-4xdp.yaml
+kubectl create -f full-sft.yaml
 ```
 
 对于 YAML 配置文件进行如下说明：
 
-* 训练副本（replica）数量为 1（第 17 行）。
-* 每个副本的进程数量（第 13 行）和 GPU 数量（第 35 和 39 行）同为 4。
-* 如要使用队列，取消第 6-9 行的注释，并修改第 8 行的队列名称（默认为 `default`）。
-* 读取配置文件 `examples/llama-factory/training/sft-70b-4xdp-config.yaml`（第 23 行）。
-* 训练占用显存 ~GB，减小配置文件的 `per_device_train_batch_size`（第 29 行）可以减小显存占用，以防止 OOM。
-* 镜像 `t9kpublic/llama-factory:20240730`（第 23 行）由 [Dockerfile](./Dockerfile) 定义。
+* 训练副本（replica）数量为 1（第 11 行）。
+* 每个副本的进程数量和 GPU 数量（第 30 和 34 行）同为 4。
+* 读取配置文件 `examples/llama-factory/training/full-sft-config.yaml`（第 22 行）。
+* 检查点文件保存在 `saves/qwen2-5-7b/full/sft` 目录下。
+* 训练最高占用显存 ~40GB。
 
-然后合并 LoRA adapter 到原模型得到新模型 Meta-Llama-3.1-70B-sft：
+### 进一步操作
+
+要对训练完成的模型作进一步的操作，包括评估、聊天、合并模型文件等，使用 `debug.yaml` 创建一个启用调试模式的 PyTorchTrainingJob，并进入其创建的 Pod：
 
 ```bash
-llamafactory-cli export examples/llama-factory/merging/70b-sft.yaml
-``` -->
+cd ~/examples/llama-factory/training
+kubectl create -f debug.yaml
+kubectl exec -it $(kubectl get pod -l tensorstack.dev/owner-name=qwen2-5-7b-debug -o jsonpath='{.items[0].metadata.name}') -- bash
+```
 
-## 评估
+进入 Pod 后，参照下面各部分，使用 `llamafactory-cli` 命令进行进一步操作。
+
+操作完成后，退出 Pod 并删除 PyTorchTrainingJob：
+
+```bash
+exit
+kubectl delete -f debug.yaml
+```
+
+#### 评估
 
 在 MMLU（或 CMMLU、C-Eval）数据集上评估模型：
 
 ```bash
-cd ~
-HF_ENDPOINT=https://hf-mirror.com llamafactory-cli eval examples/llama-factory/evaluation/8b.yaml  # 或 8b-sft.yaml, 8b-dpo.yaml
+cd /workspace
+git clone https://github.com/hiyouga/LLaMA-Factory.git
+HF_ENDPOINT=https://hf-mirror.com llamafactory-cli eval examples/llama-factory/evaluation/lora-sft.yaml  # 或 lora-dpo.yaml, full-sft.yaml
 ```
 
-## 部署为推理服务
+#### 聊天
 
-可以使用 vLLM 将合并后的模型部署为推理服务。
+与模型聊天：
+
+```bash
+cd /workspace
+llamafactory-cli chat examples/llama-factory/chat/lora-sft.yaml  # 或 lora-dpo.yaml, full-sft.yaml
+```
+
+#### 合并
+
+合并 LoRA adapter 到 Qwen2.5-7B-Instruct，导出为新模型：
+
+```bash
+llamafactory-cli export examples/llama-factory/merging/lora-sft.yaml  # 或 lora-dpo.yaml
+```
+
+模型文件保存在 `models/Qwen2.5-7B-Instruct-sft`（或 `models/Qwen2.5-7B-Instruct-dpo`）目录下。
+
+### 部署为推理服务
+
+可以使用 vLLM App 将合并后的模型部署为推理服务。
+
+## 对于其他厂商 GPU 的支持
+
+### 沐曦（MetaX）
+
+1. 参照[使用方法](#使用方法)进行操作，直到克隆此仓库。
+2. 克隆此仓库后，在 `examples/llama-factory` 目录下作文本替换：
+    1. `registry.cn-hangzhou.aliyuncs.com/t9k/llamafactory:20250318` -> `<REGISTRY>/mximages/mxc500-deepspeed:2.29.0.8`（替换使用的镜像）
+    2. `nvidia.com/gpu` -> `metax-tech.com/gpu`（替换使用的 GPU 类型）
+    3. `trust_remote_code: true` -> ``（修复一个错误）
+
+    可以使用 IDE 的搜索功能替换，或执行以下命令：
+
+    ```bash
+    cd ~/examples/llama-factory
+    find . -type f -exec sed -i 's/registry.cn-hangzhou.aliyuncs.com\/t9k\/llamafactory:20250318/<REGISTRY>\/mximages\/mxc500-deepspeed:2.29.0.8/g' {} +
+    find . -type f -exec sed -i 's/nvidia.com\/gpu/metax-tech.com\/gpu/g' {} +
+    find . -type f -exec sed -i 's/trust_remote_code: true//g' {} +
+    ```
+
+3. 继续参照[使用方法](#使用方法)进行操作。
+
+## 参考
+
+* 原始项目：[hiyouga/LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory)

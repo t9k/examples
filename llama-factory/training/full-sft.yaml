@@ -1,12 +1,11 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: llama3-1-8b-sft
+  name: qwen2-5-7b-full-sft
 spec:
-  # scheduler:
-  #   t9kScheduler:
-  #     queue: default
-  #     priority: 50
+  # runMode:
+  #   debug:
+  #     enabled: true
   replicaSpecs:
     - type: worker
       replicas: 1
@@ -15,24 +14,24 @@ spec:
         spec:
           containers:
             - name: worker
-              image: t9kpublic/llama-factory:20240730
+              image: registry.cn-hangzhou.aliyuncs.com/t9k/llamafactory:20250318
               workingDir: /workspace
               command: 
                 - llamafactory-cli
                 - train
-                - examples/llama-factory/training/sft-8b-config.yaml
+                - examples/llama-factory/training/full-sft-config.yaml
               env:
                 - name: HF_ENDPOINT
                   value: "https://hf-mirror.com"
               resources:
                 requests:
-                  cpu: 2
-                  memory: 4Gi
-                  nvidia.com/gpu: 1
-                limits:
                   cpu: 4
-                  memory: 8Gi
-                  nvidia.com/gpu: 1
+                  memory: 64Gi
+                  nvidia.com/gpu: 4
+                limits:
+                  cpu: 8
+                  memory: 128Gi
+                  nvidia.com/gpu: 4
               volumeMounts:
                 - mountPath: /workspace
                   name: data
