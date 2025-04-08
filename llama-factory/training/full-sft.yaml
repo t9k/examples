@@ -26,11 +26,11 @@ spec:
               resources:
                 requests:
                   cpu: 4
-                  memory: 8Gi
+                  memory: 64Gi
                   nvidia.com/gpu: 4
                 limits:
                   cpu: 8
-                  memory: 16Gi
+                  memory: 128Gi
                   nvidia.com/gpu: 4
               volumeMounts:
                 - mountPath: /workspace

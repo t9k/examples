@@ -15,9 +15,9 @@
 | Full     | SFT  | [identity](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/identity.json), [alpaca_en_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_en_demo.json), [alpaca_zh_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_zh_demo.json) | `full-sft.yaml` | 数据并行 | 4x A100 40GB     |
 
 
-创建一个名为 llama-factory、大小为 60 GiB 的 PVC，然后创建一个同样名为 llama-factory 的 JupyterLab/CodeServer App 挂载该 PVC。
+创建一个名为 llama-factory、大小为 100 GiB 的 PVC，然后创建一个同样名为 llama-factory 的 JupyterLab/CodeServer App 挂载该 PVC。
 
-进入 JupyterLab/CodeServer 的 UI，启动一个终端，执行以下命令以克隆 LLaMA-Factory 以及此仓库：
+进入 JupyterLab/CodeServer 的 UI，启动一个终端，执行以下命令以克隆此仓库：
 
 ```bash
 cd ~
@@ -85,7 +85,7 @@ kubectl create -f full-sft.yaml
 * 每个副本的进程数量和 GPU 数量（第 30 和 34 行）同为 4。
 * 读取配置文件 `examples/llama-factory/training/full-sft-config.yaml`（第 22 行）。
 * 检查点文件保存在 `saves/qwen2-5-7b/full/sft` 目录下。
-* 训练占用显存 ~GB。
+* 训练最高占用显存 ~40GB。
 
 ### 进一步操作
 
@@ -141,10 +141,24 @@ llamafactory-cli export examples/llama-factory/merging/lora-sft.yaml  # 或 lora
 
 ## 对于其他厂商 GPU 的支持
 
-* 沐曦（MetaX）：在当前目录下作文本替换：
-    1. `registry.cn-hangzhou.aliyuncs.com/t9k/llamafactory:20250318` -> `<REGISTRY>/mximages/mxc500-deepspeed:2.29.0.8` 以替换使用的镜像。
-    2. `nvidia.com/gpu` -> `metax-tech.com/gpu` 以替换使用的 GPU 类型。
-    3. 同样参照[使用方法](#使用方法)进行操作。
+### 沐曦（MetaX）
+
+1. 参照[使用方法](#使用方法)进行操作，直到克隆此仓库。
+2. 克隆此仓库后，在 `examples/llama-factory` 目录下作文本替换：
+    1. `registry.cn-hangzhou.aliyuncs.com/t9k/llamafactory:20250318` -> `<REGISTRY>/mximages/mxc500-deepspeed:2.29.0.8`（替换使用的镜像）
+    2. `nvidia.com/gpu` -> `metax-tech.com/gpu`（替换使用的 GPU 类型）
+    3. `trust_remote_code: true` -> ``（修复一个错误）
+
+    可以使用 IDE 的搜索功能替换，或执行以下命令：
+
+    ```bash
+    cd ~/examples/llama-factory
+    find . -type f -exec sed -i 's/registry.cn-hangzhou.aliyuncs.com\/t9k\/llamafactory:20250318/<REGISTRY>\/mximages\/mxc500-deepspeed:2.29.0.8/g' {} +
+    find . -type f -exec sed -i 's/nvidia.com\/gpu/metax-tech.com\/gpu/g' {} +
+    find . -type f -exec sed -i 's/trust_remote_code: true//g' {} +
+    ```
+
+3. 继续参照[使用方法](#使用方法)进行操作。
 
 ## 参考
 
