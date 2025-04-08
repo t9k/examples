@@ -15,7 +15,7 @@
 | Full     | SFT  | [identity](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/identity.json), [alpaca_en_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_en_demo.json), [alpaca_zh_demo](https://github.com/hiyouga/LLaMA-Factory/blob/main/data/alpaca_zh_demo.json) | `full-sft.yaml` | 数据并行 | 4x A100 40GB     |
 
 
-创建一个名为 llama-factory、大小为 100 GiB 的 PVC，然后创建一个同样名为 llama-factory 的 JupyterLab/CodeServer App 挂载该 PVC。
+创建一个名为 finetune、大小为 100 GiB 的 PVC，然后创建一个同样名为 finetune 的 JupyterLab/CodeServer App 挂载该 PVC。
 
 进入 JupyterLab/CodeServer 的 UI，启动一个终端，执行以下命令以克隆此仓库：
 
