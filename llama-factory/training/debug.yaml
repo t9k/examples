@@ -1,39 +1,42 @@
 apiVersion: batch.tensorstack.dev/v1beta1
 kind: PyTorchTrainingJob
 metadata:
-  name: finetune-llama3
+  name: qwen2-5-7b-debug
 spec:
   runMode:
     debug:
       enabled: true
   replicaSpecs:
-  - type: worker
-    replicas: 1
-    restartPolicy: OnFailure
-    template:
-      spec:
-        containers:
-        - name: pytorch
-          image: pytorch/pytorch:2.4.0-cuda12.1-cudnn9-runtime
-          resources:
-            limits:
-              cpu: 16
-              memory: 32Gi
-              nvidia.com/gpu: 1
-            requests:
-              cpu: 16
-              memory: 32Gi
-              nvidia.com/gpu: 1
-          volumeMounts:
-          - name: data
-            mountPath: /workspace
-          - name: dshm
-            mountPath: /dev/shm
-        volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: vllm
-        - name: dshm
-          emptyDir:
-            medium: Memory
-            sizeLimit: "32Gi"
+    - type: worker
+      replicas: 1
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: worker
+              image: registry.cn-hangzhou.aliyuncs.com/t9k/llamafactory:20250318
+              workingDir: /workspace
+              env:
+                - name: HF_ENDPOINT
+                  value: "https://hf-mirror.com"
+              resources:
+                requests:
+                  cpu: 2
+                  memory: 4Gi
+                  nvidia.com/gpu: 1
+                limits:
+                  cpu: 4
+                  memory: 8Gi
+                  nvidia.com/gpu: 1
+              volumeMounts:
+                - mountPath: /workspace
+                  name: data
+                - mountPath: /dev/shm
+                  name: dshm
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: llama-factory
+            - name: dshm
+              emptyDir:
+                medium: Memory
