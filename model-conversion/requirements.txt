@@ -1,0 +1,11 @@
+torch
+safetensors
+transformers
+sentencepiece
+numpy
+onnx
+onnxruntime
+tensorflow
+tf2onnx
+gguf
+onnx-tf
