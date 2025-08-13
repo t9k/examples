@@ -28,5 +28,3 @@
 * 推理：
    * [Tensorizer](./deployments/tensorizer/)
    * [vLLM](./deployments/vllm/)
-* 应用：
-    * [AutoGen 示例](./applications/autogen/)
